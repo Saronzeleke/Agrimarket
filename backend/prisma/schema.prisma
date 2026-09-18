@@ -521,3 +521,36 @@ model PasswordReset {
   @@index([expiresAt])
   @@map("password_resets")
 }
+
+// ============================================
+// SEARCH & ANALYTICS
+// ============================================
+
+model SearchLog {
+  id          String   @id @default(uuid())
+  query       String
+  userId      String?
+  resultCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([query])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("search_logs")
+}
+
+model SavedSearch {
+  id                  String   @id @default(uuid())
+  userId              String
+  name                String
+  query               String?
+  filters             Json     // Flexible storage for filter criteria
+  notifyOnNewResults  Boolean  @default(false)
+  lastNotifiedAt      DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("saved_searches")
+}

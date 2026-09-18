@@ -6,11 +6,19 @@
 
 import { Router } from 'express'
 import authRoutes from './auth.routes'
+import productRoutes from './product.routes'
+import categoryRoutes from './category.routes'
+import sellerRoutes from './seller.routes'
+import searchRoutes from './search.routes'
 
 const router = Router()
 
 // Mount route modules
 router.use('/auth', authRoutes)
+router.use('/products', productRoutes)
+router.use('/categories', categoryRoutes)
+router.use('/seller', sellerRoutes)
+router.use('/search', searchRoutes)
 
 // Health check for API
 router.get('/health', (req, res) => {

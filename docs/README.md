@@ -26,6 +26,20 @@ Welcome to the **AgriMarket** project documentation. This folder contains compre
    - Deployment architecture
    - Technology decisions and trade-offs
 
+3. **[Database Design Document](./03-database-design.md)**
+   - Complete database schema (23 tables)
+   - Entity relationships and constraints
+   - Indexing strategy
+   - Data integrity rules
+   - Migration and seed data
+
+4. **[Phase 6: Advanced Search & Filtering](./04-phase-6-advanced-search.md)**
+   - Full-text search implementation
+   - Search analytics and logging
+   - Autocomplete suggestions
+   - Saved searches functionality
+   - API endpoints and testing guide
+
 ## 🎯 Quick Start
 
 ### For Product Managers
@@ -139,22 +153,22 @@ The project follows a 20-phase incremental development approach:
 
 **Foundation (Phase 1-3)**
 1. ✅ Requirements + Architecture
-2. Database schema + migrations
-3. Project setup + configuration
+2. ✅ Database schema + migrations
+3. ✅ Project setup + configuration
 
 **Core Features (Phase 4-10)**
-4. Authentication & authorization
-5. Product catalog
-6. Search & filtering
-7. Shopping cart
-8. Checkout
-9. Orders
-10. Inventory
+4. ✅ Authentication & authorization
+5. ✅ Product catalog
+6. ✅ Advanced search & filtering
+7. Shopping cart & wishlist
+8. Checkout process
+9. Order management
+10. Inventory management
 
 **Advanced Features (Phase 11-15)**
 11. Seller dashboard
 12. Admin dashboard
-13. Reviews
+13. Reviews & ratings
 14. Recommendations
 15. Notifications
 
@@ -163,7 +177,7 @@ The project follows a 20-phase incremental development approach:
 17. Security review
 18. Performance review
 19. Deployment
-20. Documentation
+20. Documentation & launch
 
 ## 🔒 Security Considerations
 
@@ -416,8 +430,9 @@ Before submitting documentation updates:
 |----------|---------|--------|--------------|
 | Product Requirements | 1.0 | ✅ Complete | 2026-09-18 |
 | System Architecture | 1.0 | ✅ Complete | 2026-09-18 |
-| Database Schema | - | ⏳ Pending | Phase 2 |
-| API Reference | - | ⏳ Pending | Phase 4+ |
+| Database Design | 1.0 | ✅ Complete | 2026-09-18 |
+| Phase 6: Advanced Search | 1.0 | ✅ Complete | 2026-09-18 |
+| API Reference | - | ⏳ Pending | Phase 7+ |
 | Deployment Guide | - | ⏳ Pending | Phase 19 |
 | User Guides | - | ⏳ Pending | Phase 20 |
 
