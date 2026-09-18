@@ -8,6 +8,7 @@ import { Request, Response, NextFunction } from 'express'
 import { verifyAccessToken } from '../utils/jwt.utils'
 import { AuthenticationError } from '../utils/errors'
 import userRepository from '../repositories/user.repository'
+import prisma from '../config/database'
 import logger from '../config/logger'
 
 /**
@@ -42,6 +43,22 @@ export async function authenticate(
       throw new AuthenticationError('Account is suspended')
     }
 
+    // Get seller profile if user is a seller
+    let sellerProfile = undefined
+    if (user.role === 'SELLER') {
+      const profile = await prisma.sellerProfile.findUnique({
+        where: { userId: user.id },
+        select: {
+          id: true,
+          businessName: true,
+          verified: true,
+        },
+      })
+      if (profile) {
+        sellerProfile = profile
+      }
+    }
+
     // Attach user info to request
     req.user = {
       id: user.id,
@@ -49,6 +66,7 @@ export async function authenticate(
       role: user.role,
       emailVerified: user.emailVerified,
       active: user.active,
+      sellerProfile,
     }
 
     next()

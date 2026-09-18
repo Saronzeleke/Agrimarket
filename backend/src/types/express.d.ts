@@ -15,6 +15,11 @@ declare global {
         role: 'CUSTOMER' | 'SELLER' | 'ADMIN'
         emailVerified: boolean
         active: boolean
+        sellerProfile?: {
+          id: string
+          businessName: string
+          verified: boolean
+        }
       }
       
       file?: Express.Multer.File
