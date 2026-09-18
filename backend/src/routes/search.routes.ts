@@ -2,18 +2,19 @@ import { Router } from 'express';
 import { searchController } from '../controllers/search.controller';
 import { authenticate, optionalAuthenticate } from '../middleware/auth.middleware';
 import { asyncHandler } from '../utils/helpers';
+import { searchLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
 /**
- * Public search endpoints
+ * Public search endpoints (with rate limiting)
  */
 
 // Advanced product search (with optional auth for logging)
-router.get('/', optionalAuthenticate, asyncHandler(searchController.searchProducts));
+router.get('/', searchLimiter, optionalAuthenticate, asyncHandler(searchController.searchProducts));
 
 // Autocomplete suggestions (public)
-router.get('/suggestions', asyncHandler(searchController.getAutocompleteSuggestions));
+router.get('/suggestions', searchLimiter, asyncHandler(searchController.getAutocompleteSuggestions));
 
 // Popular searches (public)
 router.get('/popular', asyncHandler(searchController.getPopularSearches));

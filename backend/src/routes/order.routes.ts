@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { orderController } from '../controllers/order.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { asyncHandler } from '../utils/helpers';
+import { orderCreationLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.get('/', authenticate, asyncHandler(orderController.getOrders));
 // Get order by ID
 router.get('/:orderId', authenticate, asyncHandler(orderController.getOrder));
 
-// Cancel order
-router.post('/:orderId/cancel', authenticate, asyncHandler(orderController.cancelOrder));
+// Cancel order (apply rate limiter)
+router.post('/:orderId/cancel', authenticate, orderCreationLimiter, asyncHandler(orderController.cancelOrder));
 
 export default router;

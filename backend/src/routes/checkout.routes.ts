@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { checkoutController } from '../controllers/checkout.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { asyncHandler } from '../utils/helpers';
+import { orderCreationLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get('/summary', authenticate, asyncHandler(checkoutController.getCheckout
 // Get payment methods
 router.get('/payment-methods', authenticate, asyncHandler(checkoutController.getPaymentMethods));
 
-// Process checkout
-router.post('/', authenticate, asyncHandler(checkoutController.processCheckout));
+// Process checkout (with rate limiting to prevent abuse)
+router.post('/', authenticate, orderCreationLimiter, asyncHandler(checkoutController.processCheckout));
 
 export default router;

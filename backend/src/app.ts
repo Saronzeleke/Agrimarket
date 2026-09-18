@@ -16,6 +16,15 @@ import {
   errorHandler,
   notFoundHandler,
 } from './middleware/error.middleware'
+import {
+  sanitizeInput,
+  logSuspiciousActivity,
+} from './middleware/security.middleware'
+import {
+  authLimiter,
+  apiLimiter,
+  passwordResetLimiter,
+} from './middleware/rate-limit.middleware'
 
 // Create Express application
 const app: Application = express()
@@ -28,21 +37,66 @@ const app: Application = express()
 app.use(
   helmet({
     contentSecurityPolicy: config.isProduction
-      ? undefined
+      ? {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+          },
+        }
       : false, // Disable in development
     crossOriginEmbedderPolicy: false,
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    noSniff: true,
+    frameguard: {
+      action: 'deny',
+    },
+    xssFilter: true,
   })
 )
 
 // CORS - Cross-Origin Resource Sharing
+const allowedOrigins = config.isProduction
+  ? [config.cors.origin]
+  : [config.cors.origin, 'http://localhost:3000', 'http://localhost:5173']
+
 app.use(
   cors({
-    origin: config.cors.origin,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true)
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
     credentials: config.cors.credentials,
-    methods: CONSTANTS.ALLOWED_METHODS,
-    allowedHeaders: CONSTANTS.ALLOWED_HEADERS,
+    methods: CONSTANTS.ALLOWED_METHODS as string[],
+    allowedHeaders: CONSTANTS.ALLOWED_HEADERS as string[],
+    maxAge: 600, // 10 minutes
   })
 )
+
+// XSS Protection - Sanitize user input
+app.use(sanitizeInput)
+
+// Suspicious Activity Monitor
+app.use(logSuspiciousActivity)
+
+// Global API Rate Limiter
+app.use(apiLimiter)
 
 // ============================================
 // Parsing Middleware

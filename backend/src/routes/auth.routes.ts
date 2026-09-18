@@ -7,25 +7,12 @@
 import { Router } from 'express'
 import authController from '../controllers/auth.controller'
 import { authenticate } from '../middleware/auth.middleware'
-import rateLimit from 'express-rate-limit'
-import config from '../config/env'
+import {
+  authLimiter,
+  passwordResetLimiter,
+} from '../middleware/rate-limit.middleware'
 
 const router = Router()
-
-// Rate limiter for auth endpoints (stricter limits)
-const authLimiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.auth.maxRequests,
-  message: {
-    success: false,
-    error: {
-      code: 'RATE_LIMIT_EXCEEDED',
-      message: 'Too many authentication attempts. Please try again later.',
-    },
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-})
 
 /**
  * Public routes
@@ -47,10 +34,10 @@ router.post('/verify-email', authController.verifyEmail)
 router.post('/resend-verification', authLimiter, authController.resendVerification)
 
 // POST /api/v1/auth/forgot-password - Request password reset
-router.post('/forgot-password', authLimiter, authController.requestPasswordReset)
+router.post('/forgot-password', passwordResetLimiter, authController.requestPasswordReset)
 
 // POST /api/v1/auth/reset-password - Reset password with token
-router.post('/reset-password', authLimiter, authController.resetPassword)
+router.post('/reset-password', passwordResetLimiter, authController.resetPassword)
 
 /**
  * Protected routes (require authentication)
