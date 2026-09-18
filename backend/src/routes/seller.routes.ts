@@ -7,6 +7,7 @@
 import { Router } from 'express'
 import productController from '../controllers/product.controller'
 import { sellerOrderController } from '../controllers/seller-order.controller'
+import { inventoryController } from '../controllers/inventory.controller'
 import { authenticate } from '../middleware/auth.middleware'
 import { requireSeller } from '../middleware/rbac.middleware'
 import { asyncHandler } from '../utils/helpers'
@@ -50,5 +51,36 @@ router.get('/orders/:orderId', asyncHandler(sellerOrderController.getOrder))
 
 // PATCH /api/v1/seller/orders/:orderId/status - Update order status
 router.patch('/orders/:orderId/status', asyncHandler(sellerOrderController.updateOrderStatus))
+
+/**
+ * Inventory management
+ */
+
+// GET /api/v1/seller/inventory/stats - Get inventory statistics
+router.get('/inventory/stats', asyncHandler(inventoryController.getStats))
+
+// GET /api/v1/seller/inventory/low-stock - Get low stock products
+router.get('/inventory/low-stock', asyncHandler(inventoryController.getLowStockProducts))
+
+// GET /api/v1/seller/inventory/out-of-stock - Get out of stock products
+router.get('/inventory/out-of-stock', asyncHandler(inventoryController.getOutOfStockProducts))
+
+// POST /api/v1/seller/inventory/bulk-add - Bulk add stock
+router.post('/inventory/bulk-add', asyncHandler(inventoryController.bulkAddStock))
+
+// GET /api/v1/seller/inventory/product/:productId - Get inventory for product
+router.get('/inventory/product/:productId', asyncHandler(inventoryController.getInventory))
+
+// PATCH /api/v1/seller/inventory/:inventoryId - Update inventory
+router.patch('/inventory/:inventoryId', asyncHandler(inventoryController.updateInventory))
+
+// POST /api/v1/seller/inventory/:inventoryId/add - Add stock
+router.post('/inventory/:inventoryId/add', asyncHandler(inventoryController.addStock))
+
+// POST /api/v1/seller/inventory/:inventoryId/adjust - Adjust stock
+router.post('/inventory/:inventoryId/adjust', asyncHandler(inventoryController.adjustStock))
+
+// GET /api/v1/seller/inventory/:inventoryId/history - Get inventory history
+router.get('/inventory/:inventoryId/history', asyncHandler(inventoryController.getHistory))
 
 export default router
