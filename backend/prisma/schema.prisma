@@ -43,6 +43,7 @@ model User {
   reviews       Review[]
   addresses     Address[]
   notifications Notification[]
+  helpfulVotes  HelpfulVote[]
 
   @@index([email])
   @@index([role])
@@ -382,27 +383,52 @@ model Payment {
 // ============================================
 
 model Review {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   userId           String
   productId        String
   orderId          String
-  rating           Int      // 1-5 stars
+  rating           Int       // 1-5 stars
   title            String?
-  comment          String?  @db.Text
-  verifiedPurchase Boolean  @default(true)
-  helpful          Int      @default(0) // Helpfulness votes
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  comment          String?   @db.Text
+  verifiedPurchase Boolean   @default(true)
+  helpful          Int       @default(0) // Helpfulness count
+  approved         Boolean   @default(true) // Moderation status
+  flagged          Boolean   @default(false) // Flagged for review
+  sellerResponse   String?   @db.Text
+  respondedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  helpfulVotes   HelpfulVote[]
 
   @@unique([userId, productId])
   @@index([productId])
   @@index([rating])
+  @@index([approved])
   @@index([createdAt])
   @@map("reviews")
+}
+
+// ============================================
+// REVIEW HELPFUL VOTES
+// ============================================
+
+model HelpfulVote {
+  id        String   @id @default(uuid())
+  userId    String
+  reviewId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+  @@index([reviewId])
+  @@map("helpful_votes")
 }
 
 // ============================================

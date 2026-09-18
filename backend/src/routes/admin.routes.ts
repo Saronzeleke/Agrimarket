@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { adminOrderController } from '../controllers/admin-order.controller';
 import { adminAnalyticsController } from '../controllers/admin-analytics.controller';
+import { reviewController } from '../controllers/review.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { requireAdmin } from '../middleware/rbac.middleware';
 import { asyncHandler } from '../utils/helpers';
@@ -62,5 +63,18 @@ router.get('/analytics/demographics', asyncHandler(adminAnalyticsController.getU
 
 // GET /api/v1/admin/analytics/payment-methods - Get payment method analytics
 router.get('/analytics/payment-methods', asyncHandler(adminAnalyticsController.getPaymentMethodAnalytics));
+
+/**
+ * Review Moderation
+ */
+
+// GET /api/v1/admin/reviews/flagged - Get flagged reviews
+router.get('/reviews/flagged', asyncHandler(reviewController.getFlaggedReviews));
+
+// PATCH /api/v1/admin/reviews/:reviewId/moderate - Moderate a review
+router.patch('/reviews/:reviewId/moderate', asyncHandler(reviewController.moderateReview));
+
+// DELETE /api/v1/admin/reviews/:reviewId - Delete a review
+router.delete('/reviews/:reviewId', asyncHandler(reviewController.adminDeleteReview));
 
 export default router;

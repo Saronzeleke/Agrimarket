@@ -16,11 +16,13 @@ import addressRoutes from './address.routes'
 import checkoutRoutes from './checkout.routes'
 import orderRoutes from './order.routes'
 import adminRoutes from './admin.routes'
+import reviewRoutes from './review.routes'
 
 const router = Router()
 
 // Mount route modules
 router.use('/auth', authRoutes)
+router.use(reviewRoutes) // Mounted at root for /products/:productId/reviews and /reviews
 router.use('/products', productRoutes)
 router.use('/categories', categoryRoutes)
 router.use('/seller', sellerRoutes)

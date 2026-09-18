@@ -9,6 +9,7 @@ import productController from '../controllers/product.controller'
 import { sellerOrderController } from '../controllers/seller-order.controller'
 import { inventoryController } from '../controllers/inventory.controller'
 import { sellerAnalyticsController } from '../controllers/seller-analytics.controller'
+import { reviewController } from '../controllers/review.controller'
 import { authenticate } from '../middleware/auth.middleware'
 import { requireSeller } from '../middleware/rbac.middleware'
 import { asyncHandler } from '../utils/helpers'
@@ -83,6 +84,16 @@ router.post('/inventory/:inventoryId/adjust', asyncHandler(inventoryController.a
 
 // GET /api/v1/seller/inventory/:inventoryId/history - Get inventory history
 router.get('/inventory/:inventoryId/history', asyncHandler(inventoryController.getHistory))
+
+/**
+ * Reviews & Ratings
+ */
+
+// GET /api/v1/seller/reviews - Get seller's product reviews
+router.get('/reviews', asyncHandler(reviewController.getSellerReviews))
+
+// POST /api/v1/seller/reviews/:reviewId/respond - Respond to a review
+router.post('/reviews/:reviewId/respond', asyncHandler(reviewController.addSellerResponse))
 
 /**
  * Analytics & Dashboard
