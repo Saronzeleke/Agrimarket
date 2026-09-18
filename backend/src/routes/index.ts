@@ -12,6 +12,9 @@ import sellerRoutes from './seller.routes'
 import searchRoutes from './search.routes'
 import cartRoutes from './cart.routes'
 import wishlistRoutes from './wishlist.routes'
+import addressRoutes from './address.routes'
+import checkoutRoutes from './checkout.routes'
+import orderRoutes from './order.routes'
 
 const router = Router()
 
@@ -23,6 +26,9 @@ router.use('/seller', sellerRoutes)
 router.use('/search', searchRoutes)
 router.use('/cart', cartRoutes)
 router.use('/wishlist', wishlistRoutes)
+router.use('/addresses', addressRoutes)
+router.use('/checkout', checkoutRoutes)
+router.use('/orders', orderRoutes)
 
 // Health check for API
 router.get('/health', (req, res) => {
