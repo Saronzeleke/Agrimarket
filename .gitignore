@@ -1,11 +1,3 @@
-# ========================================
-# AGRIMARKET - PRODUCTION .GITIGNORE
-# Single comprehensive file for entire project
-# ========================================
-
-# ========================================
-# SECURITY & SECRETS (CRITICAL - DO NOT COMMIT)
-# ========================================
 
 # Environment variables
 .env
@@ -106,9 +98,8 @@ sessions/
 dump.rdb
 appendonly.aof
 
-# ========================================
+
 # DEPENDENCIES
-# ========================================
 
 # Node modules
 node_modules/
@@ -129,9 +120,9 @@ env/
 ENV/
 .venv/
 
-# ========================================
+
 # BUILD OUTPUT
-# ========================================
+
 
 dist/
 build/
@@ -141,9 +132,8 @@ out/
 *.tsbuildinfo
 .turbo/
 
-# ========================================
+
 # LOGS
-# ========================================
 
 logs/
 *.log
@@ -155,9 +145,7 @@ lerna-debug.log*
 audit.log
 security.log
 
-# ========================================
 # TESTING & COVERAGE
-# ========================================
 
 coverage/
 .nyc_output/
@@ -166,9 +154,7 @@ coverage/
 test-results/
 e2e-results/
 
-# ========================================
 # IDE & EDITORS
-# ========================================
 
 # VS Code
 .vscode/*
@@ -200,9 +186,7 @@ e2e-results/
 \#*\#
 .\#*
 
-# ========================================
 # OS FILES
-# ========================================
 
 # macOS
 .DS_Store
@@ -222,9 +206,7 @@ $RECYCLE.BIN/
 .directory
 .Trash-*
 
-# ========================================
 # TEMPORARY FILES
-# ========================================
 
 *.tmp
 *.temp
@@ -232,9 +214,7 @@ $RECYCLE.BIN/
 .temp/
 tmp/
 
-# ========================================
 # UPLOADS & USER CONTENT
-# ========================================
 
 uploads/*
 !uploads/.gitkeep
@@ -245,18 +225,14 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 frontend/public/uploads/*
 
-# ========================================
-# BACKEND SPECIFIC
-# ========================================
+# BACKEND 
 
 # Prisma
 backend/prisma/.env
 backend/dist/
 backend/logs/
 
-# ========================================
-# FRONTEND SPECIFIC (When added)
-# ========================================
+# FRONTEND 
 
 # Next.js / React
 frontend/.next/
@@ -268,26 +244,20 @@ frontend/dist/
 frontend/.vercel/
 frontend/.netlify/
 
-# ========================================
 # MONITORING & ANALYTICS
-# ========================================
 
 sentry-*.json
 datadog-*.json
 newrelic.ini
 .newrelic/
 
-# ========================================
 # EMAIL SERVICE CREDENTIALS
-# ========================================
 
 sendgrid-*.json
 mailgun-*.json
 smtp-credentials.json
 
-# ========================================
-# OPTIONAL: Keep these patterns
-# ========================================
+# Keep these patterns
 
 # Optional eslint cache
 .eslintcache
@@ -327,9 +297,7 @@ smtp-credentials.json
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# ========================================
 # PROJECT SPECIFIC
-# ========================================
 
 # Keep example files but ignore actual config
 !.env.example
