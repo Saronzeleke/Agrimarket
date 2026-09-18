@@ -381,6 +381,15 @@ export class ProductRepository {
       ],
     })
   }
+
+  /**
+   * Get product inventory
+   */
+  async getInventory(productId: string) {
+    return prisma.inventory.findUnique({
+      where: { productId },
+    })
+  }
 }
 
 export default new ProductRepository()
