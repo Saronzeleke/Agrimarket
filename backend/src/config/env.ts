@@ -68,6 +68,14 @@ const envSchema = z.object({
   LOG_FILE_ERROR: z.string().default('logs/error.log'),
   LOG_FILE_COMBINED: z.string().default('logs/combined.log'),
 
+  // Redis
+  REDIS_HOST: z.string().default('localhost'),
+  REDIS_PORT: z.string().transform(Number).default('6379'),
+  REDIS_PASSWORD: z.string().optional(),
+  REDIS_DB: z.string().transform(Number).default('0'),
+  REDIS_TTL: z.string().transform(Number).default('900'), // 15 minutes
+  CACHE_ENABLED: z.string().transform((val) => val === 'true').default('true'),
+
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   CORS_CREDENTIALS: z.string().transform((val) => val === 'true').default('true'),
@@ -193,6 +201,19 @@ export const config = {
     level: env.LOG_LEVEL,
     errorFile: env.LOG_FILE_ERROR,
     combinedFile: env.LOG_FILE_COMBINED,
+  },
+
+  // Redis
+  redis: {
+    host: env.REDIS_HOST,
+    port: env.REDIS_PORT,
+    password: env.REDIS_PASSWORD,
+    db: env.REDIS_DB,
+    ttl: env.REDIS_TTL,
+  },
+
+  cache: {
+    enabled: env.CACHE_ENABLED,
   },
 
   // CORS

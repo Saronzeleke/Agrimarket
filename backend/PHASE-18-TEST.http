@@ -1,0 +1,476 @@
+### Phase 18: Performance Optimization Testing
+
+### Variables
+@baseUrl = http://localhost:5000/api/v1
+@accessToken = your_access_token_here
+
+### ============================================
+### 1. Health Check & Performance Metrics
+### ============================================
+
+### Test 1.1: Enhanced Health Check with Cache Stats
+GET http://localhost:5000/health
+Accept: application/json
+
+# Expected response includes:
+# - memory usage
+# - cache stats (connected, keys, memory, hit rate)
+# - performance metrics (avgDuration, slowRequests, errorRequests)
+
+###
+
+### ============================================
+### 2. Redis Connection Test
+### ============================================
+
+### Test 2.1: Verify Redis is Running
+# Run in terminal: docker ps | grep redis
+# Expected: agrimarket-redis container running
+
+### Test 2.2: Ping Redis
+# Run in terminal: docker exec -it agrimarket-redis redis-cli ping
+# Expected: PONG
+
+### Test 2.3: Check Redis Memory
+# Run in terminal: docker exec -it agrimarket-redis redis-cli INFO memory
+
+###
+
+### ============================================
+### 3. Caching Tests - Products
+### ============================================
+
+### Test 3.1: First Request (Cache Miss)
+# @name productList1
+GET {{baseUrl}}/products?page=1&limit=10
+Accept: application/json
+
+# Note response time (should be slower - database query)
+
+###
+
+### Test 3.2: Second Request (Cache Hit)
+# @name productList2
+GET {{baseUrl}}/products?page=1&limit=10
+Accept: application/json
+
+# Note response time (should be ~90% faster - from cache)
+# Expected: < 50ms response time
+
+###
+
+### Test 3.3: Product Detail (Cache Miss)
+# @name productDetail1
+GET {{baseUrl}}/products/clx123456789
+Accept: application/json
+
+###
+
+### Test 3.4: Product Detail (Cache Hit)
+# @name productDetail2
+GET {{baseUrl}}/products/clx123456789
+Accept: application/json
+
+# Expected: Much faster than first request
+
+###
+
+### Test 3.5: Cache Invalidation - Update Product
+PUT {{baseUrl}}/products/clx123456789
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Product Name",
+  "description": "This should invalidate product caches"
+}
+
+# This should clear all product caches
+
+###
+
+### Test 3.6: Verify Cache Cleared - Product List
+GET {{baseUrl}}/products?page=1&limit=10
+Accept: application/json
+
+# Should be slower (cache miss after invalidation)
+
+###
+
+### ============================================
+### 4. Caching Tests - Search
+### ============================================
+
+### Test 4.1: Search Query (Cache Miss)
+GET {{baseUrl}}/search?q=tomato&page=1&limit=10
+Accept: application/json
+
+# Note response time
+
+###
+
+### Test 4.2: Same Search Query (Cache Hit)
+GET {{baseUrl}}/search?q=tomato&page=1&limit=10
+Accept: application/json
+
+# Expected: ~95% faster than first request
+
+###
+
+### Test 4.3: Autocomplete (Cache Miss)
+GET {{baseUrl}}/search/suggestions?q=tom
+Accept: application/json
+
+###
+
+### Test 4.4: Autocomplete (Cache Hit)
+GET {{baseUrl}}/search/suggestions?q=tom
+Accept: application/json
+
+# Expected: Very fast (<30ms)
+
+###
+
+### Test 4.5: Popular Searches (Cached 15 minutes)
+GET {{baseUrl}}/search/popular
+Accept: application/json
+
+# Expected: Fast response, 15-minute cache
+
+###
+
+### ============================================
+### 5. Caching Tests - Categories
+### ============================================
+
+### Test 5.1: Get All Categories (Cache Miss)
+GET {{baseUrl}}/categories
+Accept: application/json
+
+# Categories cached for 1 hour (rarely change)
+
+###
+
+### Test 5.2: Get All Categories (Cache Hit)
+GET {{baseUrl}}/categories
+Accept: application/json
+
+# Expected: Very fast (<20ms)
+
+###
+
+### Test 5.3: Get Category by Slug (Cache Miss)
+GET {{baseUrl}}/categories/vegetables
+Accept: application/json
+
+###
+
+### Test 5.4: Get Category by Slug (Cache Hit)
+GET {{baseUrl}}/categories/vegetables
+Accept: application/json
+
+# Expected: Very fast
+
+###
+
+### ============================================
+### 6. User-Specific Caching - Cart
+### ============================================
+
+### Test 6.1: Get User Cart (Cache Miss)
+GET {{baseUrl}}/cart
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+# Note response time
+
+###
+
+### Test 6.2: Get User Cart (Cache Hit)
+GET {{baseUrl}}/cart
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+# Expected: Much faster (user-specific cache, 1 hour TTL)
+
+###
+
+### Test 6.3: Add Item to Cart (Invalidates User Cache)
+POST {{baseUrl}}/cart/items
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "productId": "clx123456789",
+  "quantity": 2
+}
+
+# This should invalidate all caches for this user
+
+###
+
+### Test 6.4: Get Cart After Update (Cache Miss)
+GET {{baseUrl}}/cart
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+# Should be slower (cache invalidated)
+
+###
+
+### Test 6.5: Cart Item Count (Cached per user)
+GET {{baseUrl}}/cart/count
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+###
+
+### ============================================
+### 7. User-Specific Caching - Search History
+### ============================================
+
+### Test 7.1: Get Recent Searches (Cache Miss)
+GET {{baseUrl}}/search/recent
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+###
+
+### Test 7.2: Get Recent Searches (Cache Hit)
+GET {{baseUrl}}/search/recent
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+# Expected: Faster (10-minute user cache)
+
+###
+
+### Test 7.3: Get Saved Searches (Cached per user)
+GET {{baseUrl}}/search/saved
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+###
+
+### ============================================
+### 8. Recommendation Caching
+### ============================================
+
+### Test 8.1: Similar Products (Cache Miss)
+GET {{baseUrl}}/recommendations/similar/clx123456789?limit=6
+Accept: application/json
+
+###
+
+### Test 8.2: Similar Products (Cache Hit)
+GET {{baseUrl}}/recommendations/similar/clx123456789?limit=6
+Accept: application/json
+
+# Expected: Fast response (10-minute cache)
+
+###
+
+### Test 8.3: Trending Products (5-minute cache)
+GET {{baseUrl}}/recommendations/trending?limit=10
+Accept: application/json
+
+###
+
+### Test 8.4: Best Sellers (10-minute cache)
+GET {{baseUrl}}/recommendations/best-sellers?limit=10
+Accept: application/json
+
+###
+
+### Test 8.5: Personalized For You (User-specific, 5-minute cache)
+GET {{baseUrl}}/recommendations/for-you?limit=10
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+###
+
+### Test 8.6: Recently Viewed (User-specific, 5-minute cache)
+GET {{baseUrl}}/recommendations/recently-viewed?limit=10
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+###
+
+### ============================================
+### 9. Performance Measurement
+### ============================================
+
+### Test 9.1: Response Time Comparison Script
+# Run multiple requests and compare:
+# 1. First request (cache miss): ~200-800ms
+# 2. Second request (cache hit): ~20-50ms
+# 3. Improvement: 90-97%
+
+###
+
+### Test 9.2: Load Test with Artillery
+# Create artillery-test.yml and run:
+# artillery run artillery-test.yml
+
+###
+
+### Test 9.3: Measure Cache Hit Rate
+# After running requests, check health endpoint
+GET http://localhost:5000/health
+Accept: application/json
+
+# Check: cache.hitRate
+# Target: > 70%
+
+###
+
+### ============================================
+### 10. Cache Management
+### ============================================
+
+### Test 10.1: Check Cache Keys
+# Run in terminal:
+# docker exec -it agrimarket-redis redis-cli KEYS "agrimarket:*"
+
+###
+
+### Test 10.2: Check Cache Key TTL
+# Run in terminal:
+# docker exec -it agrimarket-redis redis-cli TTL "agrimarket:response:/api/v1/products"
+
+###
+
+### Test 10.3: Manual Cache Clear (if needed)
+# Run in terminal:
+# docker exec -it agrimarket-redis redis-cli FLUSHDB
+
+###
+
+### Test 10.4: Monitor Cache in Real-Time
+# Run in terminal:
+# docker exec -it agrimarket-redis redis-cli MONITOR
+
+###
+
+### ============================================
+### 11. Performance Regression Tests
+### ============================================
+
+### Test 11.1: Slow Request Detection
+# Make 20 concurrent requests to trigger slow request detection
+# Check logs for "Slow request detected" messages
+
+###
+
+### Test 11.2: Performance Metrics Endpoint
+GET http://localhost:5000/health
+Accept: application/json
+
+# Check performance.avgDuration
+# Target: < 100ms average
+
+###
+
+### ============================================
+### 12. Cache Invalidation Patterns
+### ============================================
+
+### Test 12.1: Product Update Invalidates Product Caches
+# 1. GET /products (cached)
+# 2. PUT /products/:id (invalidates)
+# 3. GET /products (cache miss - should refetch)
+
+###
+
+### Test 12.2: Category Update Invalidates Category Caches
+# 1. GET /categories (cached)
+# 2. PUT /categories/:id (invalidates)
+# 3. GET /categories (cache miss)
+
+###
+
+### Test 12.3: User Actions Invalidate User Caches
+# 1. GET /cart (cached per user)
+# 2. POST /cart/items (invalidates user cache)
+# 3. GET /cart (cache miss for that user)
+
+###
+
+### ============================================
+### 13. Redis Persistence Test
+### ============================================
+
+### Test 13.1: Restart Redis Container
+# Run in terminal:
+# docker restart agrimarket-redis
+# Wait 5 seconds
+
+###
+
+### Test 13.2: Check Data Persisted
+# Make a cached request - should be cache miss (Redis restarted)
+GET {{baseUrl}}/products?page=1&limit=10
+Accept: application/json
+
+###
+
+### Test 13.3: Rebuild Cache
+# Make the same request again
+GET {{baseUrl}}/products?page=1&limit=10
+Accept: application/json
+
+# Should now be cached
+
+###
+
+### ============================================
+### 14. Memory Usage Tests
+### ============================================
+
+### Test 14.1: Check Redis Memory Usage
+# Run in terminal:
+# docker exec -it agrimarket-redis redis-cli INFO memory | grep used_memory_human
+
+# Expected: < 256MB (configured max)
+
+###
+
+### Test 14.2: Check Application Memory
+GET http://localhost:5000/health
+Accept: application/json
+
+# Check: memory.used
+# Expected: < 512MB
+
+###
+
+### ============================================
+### 15. Cache Warming (Optional)
+### ============================================
+
+### Test 15.1: Warm Up Product Cache
+# Pre-populate cache with most accessed endpoints
+GET {{baseUrl}}/products?page=1&limit=10
+GET {{baseUrl}}/products?page=1&limit=10&category=vegetables
+GET {{baseUrl}}/categories
+GET {{baseUrl}}/recommendations/trending
+GET {{baseUrl}}/recommendations/best-sellers
+
+###
+
+### ============================================
+### Performance Testing Checklist
+### ============================================
+
+# [ ] Redis container is running
+# [ ] Application connects to Redis successfully
+# [ ] Cache hits show faster response times (>90% improvement)
+# [ ] Cache invalidation works correctly
+# [ ] User-specific caching isolates user data
+# [ ] Health endpoint shows cache statistics
+# [ ] Cache hit rate > 70%
+# [ ] Average response time < 100ms (cached)
+# [ ] No memory leaks after extended use
+# [ ] Redis persistence works (survives restarts)
+
+###

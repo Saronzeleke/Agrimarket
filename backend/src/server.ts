@@ -8,6 +8,7 @@ import app from './app'
 import config from './config/env'
 import logger from './config/logger'
 import prisma from './config/database'
+import { initRedis, closeRedis } from './config/redis'
 import {
   setupUnhandledRejectionHandler,
   setupUncaughtExceptionHandler,
@@ -16,6 +17,14 @@ import {
 // Setup global error handlers
 setupUncaughtExceptionHandler()
 setupUnhandledRejectionHandler()
+
+// Initialize Redis
+try {
+  initRedis()
+  logger.info('✅ Redis initialized')
+} catch (error) {
+  logger.warn('⚠️  Redis initialization failed, running without cache', { error })
+}
 
 // Start server
 const server = app.listen(config.port, () => {
@@ -42,6 +51,16 @@ function gracefulShutdown(signal: string): void {
     }
 
     logger.info('Server closed successfully')
+
+    // Close Redis connections
+    try {
+      await closeRedis()
+      logger.info('Redis connections closed')
+    } catch (error: any) {
+      logger.error('Error disconnecting from Redis', {
+        error: error.message,
+      })
+    }
 
     // Close database connections
     try {

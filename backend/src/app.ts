@@ -25,6 +25,7 @@ import {
   apiLimiter,
   passwordResetLimiter,
 } from './middleware/rate-limit.middleware'
+import { performanceMiddleware, getSystemHealthMetrics } from './middleware/performance.middleware'
 
 // Create Express application
 const app: Application = express()
@@ -131,6 +132,9 @@ if (config.dev.logRequests) {
   )
 }
 
+// Performance monitoring
+app.use(performanceMiddleware)
+
 // ============================================
 // Static Files
 // ============================================
@@ -142,17 +146,25 @@ app.use('/uploads', express.static(config.upload.dir))
 // Health Check
 // ============================================
 
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    data: {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      environment: config.nodeEnv,
-      uptime: process.uptime(),
-    },
-  })
-})
+app.get('/health', async (req, res) => {
+  try {
+    const healthMetrics = await getSystemHealthMetrics();
+    
+    res.status(200).json({
+      success: true,
+      data: healthMetrics,
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      data: {
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        error: 'Failed to retrieve health metrics',
+      },
+    });
+  }
+});
 
 // ============================================
 // API Routes
