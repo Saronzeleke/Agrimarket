@@ -48,6 +48,15 @@ Welcome to the **AgriMarket** project documentation. This folder contains compre
    - Customer insights and behavior
    - Real-time activity feed
 
+6. **[Phase 12: Admin Dashboard & Analytics](./07-phase-12-admin-analytics.md)**
+   - Platform-wide analytics dashboard
+   - Sales analytics across all sellers
+   - Top performing seller rankings
+   - Revenue breakdown by category
+   - User growth and demographics
+   - Payment method analytics
+   - Real-time platform activity monitoring
+
 ## 🎯 Quick Start
 
 ### For Product Managers
@@ -175,7 +184,7 @@ The project follows a 20-phase incremental development approach:
 
 **Advanced Features (Phase 11-15)**
 11. ✅ Seller dashboard & analytics
-12. Admin dashboard
+12. ✅ Admin dashboard & analytics
 13. Reviews & ratings
 14. Recommendations
 15. Notifications
@@ -441,6 +450,7 @@ Before submitting documentation updates:
 | Database Design | 1.0 | ✅ Complete | 2026-09-18 |
 | Phase 6: Advanced Search | 1.0 | ✅ Complete | 2026-09-18 |
 | Phase 11: Seller Analytics | 1.0 | ✅ Complete | 2026-09-18 |
+| Phase 12: Admin Analytics | 1.0 | ✅ Complete | 2026-09-18 |
 | API Reference | - | ⏳ Pending | Phase 7+ |
 | Deployment Guide | - | ⏳ Pending | Phase 19 |
 | User Guides | - | ⏳ Pending | Phase 20 |

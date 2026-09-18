@@ -1,0 +1,280 @@
+###
+# Phase 12: Admin Dashboard & Analytics - API Testing
+# 
+# Prerequisites:
+# 1. Server running on http://localhost:3000
+# 2. Database seeded with test data
+# 3. Valid admin access token
+###
+
+@baseUrl = http://localhost:3000/api/v1
+@adminToken = YOUR_ADMIN_ACCESS_TOKEN_HERE
+
+###############################################################################
+# 1. Platform Overview
+###############################################################################
+
+### Get platform overview (default: month)
+GET {{baseUrl}}/admin/analytics/overview
+Authorization: Bearer {{adminToken}}
+
+### Get platform overview - Today
+GET {{baseUrl}}/admin/analytics/overview?period=today
+Authorization: Bearer {{adminToken}}
+
+### Get platform overview - This week
+GET {{baseUrl}}/admin/analytics/overview?period=week
+Authorization: Bearer {{adminToken}}
+
+### Get platform overview - This month
+GET {{baseUrl}}/admin/analytics/overview?period=month
+Authorization: Bearer {{adminToken}}
+
+### Get platform overview - This year
+GET {{baseUrl}}/admin/analytics/overview?period=year
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# 2. Sales Analytics
+###############################################################################
+
+### Get sales analytics - Last 7 days (daily)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-01-07&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Get sales analytics - Last 30 days (daily)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Get sales analytics - Last 12 weeks (weekly)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2023-10-01&endDate=2024-01-01&groupBy=week
+Authorization: Bearer {{adminToken}}
+
+### Get sales analytics - Last 12 months (monthly)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2023-01-01&endDate=2024-01-01&groupBy=month
+Authorization: Bearer {{adminToken}}
+
+### Get sales analytics - This year (monthly)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-12-31&groupBy=month
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# 3. Top Sellers
+###############################################################################
+
+### Get top 10 sellers - This month
+GET {{baseUrl}}/admin/analytics/top-sellers?period=month&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Get top 20 sellers - This month
+GET {{baseUrl}}/admin/analytics/top-sellers?period=month&limit=20
+Authorization: Bearer {{adminToken}}
+
+### Get top sellers - This week
+GET {{baseUrl}}/admin/analytics/top-sellers?period=week&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Get top sellers - This quarter
+GET {{baseUrl}}/admin/analytics/top-sellers?period=quarter&limit=20
+Authorization: Bearer {{adminToken}}
+
+### Get top sellers - This year
+GET {{baseUrl}}/admin/analytics/top-sellers?period=year&limit=50
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# 4. Revenue by Category
+###############################################################################
+
+### Get revenue by category - Last 30 days
+GET {{baseUrl}}/admin/analytics/revenue-by-category?startDate=2024-01-01&endDate=2024-01-31
+Authorization: Bearer {{adminToken}}
+
+### Get revenue by category - This quarter
+GET {{baseUrl}}/admin/analytics/revenue-by-category?startDate=2024-01-01&endDate=2024-03-31
+Authorization: Bearer {{adminToken}}
+
+### Get revenue by category - This year
+GET {{baseUrl}}/admin/analytics/revenue-by-category?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{adminToken}}
+
+### Get revenue by category - Last 7 days
+GET {{baseUrl}}/admin/analytics/revenue-by-category?startDate=2024-01-25&endDate=2024-01-31
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# 5. User Growth Analytics
+###############################################################################
+
+### Get user growth - Last 30 days (daily)
+GET {{baseUrl}}/admin/analytics/user-growth?startDate=2024-01-01&endDate=2024-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Get user growth - Last 12 weeks (weekly)
+GET {{baseUrl}}/admin/analytics/user-growth?startDate=2023-10-01&endDate=2024-01-01&groupBy=week
+Authorization: Bearer {{adminToken}}
+
+### Get user growth - Last 12 months (monthly)
+GET {{baseUrl}}/admin/analytics/user-growth?startDate=2023-01-01&endDate=2024-01-01&groupBy=month
+Authorization: Bearer {{adminToken}}
+
+### Get user growth - This year (monthly)
+GET {{baseUrl}}/admin/analytics/user-growth?startDate=2024-01-01&endDate=2024-12-31&groupBy=month
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# 6. Platform Activity Feed
+###############################################################################
+
+### Get platform activity - Last 20 events
+GET {{baseUrl}}/admin/analytics/activity?limit=20
+Authorization: Bearer {{adminToken}}
+
+### Get platform activity - Last 50 events
+GET {{baseUrl}}/admin/analytics/activity?limit=50
+Authorization: Bearer {{adminToken}}
+
+### Get platform activity - Last 100 events
+GET {{baseUrl}}/admin/analytics/activity?limit=100
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# 7. User Demographics
+###############################################################################
+
+### Get user demographics by region
+GET {{baseUrl}}/admin/analytics/demographics
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# 8. Payment Method Analytics
+###############################################################################
+
+### Get payment method analytics - Last 30 days
+GET {{baseUrl}}/admin/analytics/payment-methods?startDate=2024-01-01&endDate=2024-01-31
+Authorization: Bearer {{adminToken}}
+
+### Get payment method analytics - This quarter
+GET {{baseUrl}}/admin/analytics/payment-methods?startDate=2024-01-01&endDate=2024-03-31
+Authorization: Bearer {{adminToken}}
+
+### Get payment method analytics - This year
+GET {{baseUrl}}/admin/analytics/payment-methods?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# Error Cases - Testing Validation
+###############################################################################
+
+### Invalid period value
+GET {{baseUrl}}/admin/analytics/overview?period=invalid
+Authorization: Bearer {{adminToken}}
+
+### Invalid date format
+GET {{baseUrl}}/admin/analytics/sales?startDate=invalid&endDate=2024-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### End date before start date
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-31&endDate=2024-01-01&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Invalid group by
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&groupBy=invalid
+Authorization: Bearer {{adminToken}}
+
+### Limit too high
+GET {{baseUrl}}/admin/analytics/top-sellers?period=month&limit=1000
+Authorization: Bearer {{adminToken}}
+
+### Missing required parameters
+GET {{baseUrl}}/admin/analytics/sales
+Authorization: Bearer {{adminToken}}
+
+### No authentication token
+GET {{baseUrl}}/admin/analytics/overview
+
+### Non-admin user attempting access (use customer or seller token)
+GET {{baseUrl}}/admin/analytics/overview
+Authorization: Bearer YOUR_NON_ADMIN_TOKEN_HERE
+
+###############################################################################
+# Integration Testing - Complete Dashboard Flow
+###############################################################################
+
+### Step 1: Get platform overview
+GET {{baseUrl}}/admin/analytics/overview?period=month
+Authorization: Bearer {{adminToken}}
+
+### Step 2: Get detailed sales data
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Step 3: Get top performing sellers
+GET {{baseUrl}}/admin/analytics/top-sellers?period=month&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Step 4: Get revenue by category
+GET {{baseUrl}}/admin/analytics/revenue-by-category?startDate=2024-01-01&endDate=2024-01-31
+Authorization: Bearer {{adminToken}}
+
+### Step 5: Get user growth trends
+GET {{baseUrl}}/admin/analytics/user-growth?startDate=2024-01-01&endDate=2024-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Step 6: Get payment method breakdown
+GET {{baseUrl}}/admin/analytics/payment-methods?startDate=2024-01-01&endDate=2024-01-31
+Authorization: Bearer {{adminToken}}
+
+### Step 7: Get user demographics
+GET {{baseUrl}}/admin/analytics/demographics
+Authorization: Bearer {{adminToken}}
+
+### Step 8: Get recent platform activity
+GET {{baseUrl}}/admin/analytics/activity?limit=20
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# Performance Testing - Date Range Variations
+###############################################################################
+
+### Small range - 1 week
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-01-07&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Medium range - 1 month
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Large range - 3 months (weekly)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-03-31&groupBy=week
+Authorization: Bearer {{adminToken}}
+
+### Very large range - 1 year (monthly)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-12-31&groupBy=month
+Authorization: Bearer {{adminToken}}
+
+###############################################################################
+# Edge Cases
+###############################################################################
+
+### Same start and end date
+GET {{baseUrl}}/admin/analytics/sales?startDate=2024-01-01&endDate=2024-01-01&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Future dates
+GET {{baseUrl}}/admin/analytics/sales?startDate=2025-01-01&endDate=2025-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Very old dates (no data expected)
+GET {{baseUrl}}/admin/analytics/sales?startDate=2020-01-01&endDate=2020-01-31&groupBy=day
+Authorization: Bearer {{adminToken}}
+
+### Minimum limit
+GET {{baseUrl}}/admin/analytics/top-sellers?period=month&limit=1
+Authorization: Bearer {{adminToken}}
+
+### Maximum limit
+GET {{baseUrl}}/admin/analytics/top-sellers?period=month&limit=100
+Authorization: Bearer {{adminToken}}
+
+###
