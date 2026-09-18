@@ -104,7 +104,12 @@ app.get('/health', (req, res) => {
 // API Routes
 // ============================================
 
-// API v1 routes will be added here in Phase 4+
+import routes from './routes'
+
+// Mount API routes
+app.use(CONSTANTS.API_PREFIX, routes)
+
+// API root endpoint
 app.get(CONSTANTS.API_PREFIX, (req, res) => {
   res.status(200).json({
     success: true,
@@ -112,6 +117,10 @@ app.get(CONSTANTS.API_PREFIX, (req, res) => {
       message: 'AgriMarket API v1',
       version: '1.0.0',
       documentation: `${config.apiUrl}/docs`,
+      endpoints: {
+        auth: `${CONSTANTS.API_PREFIX}/auth`,
+        health: `${CONSTANTS.API_PREFIX}/health`,
+      },
     },
   })
 })
