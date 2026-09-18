@@ -1,0 +1,231 @@
+###
+# Phase 14: Product Recommendation System - API Testing
+# 
+# Prerequisites:
+# 1. Server running on http://localhost:3000
+# 2. Database seeded with test data
+# 3. Valid customer access token (for personalized recommendations)
+# 4. Products with orders and reviews in the database
+###
+
+@baseUrl = http://localhost:3000/api/v1
+@customerToken = YOUR_CUSTOMER_ACCESS_TOKEN_HERE
+@productId = PRODUCT_ID_HERE
+@categoryId = CATEGORY_ID_HERE
+
+###############################################################################
+# 1. Public Recommendations (No Authentication Required)
+###############################################################################
+
+### Get trending products
+GET {{baseUrl}}/recommendations/trending
+
+### Get trending with custom limit
+GET {{baseUrl}}/recommendations/trending?limit=10
+
+### Get best-selling products
+GET {{baseUrl}}/recommendations/best-sellers
+
+### Get best sellers with custom limit
+GET {{baseUrl}}/recommendations/best-sellers?limit=15
+
+### Get new arrivals
+GET {{baseUrl}}/recommendations/new-arrivals
+
+### Get new arrivals with custom limit
+GET {{baseUrl}}/recommendations/new-arrivals?limit=20
+
+### Get top-rated products
+GET {{baseUrl}}/recommendations/top-rated
+
+### Get top-rated with custom limit
+GET {{baseUrl}}/recommendations/top-rated?limit=10
+
+###############################################################################
+# 2. Product-Specific Recommendations (Public)
+###############################################################################
+
+### Get similar products
+GET {{baseUrl}}/recommendations/similar/{{productId}}
+
+### Get similar products with custom limit
+GET {{baseUrl}}/recommendations/similar/{{productId}}?limit=5
+
+### Get "Customers also bought" recommendations
+GET {{baseUrl}}/recommendations/also-bought/{{productId}}
+
+### Get "Also bought" with custom limit
+GET {{baseUrl}}/recommendations/also-bought/{{productId}}?limit=8
+
+###############################################################################
+# 3. Category-Based Recommendations (Public)
+###############################################################################
+
+### Get popular products in a category
+GET {{baseUrl}}/recommendations/popular-in-category/{{categoryId}}
+
+### Get popular in category with custom limit
+GET {{baseUrl}}/recommendations/popular-in-category/{{categoryId}}?limit=12
+
+###############################################################################
+# 4. Personalized Recommendations (Authenticated)
+###############################################################################
+
+### Get "For You" personalized feed
+GET {{baseUrl}}/recommendations/for-you
+Authorization: Bearer {{customerToken}}
+
+### Get "For You" feed with custom limit
+GET {{baseUrl}}/recommendations/for-you?limit=30
+Authorization: Bearer {{customerToken}}
+
+### Get personalized recommendations
+GET {{baseUrl}}/recommendations/personalized
+Authorization: Bearer {{customerToken}}
+
+### Get personalized with custom limit
+GET {{baseUrl}}/recommendations/personalized?limit=15
+Authorization: Bearer {{customerToken}}
+
+### Get recently viewed products
+GET {{baseUrl}}/recommendations/recently-viewed
+Authorization: Bearer {{customerToken}}
+
+### Get recently viewed with custom limit
+GET {{baseUrl}}/recommendations/recently-viewed?limit=10
+Authorization: Bearer {{customerToken}}
+
+### Get products from favorite sellers
+GET {{baseUrl}}/recommendations/favorite-sellers
+Authorization: Bearer {{customerToken}}
+
+### Get favorite sellers products with custom limit
+GET {{baseUrl}}/recommendations/favorite-sellers?limit=25
+Authorization: Bearer {{customerToken}}
+
+###############################################################################
+# Error Cases - Validation Testing
+###############################################################################
+
+### Invalid limit (too low)
+GET {{baseUrl}}/recommendations/trending?limit=0
+
+### Invalid limit (too high)
+GET {{baseUrl}}/recommendations/trending?limit=1000
+
+### Invalid limit (not a number)
+GET {{baseUrl}}/recommendations/trending?limit=abc
+
+### Non-existent product ID
+GET {{baseUrl}}/recommendations/similar/00000000-0000-0000-0000-000000000000
+
+### Non-existent category ID
+GET {{baseUrl}}/recommendations/popular-in-category/00000000-0000-0000-0000-000000000000
+
+### Try to access personalized without authentication
+GET {{baseUrl}}/recommendations/for-you
+
+### Try to access recently viewed without authentication
+GET {{baseUrl}}/recommendations/recently-viewed
+
+###############################################################################
+# Integration Testing - Complete User Journey
+###############################################################################
+
+### Step 1: User lands on homepage, sees trending products
+GET {{baseUrl}}/recommendations/trending?limit=20
+
+### Step 2: User views a specific product, sees similar products
+GET {{baseUrl}}/recommendations/similar/{{productId}}?limit=10
+
+### Step 3: User sees "Customers also bought" for that product
+GET {{baseUrl}}/recommendations/also-bought/{{productId}}?limit=8
+
+### Step 4: User logs in and gets personalized "For You" feed
+GET {{baseUrl}}/recommendations/for-you?limit=30
+Authorization: Bearer {{customerToken}}
+
+### Step 5: User browses a category, sees popular products
+GET {{baseUrl}}/recommendations/popular-in-category/{{categoryId}}?limit=15
+
+### Step 6: User checks recently viewed products
+GET {{baseUrl}}/recommendations/recently-viewed?limit=10
+Authorization: Bearer {{customerToken}}
+
+### Step 7: User sees products from favorite sellers
+GET {{baseUrl}}/recommendations/favorite-sellers?limit=20
+Authorization: Bearer {{customerToken}}
+
+### Step 8: User checks best sellers
+GET {{baseUrl}}/recommendations/best-sellers?limit=10
+
+### Step 9: User checks new arrivals
+GET {{baseUrl}}/recommendations/new-arrivals?limit=15
+
+### Step 10: User checks top-rated products
+GET {{baseUrl}}/recommendations/top-rated?limit=10
+
+###############################################################################
+# Performance Testing - Various Limits
+###############################################################################
+
+### Small limit (5 items)
+GET {{baseUrl}}/recommendations/trending?limit=5
+
+### Medium limit (20 items - default)
+GET {{baseUrl}}/recommendations/trending?limit=20
+
+### Large limit (50 items)
+GET {{baseUrl}}/recommendations/trending?limit=50
+
+### Maximum limit (100 items)
+GET {{baseUrl}}/recommendations/trending?limit=100
+
+###############################################################################
+# Use Case Testing - Different Recommendation Types
+###############################################################################
+
+### Homepage - Mix of trending and best sellers
+GET {{baseUrl}}/recommendations/trending?limit=10
+###
+GET {{baseUrl}}/recommendations/best-sellers?limit=10
+
+### Product Page - Similar and also bought
+GET {{baseUrl}}/recommendations/similar/{{productId}}?limit=8
+###
+GET {{baseUrl}}/recommendations/also-bought/{{productId}}?limit=8
+
+### Category Page - Popular in category
+GET {{baseUrl}}/recommendations/popular-in-category/{{categoryId}}?limit=20
+
+### User Profile Page - Personalized recommendations
+GET {{baseUrl}}/recommendations/personalized?limit=20
+Authorization: Bearer {{customerToken}}
+
+### Discover Page - New arrivals and top rated
+GET {{baseUrl}}/recommendations/new-arrivals?limit=15
+###
+GET {{baseUrl}}/recommendations/top-rated?limit=15
+
+###############################################################################
+# Edge Cases
+###############################################################################
+
+### Product with no orders (should return similar by category/price)
+GET {{baseUrl}}/recommendations/also-bought/{{productId}}
+
+### New user with no purchase history (should return general recommendations)
+GET {{baseUrl}}/recommendations/personalized
+Authorization: Bearer {{customerToken}}
+
+### User with no wishlist items (recently viewed should be empty)
+GET {{baseUrl}}/recommendations/recently-viewed
+Authorization: Bearer {{customerToken}}
+
+### Category with few products
+GET {{baseUrl}}/recommendations/popular-in-category/{{categoryId}}?limit=50
+
+### Default limit (no limit parameter)
+GET {{baseUrl}}/recommendations/trending
+
+###
