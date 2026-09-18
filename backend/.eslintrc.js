@@ -1,45 +1,53 @@
+/**
+ * ESLint Configuration
+ * 
+ * Code linting rules for AgriMarket backend.
+ */
+
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.json',
-    tsconfigRootDir: __dirname,
+    ecmaVersion: 2022,
     sourceType: 'module',
+    project: './tsconfig.json',
   },
   plugins: ['@typescript-eslint', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
+    'prettier',
   ],
-  root: true,
-  env: {
-    node: true,
-    jest: true,
-  },
-  ignorePatterns: ['.eslintrc.js', 'dist', 'node_modules'],
   rules: {
-    // TypeScript
-    '@typescript-eslint/interface-name-prefix': 'off',
+    // TypeScript specific rules
+    '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unused-vars': [
-      'warn',
-      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-    ],
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-non-null-assertion': 'warn',
-
-    // General
+    
+    // General rules
     'no-console': ['warn', { allow: ['warn', 'error'] }],
-    'prefer-const': 'error',
+    'no-debugger': 'error',
+    'prettier/prettier': 'warn',
+    
+    // Best practices
+    'eqeqeq': ['error', 'always'],
+    'curly': ['error', 'all'],
     'no-var': 'error',
-
-    // Prettier
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto',
-      },
-    ],
+    'prefer-const': 'error',
+    'prefer-arrow-callback': 'warn',
   },
-}
+  env: {
+    node: true,
+    es2022: true,
+    jest: true,
+  },
+  ignorePatterns: [
+    'dist',
+    'node_modules',
+    'coverage',
+    '*.js',
+    '!.eslintrc.js',
+    '!jest.config.js',
+  ],
+};
