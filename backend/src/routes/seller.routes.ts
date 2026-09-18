@@ -8,6 +8,7 @@ import { Router } from 'express'
 import productController from '../controllers/product.controller'
 import { sellerOrderController } from '../controllers/seller-order.controller'
 import { inventoryController } from '../controllers/inventory.controller'
+import { sellerAnalyticsController } from '../controllers/seller-analytics.controller'
 import { authenticate } from '../middleware/auth.middleware'
 import { requireSeller } from '../middleware/rbac.middleware'
 import { asyncHandler } from '../utils/helpers'
@@ -82,5 +83,27 @@ router.post('/inventory/:inventoryId/adjust', asyncHandler(inventoryController.a
 
 // GET /api/v1/seller/inventory/:inventoryId/history - Get inventory history
 router.get('/inventory/:inventoryId/history', asyncHandler(inventoryController.getHistory))
+
+/**
+ * Analytics & Dashboard
+ */
+
+// GET /api/v1/seller/analytics/dashboard - Get dashboard overview
+router.get('/analytics/dashboard', asyncHandler(sellerAnalyticsController.getDashboardOverview))
+
+// GET /api/v1/seller/analytics/sales - Get sales over time
+router.get('/analytics/sales', asyncHandler(sellerAnalyticsController.getSalesOverTime))
+
+// GET /api/v1/seller/analytics/products - Get product performance
+router.get('/analytics/products', asyncHandler(sellerAnalyticsController.getProductPerformance))
+
+// GET /api/v1/seller/analytics/revenue - Get revenue by category
+router.get('/analytics/revenue', asyncHandler(sellerAnalyticsController.getRevenueByCategory))
+
+// GET /api/v1/seller/analytics/customers - Get customer insights
+router.get('/analytics/customers', asyncHandler(sellerAnalyticsController.getCustomerInsights))
+
+// GET /api/v1/seller/analytics/activity - Get recent activity
+router.get('/analytics/activity', asyncHandler(sellerAnalyticsController.getRecentActivity))
 
 export default router

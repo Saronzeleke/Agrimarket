@@ -40,6 +40,14 @@ Welcome to the **AgriMarket** project documentation. This folder contains compre
    - Saved searches functionality
    - API endpoints and testing guide
 
+5. **[Phase 11: Seller Dashboard & Analytics](./06-phase-11-seller-analytics.md)**
+   - Comprehensive seller analytics dashboard
+   - Sales trends and performance metrics
+   - Product performance analytics
+   - Revenue analysis by category
+   - Customer insights and behavior
+   - Real-time activity feed
+
 ## 🎯 Quick Start
 
 ### For Product Managers
@@ -160,13 +168,13 @@ The project follows a 20-phase incremental development approach:
 4. ✅ Authentication & authorization
 5. ✅ Product catalog
 6. ✅ Advanced search & filtering
-7. Shopping cart & wishlist
-8. Checkout process
-9. Order management
-10. Inventory management
+7. ✅ Shopping cart & wishlist
+8. ✅ Checkout process
+9. ✅ Order management
+10. ✅ Inventory management
 
 **Advanced Features (Phase 11-15)**
-11. Seller dashboard
+11. ✅ Seller dashboard & analytics
 12. Admin dashboard
 13. Reviews & ratings
 14. Recommendations
@@ -432,6 +440,7 @@ Before submitting documentation updates:
 | System Architecture | 1.0 | ✅ Complete | 2026-09-18 |
 | Database Design | 1.0 | ✅ Complete | 2026-09-18 |
 | Phase 6: Advanced Search | 1.0 | ✅ Complete | 2026-09-18 |
+| Phase 11: Seller Analytics | 1.0 | ✅ Complete | 2026-09-18 |
 | API Reference | - | ⏳ Pending | Phase 7+ |
 | Deployment Guide | - | ⏳ Pending | Phase 19 |
 | User Guides | - | ⏳ Pending | Phase 20 |

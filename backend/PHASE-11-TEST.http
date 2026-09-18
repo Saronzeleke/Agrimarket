@@ -1,0 +1,256 @@
+###
+# Phase 11: Seller Dashboard & Analytics - API Testing
+# 
+# Prerequisites:
+# 1. Server running on http://localhost:3000
+# 2. Database seeded with test data
+# 3. Valid seller access token
+###
+
+@baseUrl = http://localhost:3000/api/v1
+@sellerToken = YOUR_SELLER_ACCESS_TOKEN_HERE
+
+###############################################################################
+# 1. Dashboard Overview
+###############################################################################
+
+### Get dashboard overview (default: month)
+GET {{baseUrl}}/seller/analytics/dashboard
+Authorization: Bearer {{sellerToken}}
+
+### Get dashboard overview - Today
+GET {{baseUrl}}/seller/analytics/dashboard?period=today
+Authorization: Bearer {{sellerToken}}
+
+### Get dashboard overview - This week
+GET {{baseUrl}}/seller/analytics/dashboard?period=week
+Authorization: Bearer {{sellerToken}}
+
+### Get dashboard overview - This month
+GET {{baseUrl}}/seller/analytics/dashboard?period=month
+Authorization: Bearer {{sellerToken}}
+
+### Get dashboard overview - This year
+GET {{baseUrl}}/seller/analytics/dashboard?period=year
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# 2. Sales Over Time
+###############################################################################
+
+### Get sales over time - Last 7 days (daily)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-01-07&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Get sales over time - Last 30 days (daily)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Get sales over time - Last 12 weeks (weekly)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2023-10-01&endDate=2024-01-01&interval=week
+Authorization: Bearer {{sellerToken}}
+
+### Get sales over time - Last 12 months (monthly)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2023-01-01&endDate=2024-01-01&interval=month
+Authorization: Bearer {{sellerToken}}
+
+### Get sales over time - This year (monthly)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-12-31&interval=month
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# 3. Product Performance
+###############################################################################
+
+### Get product performance - Top 10 by revenue (month)
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=revenue&limit=10
+Authorization: Bearer {{sellerToken}}
+
+### Get product performance - Top 20 by revenue (month)
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=revenue&limit=20
+Authorization: Bearer {{sellerToken}}
+
+### Get product performance - Top 10 by quantity sold
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=quantity&limit=10
+Authorization: Bearer {{sellerToken}}
+
+### Get product performance - This week
+GET {{baseUrl}}/seller/analytics/products?period=week&sortBy=revenue&limit=20
+Authorization: Bearer {{sellerToken}}
+
+### Get product performance - This quarter
+GET {{baseUrl}}/seller/analytics/products?period=quarter&sortBy=revenue&limit=20
+Authorization: Bearer {{sellerToken}}
+
+### Get product performance - This year
+GET {{baseUrl}}/seller/analytics/products?period=year&sortBy=revenue&limit=50
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# 4. Revenue by Category
+###############################################################################
+
+### Get revenue by category - Last 30 days
+GET {{baseUrl}}/seller/analytics/revenue?startDate=2024-01-01&endDate=2024-01-31
+Authorization: Bearer {{sellerToken}}
+
+### Get revenue by category - This quarter
+GET {{baseUrl}}/seller/analytics/revenue?startDate=2024-01-01&endDate=2024-03-31
+Authorization: Bearer {{sellerToken}}
+
+### Get revenue by category - This year
+GET {{baseUrl}}/seller/analytics/revenue?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{sellerToken}}
+
+### Get revenue by category - Last 7 days
+GET {{baseUrl}}/seller/analytics/revenue?startDate=2024-01-25&endDate=2024-01-31
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# 5. Customer Insights
+###############################################################################
+
+### Get customer insights - Top 10 customers (month)
+GET {{baseUrl}}/seller/analytics/customers?period=month&limit=10
+Authorization: Bearer {{sellerToken}}
+
+### Get customer insights - Top 20 customers (month)
+GET {{baseUrl}}/seller/analytics/customers?period=month&limit=20
+Authorization: Bearer {{sellerToken}}
+
+### Get customer insights - This week
+GET {{baseUrl}}/seller/analytics/customers?period=week&limit=10
+Authorization: Bearer {{sellerToken}}
+
+### Get customer insights - This quarter
+GET {{baseUrl}}/seller/analytics/customers?period=quarter&limit=20
+Authorization: Bearer {{sellerToken}}
+
+### Get customer insights - This year
+GET {{baseUrl}}/seller/analytics/customers?period=year&limit=50
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# 6. Recent Activity
+###############################################################################
+
+### Get recent activity - Last 20 events
+GET {{baseUrl}}/seller/analytics/activity?limit=20
+Authorization: Bearer {{sellerToken}}
+
+### Get recent activity - Last 50 events
+GET {{baseUrl}}/seller/analytics/activity?limit=50
+Authorization: Bearer {{sellerToken}}
+
+### Get recent activity - Last 100 events
+GET {{baseUrl}}/seller/analytics/activity?limit=100
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# Error Cases - Testing Validation
+###############################################################################
+
+### Invalid period value
+GET {{baseUrl}}/seller/analytics/dashboard?period=invalid
+Authorization: Bearer {{sellerToken}}
+
+### Invalid date format
+GET {{baseUrl}}/seller/analytics/sales?startDate=invalid&endDate=2024-01-31&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### End date before start date
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-31&endDate=2024-01-01&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Invalid interval
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&interval=invalid
+Authorization: Bearer {{sellerToken}}
+
+### Invalid sort by
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=invalid&limit=10
+Authorization: Bearer {{sellerToken}}
+
+### Limit too high
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=revenue&limit=1000
+Authorization: Bearer {{sellerToken}}
+
+### Missing required parameters
+GET {{baseUrl}}/seller/analytics/sales
+Authorization: Bearer {{sellerToken}}
+
+### No authentication token
+GET {{baseUrl}}/seller/analytics/dashboard
+
+###############################################################################
+# Integration Testing - Complete Dashboard Flow
+###############################################################################
+
+### Step 1: Get dashboard overview
+GET {{baseUrl}}/seller/analytics/dashboard?period=month
+Authorization: Bearer {{sellerToken}}
+
+### Step 2: Get detailed sales data for the period
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Step 3: Get top performing products
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=revenue&limit=10
+Authorization: Bearer {{sellerToken}}
+
+### Step 4: Get revenue breakdown by category
+GET {{baseUrl}}/seller/analytics/revenue?startDate=2024-01-01&endDate=2024-01-31
+Authorization: Bearer {{sellerToken}}
+
+### Step 5: Get customer insights
+GET {{baseUrl}}/seller/analytics/customers?period=month&limit=10
+Authorization: Bearer {{sellerToken}}
+
+### Step 6: Get recent activity
+GET {{baseUrl}}/seller/analytics/activity?limit=20
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# Performance Testing - Date Range Variations
+###############################################################################
+
+### Small range - 1 week
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-01-07&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Medium range - 1 month
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-01-31&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Large range - 3 months (weekly)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-03-31&interval=week
+Authorization: Bearer {{sellerToken}}
+
+### Very large range - 1 year (monthly)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-12-31&interval=month
+Authorization: Bearer {{sellerToken}}
+
+###############################################################################
+# Edge Cases
+###############################################################################
+
+### Same start and end date
+GET {{baseUrl}}/seller/analytics/sales?startDate=2024-01-01&endDate=2024-01-01&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Future dates
+GET {{baseUrl}}/seller/analytics/sales?startDate=2025-01-01&endDate=2025-01-31&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Very old dates (no data expected)
+GET {{baseUrl}}/seller/analytics/sales?startDate=2020-01-01&endDate=2020-01-31&interval=day
+Authorization: Bearer {{sellerToken}}
+
+### Minimum limit
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=revenue&limit=1
+Authorization: Bearer {{sellerToken}}
+
+### Maximum limit
+GET {{baseUrl}}/seller/analytics/products?period=month&sortBy=revenue&limit=100
+Authorization: Bearer {{sellerToken}}
+
+###
