@@ -10,6 +10,8 @@
 .env.staging
 .env.test
 
+#documents
+documents
 # SSL Certificates & Private Keys
 *.pem
 *.key
