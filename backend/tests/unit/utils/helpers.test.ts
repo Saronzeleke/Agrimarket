@@ -1,8 +1,5 @@
-/**
- * Helpers Unit Tests
- * 
- * Tests for utility helper functions.
- */
+// Helpers Unit Tests
+ 
 
 import { describe, test, expect } from '@jest/globals';
 import { asyncHandler } from '../../../src/utils/helpers';
