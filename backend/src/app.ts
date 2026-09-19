@@ -1,8 +1,4 @@
-/**
- * Express Application Setup
- * 
- * Configures Express app with middleware, routes, and error handlers.
- */
+// Express Application Setup Configures Express app with middleware, routes, and error handlers.
 
 import express, { Application } from 'express'
 import cors from 'cors'
@@ -30,9 +26,7 @@ import { performanceMiddleware, getSystemHealthMetrics } from './middleware/perf
 // Create Express application
 const app: Application = express()
 
-// ============================================
 // Security Middleware
-// ============================================
 
 // Helmet - Security headers
 app.use(
@@ -99,9 +93,7 @@ app.use(logSuspiciousActivity)
 // Global API Rate Limiter
 app.use(apiLimiter)
 
-// ============================================
 // Parsing Middleware
-// ============================================
 
 // Parse JSON bodies
 app.use(express.json({ limit: '10mb' }))
@@ -109,16 +101,12 @@ app.use(express.json({ limit: '10mb' }))
 // Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-// ============================================
 // Compression
-// ============================================
 
 // Compress responses
 app.use(compression())
 
-// ============================================
 // Logging Middleware
-// ============================================
 
 if (config.dev.logRequests) {
   // HTTP request logging
@@ -135,16 +123,12 @@ if (config.dev.logRequests) {
 // Performance monitoring
 app.use(performanceMiddleware)
 
-// ============================================
 // Static Files
-// ============================================
 
 // Serve uploaded files
 app.use('/uploads', express.static(config.upload.dir))
 
-// ============================================
 // Health Check
-// ============================================
 
 app.get('/health', async (req, res) => {
   try {
@@ -165,10 +149,7 @@ app.get('/health', async (req, res) => {
     });
   }
 });
-
-// ============================================
 // API Routes
-// ============================================
 
 import routes from './routes'
 
@@ -191,18 +172,15 @@ app.get(CONSTANTS.API_PREFIX, (req, res) => {
   })
 })
 
-// ============================================
-// Error Handling
-// ============================================
 
-// 404 handler (must be after all routes)
+// Error Handling
+
+// 404 handler 
 app.use(notFoundHandler)
 
-// Global error handler (must be last)
+// Global error handler 
 app.use(errorHandler)
 
-// ============================================
 // Export Application
-// ============================================
 
 export default app
