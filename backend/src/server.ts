@@ -1,8 +1,4 @@
-/**
- * Server Entry Point
- * 
- * Starts the Express server and handles graceful shutdown.
- */
+// Server Entry Point
 
 import app from './app'
 import config from './config/env'
