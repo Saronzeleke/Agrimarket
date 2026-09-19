@@ -1,6 +1,4 @@
-# ============================================
 # Stage 1: Dependencies
-# ============================================
 FROM node:18-alpine AS deps
 WORKDIR /app
 
@@ -12,9 +10,8 @@ COPY prisma ./prisma/
 RUN npm ci --only=production && \
     npx prisma generate
 
-# ============================================
 # Stage 2: Builder
-# ============================================
+
 FROM node:18-alpine AS builder
 WORKDIR /app
 
@@ -33,9 +30,8 @@ COPY prisma ./prisma
 RUN npm run build && \
     npx prisma generate
 
-# ============================================
 # Stage 3: Production
-# ============================================
+
 FROM node:18-alpine AS production
 WORKDIR /app
 
