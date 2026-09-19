@@ -1,17 +1,12 @@
-/**
- * Product Factory
- * 
- * Factory functions for creating test products.
- */
 
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export const productFactory = {
-  /**
-   * Create a test category
-   */
+  
+   // Create a test category
+   
   async createCategory(data?: Partial<{
     name: string;
     slug: string;
@@ -31,9 +26,8 @@ export const productFactory = {
     });
   },
 
-  /**
-   * Create a test product
-   */
+   // Create a test product
+   
   async createProduct(
     sellerId: string,
     categoryId: string,
@@ -81,9 +75,9 @@ export const productFactory = {
     });
   },
 
-  /**
-   * Create multiple test products
-   */
+
+   // Create multiple test products
+   
   async createProducts(
     sellerId: string,
     categoryId: string,
