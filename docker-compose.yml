@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  # ============================================
+  
   # PostgreSQL Database
-  # ============================================
+ 
   postgres:
     image: postgres:14-alpine
     container_name: agrimarket-postgres
@@ -25,9 +25,9 @@ services:
     networks:
       - agrimarket-network
 
-  # ============================================
+ 
   # Adminer (Database Management UI)
-  # ============================================
+  
   adminer:
     image: adminer:latest
     container_name: agrimarket-adminer
@@ -42,10 +42,9 @@ services:
     networks:
       - agrimarket-network
 
-  # ============================================
+  
   # Backend API (Optional - for full Docker setup)
-  # ============================================
-  # Uncomment to run backend in Docker
+  
   # api:
   #   build:
   #     context: ./backend
@@ -72,10 +71,8 @@ services:
   #     - agrimarket-network
   #   command: npm run dev
 
-  # ============================================
   # Frontend (Optional - for full Docker setup)
-  # ============================================
-  # Uncomment to run frontend in Docker
+
   # frontend:
   #   build:
   #     context: ./frontend
@@ -95,9 +92,7 @@ services:
   #     - agrimarket-network
   #   command: npm run dev
 
-  # ============================================
   # Redis (for caching & sessions)
-  # ============================================
   redis:
     image: redis:7-alpine
     container_name: agrimarket-redis
