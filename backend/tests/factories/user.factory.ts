@@ -1,8 +1,3 @@
-/**
- * User Factory
- * 
- * Factory functions for creating test users.
- */
 
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcrypt';
@@ -10,9 +5,9 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 export const userFactory = {
-  /**
-   * Create a test customer
-   */
+
+  // Create a test customer
+   
   async createCustomer(data?: Partial<{
     email: string;
     password: string;
@@ -36,9 +31,9 @@ export const userFactory = {
     });
   },
 
-  /**
-   * Create a test seller
-   */
+  
+  //  Create a test seller
+   
   async createSeller(data?: Partial<{
     email: string;
     password: string;
@@ -77,9 +72,8 @@ export const userFactory = {
     });
   },
 
-  /**
-   * Create a test admin
-   */
+  //  Create a test admin
+  
   async createAdmin(data?: Partial<{
     email: string;
     password: string;
@@ -101,9 +95,8 @@ export const userFactory = {
     });
   },
 
-  /**
-   * Create multiple test customers
-   */
+  // Create multiple test customers
+   
   async createCustomers(count: number) {
     const customers = [];
     for (let i = 0; i < count; i++) {
