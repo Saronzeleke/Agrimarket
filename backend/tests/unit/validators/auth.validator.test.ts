@@ -1,8 +1,6 @@
-/**
- * Auth Validator Unit Tests
- * 
- * Tests for authentication validation schemas.
- */
+
+ // Tests for authentication validation schemas.
+ 
 
 import { describe, test, expect } from '@jest/globals';
 import { registerSchema, loginSchema } from '../../../src/validators/auth.validator';
