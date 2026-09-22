@@ -1,14 +1,6 @@
-/**
- * Helper Utilities
- * 
- * Common utility functions used throughout the application.
- */
-
+// Common utility functions used throughout the application.
 import crypto from 'crypto'
-
-/**
- * Generate a slug from a string
- */
+// Generate a slug from a string
 export function generateSlug(text: string): string {
   return text
     .toLowerCase()
@@ -33,31 +25,22 @@ export function generateOrderNumber(): string {
   return `AGM-${year}${month}${day}-${random}`
 }
 
-/**
- * Generate a random token
- */
+// Generate a random token
 export function generateToken(length: number = 32): string {
   return crypto.randomBytes(length).toString('hex')
 }
 
-/**
- * Hash a token using SHA256
- */
+// Hash a token using SHA256
 export function hashToken(token: string): string {
   return crypto.createHash('sha256').update(token).digest('hex')
 }
 
-/**
- * Format currency (Ethiopian Birr)
- */
+// Format currency (Ethiopian Birr)
 export function formatCurrency(amount: number): string {
   return `${amount.toFixed(2)} ETB`
 }
 
-/**
- * Calculate delivery fee based on location
- * (Simplified implementation - can be enhanced based on actual distance)
- */
+// Calculate delivery fee based on location
 export function calculateDeliveryFee(region: string): number {
   const BASE_FEE = 50 // ETB
 
@@ -80,9 +63,7 @@ export function calculateDeliveryFee(region: string): number {
   return regionFees[region] || BASE_FEE + 30
 }
 
-/**
- * Sanitize filename for safe storage
- */
+// Sanitize filename for safe storage
 export function sanitizeFilename(filename: string): string {
   const ext = filename.split('.').pop()
   const name = filename.replace(/\.[^/.]+$/, '') // Remove extension
@@ -118,9 +99,7 @@ export function parseSort(sortParam?: string): {
   }
 }
 
-/**
- * Check if date is within a specified number of days
- */
+// Check if date is within a specified number of days
 export function isWithinDays(date: Date, days: number): boolean {
   const now = new Date()
   const diff = now.getTime() - date.getTime()
@@ -129,34 +108,26 @@ export function isWithinDays(date: Date, days: number): boolean {
   return daysDiff <= days
 }
 
-/**
- * Check if date has expired
- */
+// Check if date has expired
 export function isExpired(expiryDate: Date): boolean {
   return new Date() > expiryDate
 }
 
-/**
- * Add hours to a date
- */
+// Add hours to a date
 export function addHours(date: Date, hours: number): Date {
   const result = new Date(date)
   result.setHours(result.getHours() + hours)
   return result
 }
 
-/**
- * Add days to a date
- */
+// Add days to a date
 export function addDays(date: Date, days: number): Date {
   const result = new Date(date)
   result.setDate(result.getDate() + days)
   return result
 }
 
-/**
- * Mask sensitive data for logging
- */
+// Mask sensitive data for logging
 export function maskEmail(email: string): string {
   const [username, domain] = email.split('@')
   if (!username || !domain) return '***'
@@ -169,24 +140,18 @@ export function maskEmail(email: string): string {
   return `${masked}@${domain}`
 }
 
-/**
- * Mask phone number
- */
+// Mask phone number
 export function maskPhone(phone: string): string {
   if (phone.length < 4) return '***'
   return `***${phone.slice(-4)}`
 }
 
-/**
- * Deep clone an object
- */
+// Deep clone an object
 export function deepClone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj))
 }
 
-/**
- * Omit keys from an object
- */
+// Omit keys from an object
 export function omit<T extends object, K extends keyof T>(
   obj: T,
   ...keys: K[]
@@ -196,9 +161,8 @@ export function omit<T extends object, K extends keyof T>(
   return result
 }
 
-/**
- * Pick keys from an object
- */
+// Pick keys from an object
+ 
 export function pick<T extends object, K extends keyof T>(
   obj: T,
   ...keys: K[]
@@ -212,9 +176,7 @@ export function pick<T extends object, K extends keyof T>(
   return result
 }
 
-/**
- * Check if value is empty
- */
+// Check if value is empty
 export function isEmpty(
   value: any
 ): value is null | undefined | '' | [] | {} {
@@ -225,16 +187,13 @@ export function isEmpty(
   return false
 }
 
-/**
- * Sleep/delay execution
- */
+// Sleep/delay execution
+
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-/**
- * Retry async operation
- */
+// Retry async operation
 export async function retry<T>(
   fn: () => Promise<T>,
   maxAttempts: number = 3,
