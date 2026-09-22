@@ -1,9 +1,7 @@
+// Validation schemas for order endpoints
+
 import { z } from 'zod';
 import { OrderStatus } from '@prisma/client';
-
-/**
- * Validation schemas for order endpoints
- */
 
 export const orderIdSchema = z.object({
   orderId: z.string().uuid('Invalid order ID'),
