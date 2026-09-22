@@ -2,9 +2,8 @@ import { addressRepository, CreateAddressData, UpdateAddressData } from '../repo
 import { BadRequestError } from '../utils/errors';
 
 export const addressService = {
-  /**
-   * Create new address
-   */
+  // Create new address
+   
   async createAddress(userId: string, data: CreateAddressData) {
     // Validate required fields
     if (!data.fullName || !data.phone || !data.region || !data.zone || !data.woreda || !data.kebele) {
@@ -20,44 +19,38 @@ export const addressService = {
     return addressRepository.create(userId, data);
   },
 
-  /**
-   * Get all user addresses
-   */
+  // Get all user addresses
+   
   async getAddresses(userId: string) {
     return addressRepository.findByUserId(userId);
   },
-
-  /**
-   * Get address by ID
-   */
+// Get address by ID
+   
   async getAddress(id: string, userId: string) {
     return addressRepository.findById(id, userId);
   },
 
-  /**
-   * Get default address
-   */
+  // Get default address
+  
   async getDefaultAddress(userId: string) {
     return addressRepository.findDefault(userId);
   },
 
-  /**
-   * Update address
-   */
+ // Update address
+ 
   async updateAddress(id: string, userId: string, data: UpdateAddressData) {
     return addressRepository.update(id, userId, data);
   },
 
-  /**
-   * Set address as default
-   */
+ 
+   // Set address as default
+   
   async setDefaultAddress(id: string, userId: string) {
     return addressRepository.setDefault(id, userId);
   },
 
-  /**
-   * Delete address
-   */
+// Delete address
+
   async deleteAddress(id: string, userId: string) {
     // Check if this is the default address
     const address = await addressRepository.findById(id, userId);
@@ -77,9 +70,7 @@ export const addressService = {
     return addressRepository.delete(id, userId);
   },
 
-  /**
-   * Validate Ethiopian address format
-   */
+  // Validate Ethiopian address format
   validateAddressFormat(data: CreateAddressData | UpdateAddressData) {
     const errors: string[] = [];
 
