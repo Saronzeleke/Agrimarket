@@ -3,9 +3,7 @@ import { savedSearchRepository, SavedSearchData } from '../repositories/saved-se
 import { BadRequestError, NotFoundError } from '../utils/errors';
 
 export const searchService = {
-  /**
-   * Search products with advanced filtering
-   */
+  // Search products with advanced filtering
   async searchProducts(filters: SearchFilters, userId?: string) {
     // Validate pagination
     const limit = Math.min(filters.limit || 20, 100); // Max 100 per page
@@ -53,9 +51,7 @@ export const searchService = {
     };
   },
 
-  /**
-   * Get autocomplete suggestions
-   */
+//Get autocomplete suggestions
   async getAutocompleteSuggestions(query: string, limit: number = 10) {
     if (!query || query.trim().length < 2) {
       return [];
@@ -63,24 +59,15 @@ export const searchService = {
 
     return searchRepository.getSearchSuggestions(query.trim(), limit);
   },
-
-  /**
-   * Get popular search terms
-   */
+// Get popular search term
   async getPopularSearches(limit: number = 10) {
     return searchRepository.getPopularSearches(limit);
   },
-
-  /**
-   * Get user's recent searches
-   */
+// Get user's recent searches
   async getUserRecentSearches(userId: string, limit: number = 10) {
     return searchRepository.getUserRecentSearches(userId, limit);
   },
-
-  /**
-   * Save a search for a user
-   */
+// Save a search for a user
   async saveSearch(userId: string, data: SavedSearchData) {
     // Validate the search name
     if (!data.name || data.name.trim().length === 0) {
@@ -102,24 +89,15 @@ export const searchService = {
 
     return savedSearchRepository.create(userId, data);
   },
-
-  /**
-   * Get all saved searches for a user
-   */
+// Get all saved searches for a user
   async getUserSavedSearches(userId: string) {
     return savedSearchRepository.findByUserId(userId);
   },
-
-  /**
-   * Get a specific saved search
-   */
+// Get a specific saved search
   async getSavedSearch(id: string, userId: string) {
     return savedSearchRepository.findById(id, userId);
   },
-
-  /**
-   * Update a saved search
-   */
+// Update a saved search
   async updateSavedSearch(id: string, userId: string, data: Partial<SavedSearchData>) {
     // Validate the search name if provided
     if (data.name !== undefined) {
@@ -145,17 +123,11 @@ export const searchService = {
 
     return savedSearchRepository.update(id, userId, data);
   },
-
-  /**
-   * Delete a saved search
-   */
+// Delete a saved search
   async deleteSavedSearch(id: string, userId: string) {
     await savedSearchRepository.delete(id, userId);
   },
-
-  /**
-   * Execute a saved search
-   */
+// Execute a saved search
   async executeSavedSearch(id: string, userId: string, page: number = 1, limit: number = 20) {
     // Validate pagination
     const validLimit = Math.min(Math.max(limit, 1), 100);
