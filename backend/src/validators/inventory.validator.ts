@@ -1,9 +1,5 @@
+// Validation schemas for inventory endpoints
 import { z } from 'zod';
-
-/**
- * Validation schemas for inventory endpoints
- */
-
 export const updateInventorySchema = z.object({
   currentStock: z.number().int().min(0, 'Stock cannot be negative').optional(),
   reservedStock: z.number().int().min(0, 'Reserved stock cannot be negative').optional(),
