@@ -1,9 +1,4 @@
-/**
- * Product Service
- * 
- * Business logic for product management.
- */
-
+// Product Service
 import productRepository from '../repositories/product.repository'
 import categoryRepository from '../repositories/category.repository'
 import { generateSlug } from '../utils/helpers'
@@ -43,9 +38,7 @@ interface UpdateProductData {
 }
 
 export class ProductService {
-  /**
-   * Get product by ID
-   */
+  // Get product by ID
   async getById(id: string, userId?: string) {
     const product = await productRepository.findById(id)
     
@@ -60,10 +53,7 @@ export class ProductService {
 
     return product
   }
-
-  /**
-   * Get product by slug
-   */
+//  Get product by slug
   async getBySlug(slug: string) {
     const product = await productRepository.findBySlug(slug)
     
@@ -78,18 +68,12 @@ export class ProductService {
 
     return product
   }
-
-  /**
-   * List products with filters
-   */
+//  List products with filters
   async list(filters: ProductFilters, pagination: PaginationParams) {
     const { products, total } = await productRepository.findMany(filters, pagination)
     return { products, total }
   }
-
-  /**
-   * Create product (seller only)
-   */
+//  Create product (seller only)
   async create(data: CreateProductData, userId: string, userRole: Role) {
     // Only sellers can create products
     if (userRole !== Role.SELLER && userRole !== Role.ADMIN) {
@@ -137,10 +121,7 @@ export class ProductService {
 
     return product
   }
-
-  /**
-   * Update product
-   */
+// Update product
   async update(
     productId: string,
     data: UpdateProductData,
@@ -203,10 +184,7 @@ export class ProductService {
 
     return updated
   }
-
-  /**
-   * Delete product
-   */
+// Delete product
   async delete(productId: string, userId: string, userRole: Role) {
     // Get product
     const product = await productRepository.findById(productId)
@@ -228,10 +206,7 @@ export class ProductService {
       userId,
     })
   }
-
-  /**
-   * Get seller's products
-   */
+// Get seller's products
   async getSellerProducts(sellerId: string, pagination: PaginationParams) {
     const { products, total } = await productRepository.findBySeller(
       sellerId,
@@ -239,18 +214,12 @@ export class ProductService {
     )
     return { products, total }
   }
-
-  /**
-   * Get seller's low stock products
-   */
+//  Get seller's low stock products
   async getSellerLowStock(sellerId: string) {
     const products = await productRepository.findLowStock(sellerId)
     return products
   }
-
-  /**
-   * Get related products
-   */
+// Get related products
   async getRelatedProducts(productId: string, limit: number = 6) {
     const product = await productRepository.findById(productId)
     if (!product) {
@@ -264,10 +233,7 @@ export class ProductService {
     )
     return related
   }
-
-  /**
-   * Toggle product active status
-   */
+// Toggle product active status
   async toggleActive(productId: string, userId: string, userRole: Role) {
     const product = await productRepository.findById(productId)
     if (!product) {
@@ -291,10 +257,7 @@ export class ProductService {
 
     return updated
   }
-
-  /**
-   * Get product statistics for seller
-   */
+// Get product statistics for seller
   async getSellerStats(sellerId: string) {
     const [allProducts, activeProducts, lowStockProducts] = await Promise.all([
       productRepository.findBySeller(sellerId, { page: 1, limit: 1, skip: 0 }),
