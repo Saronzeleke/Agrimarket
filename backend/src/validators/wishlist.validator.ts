@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-/**
- * Validation schemas for wishlist endpoints
- */
+// Validation schemas for wishlist endpoints
 
 export const addToWishlistSchema = z.object({
   productId: z.string().uuid('Invalid product ID'),
