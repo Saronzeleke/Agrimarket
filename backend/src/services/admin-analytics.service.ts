@@ -1,17 +1,11 @@
-/**
- * Admin Analytics Service
- * 
- * Provides platform-wide analytics and monitoring for administrators.
- */
-
+// Admin Analytics Service, Provides platform-wide analytics and monitoring for administrators.
 import { OrderStatus, PaymentStatus, Role } from '@prisma/client';
 import prisma from '../config/database';
 import { ValidationError, NotFoundError } from '../utils/errors';
 
 export const adminAnalyticsService = {
-  /**
-   * Get platform overview dashboard
-   */
+  // Get platform overview dashboard
+   
   async getPlatformOverview(period: 'today' | 'week' | 'month' | 'year' = 'month') {
     const now = new Date();
     let startDate: Date;
@@ -183,9 +177,7 @@ export const adminAnalyticsService = {
     };
   },
 
-  /**
-   * Get sales analytics over time
-   */
+  // Get sales analytics over time
   async getSalesAnalytics(params: {
     startDate: Date;
     endDate: Date;
@@ -262,9 +254,8 @@ export const adminAnalyticsService = {
     };
   },
 
-  /**
-   * Get top performing sellers
-   */
+  // Get top performing sellers
+   
   async getTopSellers(params: {
     period: 'week' | 'month' | 'quarter' | 'year';
     limit: number;
@@ -353,9 +344,8 @@ export const adminAnalyticsService = {
     return sellers;
   },
 
-  /**
-   * Get revenue by category
-   */
+  // Get revenue by category
+ 
   async getRevenueByCategory(startDate: Date, endDate: Date) {
     if (startDate >= endDate) {
       throw new ValidationError('Start date must be before end date');
@@ -422,9 +412,8 @@ export const adminAnalyticsService = {
     return categories;
   },
 
-  /**
-   * Get user growth analytics
-   */
+  // Get user growth analytics
+   
   async getUserGrowth(params: {
     startDate: Date;
     endDate: Date;
@@ -492,9 +481,8 @@ export const adminAnalyticsService = {
     };
   },
 
-  /**
-   * Get platform activity feed
-   */
+  // Get platform activity feed
+   
   async getPlatformActivity(limit: number = 50) {
     const activities: Array<{
       type: string;
@@ -564,9 +552,8 @@ export const adminAnalyticsService = {
       .slice(0, limit);
   },
 
-  /**
-   * Get user demographics by region
-   */
+  // Get user demographics by region
+  
   async getUserDemographics() {
     const addresses = await prisma.address.groupBy({
       by: ['region'],
@@ -581,9 +568,8 @@ export const adminAnalyticsService = {
     })).sort((a, b) => b.userCount - a.userCount);
   },
 
-  /**
-   * Get payment method analytics
-   */
+  // Get payment method analytics
+ 
   async getPaymentMethodAnalytics(startDate: Date, endDate: Date) {
     if (startDate >= endDate) {
       throw new ValidationError('Start date must be before end date');
