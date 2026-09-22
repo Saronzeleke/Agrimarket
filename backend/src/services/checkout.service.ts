@@ -45,10 +45,8 @@ export const checkoutService = {
     return 150;
   },
 
-  /**
-   * Get checkout summary
-   * Shows cart items, address, and calculated totals
-   */
+  // Get checkout summary, Shows cart items, address, and calculated totals
+  
   async getCheckoutSummary(userId: string, addressId?: string) {
     // Get cart
     const cart = await cartService.getCart(userId);
@@ -101,10 +99,8 @@ export const checkoutService = {
       canCheckout: !!shippingAddress,
     };
   },
+ //  Process checkout and create order
 
-  /**
-   * Process checkout and create order
-   */
   async processCheckout(userId: string, data: CheckoutData) {
     // Validate cart
     const cart = await cartService.getCart(userId);
@@ -223,10 +219,7 @@ export const checkoutService = {
       },
     };
   },
-
-  /**
-   * Get available payment methods
-   */
+ // Get available payment methods
   getPaymentMethods() {
     return [
       {
