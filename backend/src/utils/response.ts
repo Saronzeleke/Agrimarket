@@ -1,6 +1,5 @@
 /**
  * API Response Utilities
- * 
  * Standardized response formatting for API endpoints.
  * Ensures consistent response structure across all endpoints.
  */
@@ -32,9 +31,7 @@ interface PaginationMeta {
   hasPrev: boolean
 }
 
-/**
- * Send success response
- */
+// Send success response
 export function sendSuccess<T>(
   res: Response,
   data: T,
@@ -48,9 +45,7 @@ export function sendSuccess<T>(
   return res.status(statusCode).json(response)
 }
 
-/**
- * Send success response with pagination
- */
+// Send success response with pagination
 export function sendSuccessWithPagination<T>(
   res: Response,
   data: T,
@@ -66,9 +61,7 @@ export function sendSuccessWithPagination<T>(
   return res.status(statusCode).json(response)
 }
 
-/**
- * Send error response
- */
+// Send error response
 export function sendError(
   res: Response,
   code: string,
@@ -88,9 +81,7 @@ export function sendError(
   return res.status(statusCode).json(response)
 }
 
-/**
- * Send validation error response
- */
+// Send validation error response
 export function sendValidationError(
   res: Response,
   errors: any[]
@@ -104,9 +95,7 @@ export function sendValidationError(
   )
 }
 
-/**
- * Send not found response
- */
+// Send not found response
 export function sendNotFound(
   res: Response,
   resource: string = 'Resource'
@@ -119,9 +108,7 @@ export function sendNotFound(
   )
 }
 
-/**
- * Send unauthorized response
- */
+// Send unauthorized response
 export function sendUnauthorized(
   res: Response,
   message: string = 'Authentication required'
@@ -134,9 +121,7 @@ export function sendUnauthorized(
   )
 }
 
-/**
- * Send forbidden response
- */
+// Send forbidden response
 export function sendForbidden(
   res: Response,
   message: string = 'Insufficient permissions'
@@ -149,9 +134,7 @@ export function sendForbidden(
   )
 }
 
-/**
- * Calculate pagination metadata
- */
+// Calculate pagination metadata
 export function calculatePagination(
   page: number,
   limit: number,
@@ -169,9 +152,7 @@ export function calculatePagination(
   }
 }
 
-/**
- * Parse pagination parameters from query
- */
+// Parse pagination parameters from query
 export function parsePaginationParams(query: any): {
   page: number
   limit: number
