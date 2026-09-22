@@ -1,8 +1,4 @@
-/**
- * Notification Service
- * 
- * Business logic for creating and managing notifications.
- */
+// Notification Service
 
 import { notificationRepository } from '../repositories/notification.repository';
 import { NotificationType } from '@prisma/client';
@@ -11,9 +7,8 @@ import { emailService } from './email.service';
 import logger from '../config/logger';
 
 export const notificationService = {
-  /**
-   * Create a notification
-   */
+  //  Create a notification
+  
   async createNotification(data: {
     userId: string;
     type: NotificationType;
@@ -50,10 +45,7 @@ export const notificationService = {
 
     return notification;
   },
-
-  /**
-   * Get user notifications with pagination
-   */
+//  Get user notifications with pagination
   async getUserNotifications(
     userId: string,
     options: {
@@ -87,10 +79,7 @@ export const notificationService = {
       },
     };
   },
-
-  /**
-   * Get notification by ID
-   */
+// Get notification by ID
   async getNotificationById(notificationId: string, userId: string) {
     const notification = await notificationRepository.findById(notificationId);
 
@@ -105,18 +94,12 @@ export const notificationService = {
 
     return notification;
   },
-
-  /**
-   * Get unread notification count
-   */
+//  Get unread notification count
   async getUnreadCount(userId: string) {
     const count = await notificationRepository.getUnreadCount(userId);
     return { unreadCount: count };
   },
-
-  /**
-   * Mark notification as read
-   */
+// Mark notification as read
   async markAsRead(notificationId: string, userId: string) {
     const notification = await this.getNotificationById(notificationId, userId);
     
@@ -126,18 +109,12 @@ export const notificationService = {
 
     return notificationRepository.markAsRead(notificationId);
   },
-
-  /**
-   * Mark all notifications as read
-   */
+// Mark all notifications as read
   async markAllAsRead(userId: string) {
     await notificationRepository.markAllAsRead(userId);
     return { message: 'All notifications marked as read' };
   },
-
-  /**
-   * Mark notification as unread
-   */
+//  Mark notification as unread
   async markAsUnread(notificationId: string, userId: string) {
     const notification = await this.getNotificationById(notificationId, userId);
     
@@ -147,39 +124,26 @@ export const notificationService = {
 
     return notificationRepository.markAsUnread(notificationId);
   },
-
-  /**
-   * Delete a notification
-   */
+// Delete a notification
   async deleteNotification(notificationId: string, userId: string) {
     await this.getNotificationById(notificationId, userId);
     await notificationRepository.delete(notificationId);
     return { message: 'Notification deleted successfully' };
   },
-
-  /**
-   * Delete all notifications for a user
-   */
+//  Delete all notifications for a user
   async deleteAllNotifications(userId: string) {
     await notificationRepository.deleteAllForUser(userId);
     return { message: 'All notifications deleted successfully' };
   },
-
-  /**
-   * Get recent notifications
-   */
+// Get recent notifications
   async getRecentNotifications(userId: string, limit: number = 10) {
     const notifications = await notificationRepository.getRecent(userId, limit);
     return { notifications };
   },
 
-  // ============================================
   // Notification Creators for Specific Events
-  // ============================================
 
-  /**
-   * Order created notification
-   */
+// Order created notification
   async notifyOrderCreated(userId: string, orderId: string, orderNumber: string) {
     return this.createNotification({
       userId,
@@ -190,10 +154,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Order confirmed notification
-   */
+// Order confirmed notification
   async notifyOrderConfirmed(userId: string, orderId: string, orderNumber: string) {
     return this.createNotification({
       userId,
@@ -204,10 +165,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Order shipped notification
-   */
+// Order shipped notification
   async notifyOrderShipped(userId: string, orderId: string, orderNumber: string) {
     return this.createNotification({
       userId,
@@ -218,10 +176,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Order delivered notification
-   */
+// Order delivered notification
   async notifyOrderDelivered(userId: string, orderId: string, orderNumber: string) {
     return this.createNotification({
       userId,
@@ -232,10 +187,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Order cancelled notification
-   */
+// Order cancelled notification
   async notifyOrderCancelled(userId: string, orderId: string, orderNumber: string) {
     return this.createNotification({
       userId,
@@ -246,10 +198,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Payment confirmed notification
-   */
+// Payment confirmed notification
   async notifyPaymentConfirmed(userId: string, orderId: string, amount: number) {
     return this.createNotification({
       userId,
@@ -260,10 +209,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Payment failed notification
-   */
+// Payment failed notification
   async notifyPaymentFailed(userId: string, orderId: string, reason?: string) {
     return this.createNotification({
       userId,
@@ -274,10 +220,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Low stock notification (for sellers)
-   */
+// Low stock notification (for sellers)
   async notifyLowStock(sellerId: string, productId: string, productName: string, currentStock: number) {
     return this.createNotification({
       userId: sellerId,
@@ -288,10 +231,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * New review notification (for sellers)
-   */
+// New review notification (for sellers)
   async notifyNewReview(
     sellerId: string,
     productId: string,
@@ -308,10 +248,7 @@ export const notificationService = {
       sendEmail: true,
     });
   },
-
-  /**
-   * Account verification notification
-   */
+//  Account verification notification
   async notifyAccountVerification(userId: string, email: string) {
     return this.createNotification({
       userId,
@@ -322,10 +259,7 @@ export const notificationService = {
       sendEmail: false, // Email sent separately via auth flow
     });
   },
-
-  /**
-   * Password reset notification
-   */
+// Password reset notification
   async notifyPasswordReset(userId: string) {
     return this.createNotification({
       userId,
@@ -336,10 +270,7 @@ export const notificationService = {
       sendEmail: false, // Email sent separately via auth flow
     });
   },
-
-  /**
-   * Bulk notify sellers about their orders
-   */
+// Bulk notify sellers about their orders
   async notifySellerNewOrder(
     sellerUserIds: string[],
     orderId: string,
