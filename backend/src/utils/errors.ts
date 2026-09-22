@@ -1,6 +1,5 @@
 /**
  * Custom Error Classes
- * 
  * Provides specific error types for different error scenarios.
  * All errors extend AppError for consistent handling.
  */
