@@ -1,14 +1,8 @@
-/**
- * Review Validators
- * 
- * Zod schemas for validating review request data.
- */
+// Review Validators
 
 import { z } from 'zod';
 
-/**
- * Submit review schema
- */
+//  Submit review schema
 export const submitReviewSchema = z.object({
   productId: z.string().uuid('Invalid product ID'),
   orderId: z.string().uuid('Invalid order ID'),
@@ -17,9 +11,8 @@ export const submitReviewSchema = z.object({
   comment: z.string().min(10, 'Comment must be at least 10 characters').max(1000, 'Comment must be at most 1000 characters').optional(),
 });
 
-/**
- * Update review schema
- */
+// Update review schema
+ 
 export const updateReviewSchema = z.object({
   rating: z.number().int().min(1).max(5).optional(),
   title: z.string().min(3).max(100).optional(),
@@ -28,9 +21,8 @@ export const updateReviewSchema = z.object({
   message: 'At least one field must be provided for update',
 });
 
-/**
- * Get product reviews query parameters
- */
+// Get product reviews query parameters
+ 
 export const getProductReviewsSchema = z.object({
   rating: z
     .string()
@@ -54,16 +46,14 @@ export const getProductReviewsSchema = z.object({
   sortBy: z.enum(['recent', 'rating', 'helpful']).default('recent'),
 });
 
-/**
- * Seller response schema
- */
+// Seller response schema
+ 
 export const sellerResponseSchema = z.object({
   response: z.string().min(10, 'Response must be at least 10 characters').max(500, 'Response must be at most 500 characters'),
 });
 
-/**
- * Moderate review schema
- */
+// Moderate review schema
+ 
 export const moderateReviewSchema = z.object({
   approved: z.boolean(),
 });
