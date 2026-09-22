@@ -1,17 +1,11 @@
-/**
- * JWT Utilities
- * 
- * Token generation and verification using jsonwebtoken.
- */
+// JWT Utilities , Token generation and verification using jsonwebtoken.
 
 import jwt from 'jsonwebtoken'
 import config from '../config/env'
 import { TokenPayload, AuthTokens } from '../types'
 import { Role } from '@prisma/client'
 
-/**
- * Generate access token
- */
+// Generate access token
 export function generateAccessToken(payload: {
   userId: string
   email: string
@@ -22,9 +16,7 @@ export function generateAccessToken(payload: {
   })
 }
 
-/**
- * Generate refresh token
- */
+// Generate refresh token
 export function generateRefreshToken(payload: {
   userId: string
   email: string
@@ -35,9 +27,7 @@ export function generateRefreshToken(payload: {
   })
 }
 
-/**
- * Generate both access and refresh tokens
- */
+// Generate both access and refresh token
 export function generateTokens(payload: {
   userId: string
   email: string
@@ -49,23 +39,17 @@ export function generateTokens(payload: {
   }
 }
 
-/**
- * Verify access token
- */
+// Verify access token
 export function verifyAccessToken(token: string): TokenPayload {
   return jwt.verify(token, config.jwt.accessSecret) as TokenPayload
 }
 
-/**
- * Verify refresh token
- */
+// Verify refresh token
 export function verifyRefreshToken(token: string): TokenPayload {
   return jwt.verify(token, config.jwt.refreshSecret) as TokenPayload
 }
 
-/**
- * Decode token without verification (for inspection)
- */
+// Decode token without verification (for inspection)
 export function decodeToken(token: string): TokenPayload | null {
   return jwt.decode(token) as TokenPayload | null
 }
