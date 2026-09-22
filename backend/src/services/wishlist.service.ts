@@ -4,9 +4,7 @@ import { cartRepository } from '../repositories/cart.repository';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 
 export const wishlistService = {
-  /**
-   * Get user's wishlist
-   */
+ // Get user's wishlist
   async getWishlist(userId: string) {
     const wishlist = await wishlistRepository.getOrCreateWishlist(userId);
 
@@ -41,10 +39,7 @@ export const wishlistService = {
       updatedAt: wishlist.updatedAt,
     };
   },
-
-  /**
-   * Add product to wishlist
-   */
+// Add product to wishlist
   async addToWishlist(userId: string, productId: string) {
     // Validate product exists
     const product = await productRepository.findById(productId);
@@ -76,31 +71,20 @@ export const wishlistService = {
       addedAt: item.createdAt,
     };
   },
-
-  /**
-   * Remove item from wishlist
-   */
+// Remove item from wishlist
   async removeFromWishlist(userId: string, itemId: string) {
     await wishlistRepository.removeItem(userId, itemId);
   },
-
-  /**
-   * Remove product from wishlist by product ID
-   */
+//Remove product from wishlist by product ID
   async removeProductFromWishlist(userId: string, productId: string) {
     await wishlistRepository.removeItemByProductId(userId, productId);
   },
-
-  /**
-   * Clear all items from wishlist
-   */
+// Clear all items from wishlist
+   
   async clearWishlist(userId: string) {
     await wishlistRepository.clearWishlist(userId);
   },
-
-  /**
-   * Move item from wishlist to cart
-   */
+// Move item from wishlist to cart
   async moveToCart(userId: string, itemId: string, quantity: number = 1) {
     // Get wishlist to verify item exists
     const wishlist = await wishlistRepository.getOrCreateWishlist(userId);
@@ -148,10 +132,7 @@ export const wishlistService = {
       message: 'Item moved to cart successfully',
     };
   },
-
-  /**
-   * Move all available items from wishlist to cart
-   */
+// Move all available items from wishlist to cart
   async moveAllToCart(userId: string) {
     const wishlist = await wishlistRepository.getOrCreateWishlist(userId);
     
@@ -216,17 +197,11 @@ export const wishlistService = {
 
     return results;
   },
-
-  /**
-   * Check if product is in wishlist
-   */
+//  Check if product is in wishlist
   async isInWishlist(userId: string, productId: string) {
     return wishlistRepository.isProductInWishlist(userId, productId);
   },
-
-  /**
-   * Get wishlist item count
-   */
+// Get wishlist item count
   async getWishlistItemCount(userId: string) {
     return wishlistRepository.getItemCount(userId);
   },
