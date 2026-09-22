@@ -3,7 +3,6 @@
  * 
  * Provides caching functionality using Redis with fallback support.
  */
-
 import { Redis } from 'ioredis';
 import { getRedisClient } from '../config/redis';
 import config from '../config/env';
@@ -18,24 +17,15 @@ export class CacheService {
     this.redis = getRedisClient();
     this.enabled = config.cache.enabled && this.redis !== null;
   }
-
-  /**
-   * Check if cache is enabled and connected
-   */
+// Check if cache is enabled and connected
   isEnabled(): boolean {
     return this.enabled && this.redis?.status === 'ready';
   }
-
-  /**
-   * Generate cache key with prefix
-   */
+// Generate cache key with prefix
   private getKey(key: string): string {
     return `${this.prefix}${key}`;
   }
-
-  /**
-   * Get value from cache
-   */
+// Get value from cache
   async get<T>(key: string): Promise<T | null> {
     if (!this.isEnabled()) {
       return null;
@@ -54,10 +44,7 @@ export class CacheService {
       return null;
     }
   }
-
-  /**
-   * Set value in cache with TTL
-   */
+// Set value in cache with TTL
   async set(key: string, value: any, ttl?: number): Promise<boolean> {
     if (!this.isEnabled()) {
       return false;
@@ -74,10 +61,7 @@ export class CacheService {
       return false;
     }
   }
-
-  /**
-   * Delete key from cache
-   */
+// Delete key from cache
   async del(key: string): Promise<boolean> {
     if (!this.isEnabled()) {
       return false;
@@ -91,10 +75,7 @@ export class CacheService {
       return false;
     }
   }
-
-  /**
-   * Delete multiple keys matching pattern
-   */
+// Delete multiple keys matching pattern
   async delPattern(pattern: string): Promise<number> {
     if (!this.isEnabled()) {
       return 0;
@@ -114,10 +95,7 @@ export class CacheService {
       return 0;
     }
   }
-
-  /**
-   * Check if key exists in cache
-   */
+// Check if key exists in cache
   async exists(key: string): Promise<boolean> {
     if (!this.isEnabled()) {
       return false;
@@ -131,10 +109,7 @@ export class CacheService {
       return false;
     }
   }
-
-  /**
-   * Get or set pattern - get from cache or execute function and cache result
-   */
+// Get or set pattern - get from cache or execute function and cache result
   async getOrSet<T>(
     key: string,
     fetchFn: () => Promise<T>,
@@ -158,10 +133,7 @@ export class CacheService {
 
     return freshData;
   }
-
-  /**
-   * Increment counter
-   */
+// Increment counter
   async increment(key: string, amount: number = 1): Promise<number> {
     if (!this.isEnabled()) {
       return 0;
@@ -175,10 +147,7 @@ export class CacheService {
       return 0;
     }
   }
-
-  /**
-   * Decrement counter
-   */
+// Decrement counter
   async decrement(key: string, amount: number = 1): Promise<number> {
     if (!this.isEnabled()) {
       return 0;
@@ -192,10 +161,7 @@ export class CacheService {
       return 0;
     }
   }
-
-  /**
-   * Add item to sorted set with score
-   */
+// Add item to sorted set with score
   async zadd(key: string, score: number, member: string): Promise<boolean> {
     if (!this.isEnabled()) {
       return false;
@@ -209,10 +175,7 @@ export class CacheService {
       return false;
     }
   }
-
-  /**
-   * Get top N members from sorted set (highest scores)
-   */
+//  Get top N members from sorted set (highest scores)
   async zrevrange(key: string, start: number = 0, stop: number = -1): Promise<string[]> {
     if (!this.isEnabled()) {
       return [];
@@ -226,10 +189,7 @@ export class CacheService {
       return [];
     }
   }
-
-  /**
-   * Get cache statistics
-   */
+// Get cache statistics
   async getStats(): Promise<{
     connected: boolean;
     keys: number;
@@ -281,17 +241,11 @@ export class CacheService {
       };
     }
   }
-
-  /**
-   * Clear all cache keys with prefix
-   */
+// Clear all cache keys with prefix
   async clear(): Promise<number> {
     return this.delPattern('*');
   }
-
-  /**
-   * Set hash field
-   */
+// Set hash field
   async hset(key: string, field: string, value: any): Promise<boolean> {
     if (!this.isEnabled()) {
       return false;
@@ -306,10 +260,7 @@ export class CacheService {
       return false;
     }
   }
-
-  /**
-   * Get hash field
-   */
+// Get hash field
   async hget<T>(key: string, field: string): Promise<T | null> {
     if (!this.isEnabled()) {
       return null;
@@ -328,10 +279,7 @@ export class CacheService {
       return null;
     }
   }
-
-  /**
-   * Get all hash fields
-   */
+// Get all hash fields
   async hgetall<T>(key: string): Promise<Record<string, T>> {
     if (!this.isEnabled()) {
       return {};
@@ -355,10 +303,7 @@ export class CacheService {
       return {};
     }
   }
-
-  /**
-   * Delete hash field
-   */
+// Delete hash field
   async hdel(key: string, field: string): Promise<boolean> {
     if (!this.isEnabled()) {
       return false;
@@ -373,9 +318,7 @@ export class CacheService {
     }
   }
 
-  /**
-   * Set expiry on key
-   */
+  // Set expiry on key
   async expire(key: string, seconds: number): Promise<boolean> {
     if (!this.isEnabled()) {
       return false;
@@ -390,9 +333,8 @@ export class CacheService {
     }
   }
 
-  /**
-   * Get time to live for key
-   */
+  // Get time to live for key
+ 
   async ttl(key: string): Promise<number> {
     if (!this.isEnabled()) {
       return -1;
