@@ -3,9 +3,7 @@ import prisma from '../config/database';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../utils/errors';
 
 export const sellerOrderService = {
-  /**
-   * Get seller's orders (orders containing their products)
-   */
+  // Get seller's orders (orders containing their products)
   async getSellerOrders(
     sellerId: string,
     options?: {
@@ -139,10 +137,7 @@ export const sellerOrderService = {
       },
     };
   },
-
-  /**
-   * Get specific order details for seller
-   */
+// Get specific order details for seller
   async getSellerOrder(orderId: string, sellerId: string) {
     // Get order items for this seller
     const orderItems = await prisma.orderItem.findMany({
@@ -226,10 +221,7 @@ export const sellerOrderService = {
       cancelledAt: order.cancelledAt,
     };
   },
-
-  /**
-   * Update order status (seller can only move to PROCESSING or SHIPPED)
-   */
+// Update order status (seller can only move to PROCESSING or SHIPPED)
   async updateOrderStatus(orderId: string, sellerId: string, newStatus: OrderStatus) {
     // Verify seller has items in this order
     const orderItems = await prisma.orderItem.findMany({
@@ -294,10 +286,7 @@ export const sellerOrderService = {
       message: `Order status updated to ${newStatus}`,
     };
   },
-
-  /**
-   * Get seller order statistics
-   */
+// Get seller order statistics
   async getSellerOrderStats(sellerId: string) {
     const [
       totalOrders,
@@ -410,10 +399,7 @@ export const sellerOrderService = {
       },
     };
   },
-
-  /**
-   * Get seller's top selling products
-   */
+// Get seller's top selling products
   async getTopSellingProducts(sellerId: string, limit: number = 10) {
     const topProducts = await prisma.orderItem.groupBy({
       by: ['productId'],
