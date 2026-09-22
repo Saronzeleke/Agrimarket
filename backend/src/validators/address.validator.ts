@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-/**
- * Validation schemas for address endpoints
- */
-
-// Ethiopian phone number pattern
+// Validation schemas for address endpoints and  Ethiopian phone number pattern
 const ethiopianPhonePattern = /^(?:\+251|0)?[97]\d{8}$/;
 
 export const createAddressSchema = z.object({
