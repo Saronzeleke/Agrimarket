@@ -1,15 +1,10 @@
-/**
- * Notification Validators
- * 
- * Zod schemas for validating notification request parameters.
- */
+//  Notification Validators
 
 import { z } from 'zod';
 import { NotificationType } from '@prisma/client';
 
-/**
- * Get notifications query parameters
- */
+// Get notifications query parameters
+
 export const getNotificationsSchema = z.object({
   read: z
     .string()
