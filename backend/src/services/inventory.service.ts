@@ -4,9 +4,7 @@ import prisma from '../config/database';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../utils/errors';
 
 export const inventoryService = {
-  /**
-   * Get inventory for product
-   */
+  // Get inventory for product
   async getInventory(productId: string, userId: string) {
     const inventory = await inventoryRepository.findByProductId(productId);
 
@@ -55,10 +53,7 @@ export const inventoryService = {
       updatedAt: inventory.updatedAt,
     };
   },
-
-  /**
-   * Update inventory (seller only)
-   */
+// Update inventory (seller only)
   async updateInventory(
     inventoryId: string,
     userId: string,
@@ -99,10 +94,7 @@ export const inventoryService = {
       updatedAt: updatedInventory.updatedAt,
     };
   },
-
-  /**
-   * Add stock (seller only)
-   */
+// Add stock (seller only)
   async addStock(
     inventoryId: string,
     userId: string,
@@ -138,10 +130,7 @@ export const inventoryService = {
       message: `Successfully added ${quantity} units to inventory`,
     };
   },
-
-  /**
-   * Adjust stock with reason (seller only)
-   */
+// Adjust stock with reason (seller only)
   async adjustStock(
     inventoryId: string,
     userId: string,
@@ -184,10 +173,7 @@ export const inventoryService = {
       message: `Stock adjusted by ${quantity} units`,
     };
   },
-
-  /**
-   * Get inventory history
-   */
+// Get inventory history
   async getHistory(
     inventoryId: string,
     userId: string,
@@ -233,10 +219,7 @@ export const inventoryService = {
       },
     };
   },
-
-  /**
-   * Get low stock products (seller)
-   */
+// Get low stock products (seller)
   async getLowStockProducts(userId: string) {
     const sellerProfile = await prisma.sellerProfile.findUnique({
       where: { userId },
@@ -266,10 +249,7 @@ export const inventoryService = {
       updatedAt: inv.updatedAt,
     }));
   },
-
-  /**
-   * Get out of stock products (seller)
-   */
+// Get out of stock products (seller)
   async getOutOfStockProducts(userId: string) {
     const sellerProfile = await prisma.sellerProfile.findUnique({
       where: { userId },
@@ -298,10 +278,7 @@ export const inventoryService = {
       updatedAt: inv.updatedAt,
     }));
   },
-
-  /**
-   * Get inventory statistics (seller)
-   */
+ // Get inventory statistics (seller)
   async getInventoryStats(userId: string) {
     const sellerProfile = await prisma.sellerProfile.findUnique({
       where: { userId },
@@ -341,10 +318,7 @@ export const inventoryService = {
       stockValue,
     };
   },
-
-  /**
-   * Bulk update stock (seller only)
-   */
+// Bulk update stock (seller only)
   async bulkAddStock(
     userId: string,
     updates: Array<{ productId: string; quantity: number }>
