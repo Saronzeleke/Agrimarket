@@ -3,9 +3,8 @@ import prisma from '../config/database';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 
 export const adminOrderService = {
-  /**
-   * Get all orders with filters (admin view)
-   */
+  // Get all orders with filters (admin view)
+   
   async getAllOrders(options?: {
     status?: OrderStatus;
     customerId?: string;
@@ -135,9 +134,7 @@ export const adminOrderService = {
     };
   },
 
-  /**
-   * Get order details (admin view)
-   */
+  // Get order details (admin view)
   async getOrderDetails(orderId: string) {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -221,10 +218,7 @@ export const adminOrderService = {
       cancelledAt: order.cancelledAt,
     };
   },
-
-  /**
-   * Update order status (admin can update to any status)
-   */
+  // Update order status (admin can update to any status)
   async updateOrderStatus(orderId: string, newStatus: OrderStatus) {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -295,10 +289,8 @@ export const adminOrderService = {
       message: `Order status updated to ${newStatus}`,
     };
   },
+  // Get platform-wide order statistics
 
-  /**
-   * Get platform-wide order statistics
-   */
   async getPlatformStats(options?: { startDate?: Date; endDate?: Date }) {
     const where: Prisma.OrderWhereInput = {};
 
@@ -360,9 +352,8 @@ export const adminOrderService = {
     };
   },
 
-  /**
-   * Get recent orders
-   */
+  // Get recent orders
+  
   async getRecentOrders(limit: number = 10) {
     const orders = await prisma.order.findMany({
       take: limit,
@@ -393,9 +384,8 @@ export const adminOrderService = {
     }));
   },
 
-  /**
-   * Bulk update order statuses
-   */
+ // Bulk update order statuses
+  
   async bulkUpdateStatus(orderIds: string[], newStatus: OrderStatus) {
     const updateData: Prisma.OrderUpdateInput = { status: newStatus };
 
