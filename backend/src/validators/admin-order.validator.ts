@@ -1,10 +1,8 @@
 import { z } from 'zod';
 import { OrderStatus } from '@prisma/client';
 
-/**
- * Validation schemas for admin order endpoints
- */
-
+// Validation schemas for admin order endpoints
+ 
 export const getAdminOrdersSchema = z.object({
   status: z.nativeEnum(OrderStatus).optional(),
   customerId: z.string().uuid().optional(),
