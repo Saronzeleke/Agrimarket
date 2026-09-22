@@ -1,15 +1,8 @@
-/**
- * Common Type Definitions
- * 
- * Shared types used across the application.
- */
+// Common Type Definitions , Shared types used across the application.
+
 
 import { Role, OrderStatus, PaymentStatus } from '@prisma/client'
-
-// ============================================
 // API Types
-// ============================================
-
 export interface ApiResponse<T> {
   success: boolean
   data?: T
@@ -37,11 +30,7 @@ export interface PaginationParams {
   limit: number
   skip: number
 }
-
-// ============================================
 // Auth Types
-// ============================================
-
 export interface AuthTokens {
   accessToken: string
   refreshToken: string
@@ -67,11 +56,7 @@ export interface RegisterData {
   lastName: string
   phone?: string
 }
-
-// ============================================
 // Product Types
-// ============================================
-
 export interface ProductFilters {
   categoryId?: string
   sellerId?: string
@@ -106,11 +91,7 @@ export interface ProductWithRelations {
     reservedStock: number
   }
 }
-
-// ============================================
 // Order Types
-// ============================================
-
 export interface CreateOrderData {
   customerId: string
   items: OrderItemData[]
@@ -141,11 +122,7 @@ export interface OrderSummary {
   discount: number
   total: number
 }
-
-// ============================================
 // Cart Types
-// ============================================
-
 export interface CartItemData {
   productId: string
   variantId?: string
@@ -174,11 +151,7 @@ export interface CartWithItems {
     }
   }>
 }
-
-// ============================================
 // Review Types
-// ============================================
-
 export interface CreateReviewData {
   productId: string
   orderId: string
@@ -200,11 +173,7 @@ export interface ReviewWithUser {
     lastName: string
   }
 }
-
-// ============================================
 // Seller Types
-// ============================================
-
 export interface SellerProfileData {
   businessName: string
   description?: string
@@ -236,11 +205,7 @@ export interface SellerAnalytics {
     orders: number
   }>
 }
-
-// ============================================
 // Notification Types
-// ============================================
-
 export interface CreateNotificationData {
   userId: string
   type: string
@@ -248,11 +213,7 @@ export interface CreateNotificationData {
   message: string
   metadata?: any
 }
-
-// ============================================
 // Search Types
-// ============================================
-
 export interface SearchFilters {
   query?: string
   categoryId?: string
@@ -263,33 +224,21 @@ export interface SearchFilters {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }
-
-// ============================================
 // Recommendation Types
-// ============================================
-
 export interface RecommendationContext {
   userId?: string
   productId?: string
   categoryId?: string
   limit?: number
 }
-
-// ============================================
 // File Upload Types
-// ============================================
-
 export interface UploadedFile {
   filename: string
   path: string
   size: number
   mimetype: string
 }
-
-// ============================================
 // Audit Types
-// ============================================
-
 export interface AuditLogData {
   userId?: string
   action: string
@@ -299,22 +248,14 @@ export interface AuditLogData {
   ipAddress?: string
   userAgent?: string
 }
-
-// ============================================
 // Email Types
-// ============================================
-
 export interface EmailOptions {
   to: string
   subject: string
   html: string
   text?: string
 }
-
-// ============================================
 // Payment Types
-// ============================================
-
 export interface PaymentInitiationData {
   orderId: string
   amount: number
@@ -329,10 +270,7 @@ export interface PaymentWebhookData {
   amount: number
   metadata?: any
 }
-
-// ============================================
 // Business Rule Types
-// ============================================
 
 export interface OrderValidationResult {
   valid: boolean
