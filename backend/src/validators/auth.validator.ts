@@ -1,15 +1,11 @@
-/**
- * Auth Validation Schemas
- * 
- * Zod schemas for authentication endpoints.
- */
+// Auth Validation Schemas
+ 
 
 import { z } from 'zod'
 import { CONSTANTS } from '../config/constants'
 
-/**
- * Register schema
- */
+// Register schema
+ 
 export const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z
@@ -24,45 +20,39 @@ export const registerSchema = z.object({
   phone: z.string().optional(),
 })
 
-/**
- * Login schema
- */
+// Login schema
+ 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 })
 
-/**
- * Refresh token schema
- */
+// Refresh token schema
+ 
 export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 })
 
-/**
- * Verify email schema
- */
+// Verify email schema
+ 
 export const verifyEmailSchema = z.object({
   token: z.string().min(1, 'Verification token is required'),
 })
 
-/**
- * Resend verification email schema
- */
+// Resend verification email schema
+ 
 export const resendVerificationSchema = z.object({
   email: z.string().email('Invalid email address'),
 })
 
-/**
- * Request password reset schema
- */
+// Request password reset schema
+ 
 export const requestPasswordResetSchema = z.object({
   email: z.string().email('Invalid email address'),
 })
 
-/**
- * Reset password schema
- */
+// Reset password schema
+ 
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Reset token is required'),
   password: z
@@ -74,9 +64,8 @@ export const resetPasswordSchema = z.object({
     ),
 })
 
-/**
- * Change password schema
- */
+// Change password schema
+ 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: z
