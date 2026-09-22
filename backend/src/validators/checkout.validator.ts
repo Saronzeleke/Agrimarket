@@ -1,9 +1,6 @@
+// Validation schemas for checkout endpoints
+ 
 import { z } from 'zod';
-
-/**
- * Validation schemas for checkout endpoints
- */
-
 export const checkoutSummarySchema = z.object({
   addressId: z.string().uuid('Invalid address ID').optional(),
 });
