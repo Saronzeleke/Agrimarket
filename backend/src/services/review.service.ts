@@ -1,16 +1,9 @@
-/**
- * Review Service
- * 
- * Business logic for product reviews and ratings.
- */
-
+// Review Service
 import { reviewRepository } from '../repositories/review.repository';
 import { ValidationError, NotFoundError, AuthorizationError, ConflictError } from '../utils/errors';
 
 export const reviewService = {
-  /**
-   * Submit a product review
-   */
+  // Submit a product review
   async submitReview(
     userId: string,
     data: {
@@ -50,10 +43,7 @@ export const reviewService = {
 
     return review;
   },
-
-  /**
-   * Get reviews for a product
-   */
+// Get reviews for a product
   async getProductReviews(
     productId: string,
     options: {
@@ -96,10 +86,7 @@ export const reviewService = {
       },
     };
   },
-
-  /**
-   * Get review by ID
-   */
+// Get review by ID
   async getReviewById(id: string) {
     const review = await reviewRepository.findById(id);
 
@@ -109,10 +96,7 @@ export const reviewService = {
 
     return review;
   },
-
-  /**
-   * Update a review
-   */
+// Update a review
   async updateReview(
     reviewId: string,
     userId: string,
@@ -142,10 +126,7 @@ export const reviewService = {
 
     return updated;
   },
-
-  /**
-   * Delete a review
-   */
+// Delete a review
   async deleteReview(reviewId: string, userId: string) {
     const review = await reviewRepository.findById(reviewId);
 
@@ -162,10 +143,7 @@ export const reviewService = {
 
     return { message: 'Review deleted successfully' };
   },
-
-  /**
-   * Toggle helpful vote on a review
-   */
+// Toggle helpful vote on a review
   async toggleHelpful(reviewId: string, userId: string) {
     // Check if review exists
     const review = await reviewRepository.findById(reviewId);
@@ -188,17 +166,11 @@ export const reviewService = {
         : 'Helpful mark removed',
     };
   },
-
-  /**
-   * Get product review statistics
-   */
+// Get product review statistics
   async getProductStats(productId: string) {
     return reviewRepository.getProductStats(productId);
   },
-
-  /**
-   * Add seller response to a review
-   */
+// Add seller response to a review
   async addSellerResponse(
     reviewId: string,
     sellerId: string,
@@ -224,10 +196,7 @@ export const reviewService = {
 
     return updated;
   },
-
-  /**
-   * Get seller's product reviews
-   */
+// Get seller's product reviews
   async getSellerReviews(
     sellerId: string,
     options: {
@@ -259,10 +228,7 @@ export const reviewService = {
       },
     };
   },
-
-  /**
-   * Flag a review for moderation (Admin or users)
-   */
+// Flag a review for moderation (Admin or users)
   async flagReview(reviewId: string) {
     const review = await reviewRepository.findById(reviewId);
 
@@ -278,10 +244,7 @@ export const reviewService = {
 
     return { message: 'Review flagged for admin review' };
   },
-
-  /**
-   * Moderate a review (Admin only)
-   */
+// Moderate a review (Admin only)
   async moderateReview(reviewId: string, approved: boolean) {
     const review = await reviewRepository.findById(reviewId);
 
@@ -297,10 +260,7 @@ export const reviewService = {
         : 'Review rejected successfully',
     };
   },
-
-  /**
-   * Get flagged reviews (Admin only)
-   */
+// Get flagged reviews (Admin only)
   async getFlaggedReviews(page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
 
@@ -320,10 +280,7 @@ export const reviewService = {
       },
     };
   },
-
-  /**
-   * Delete review (Admin only)
-   */
+//  Delete review (Admin only)
   async adminDeleteReview(reviewId: string) {
     const review = await reviewRepository.findById(reviewId);
 
