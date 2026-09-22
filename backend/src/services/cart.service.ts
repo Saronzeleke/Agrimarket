@@ -3,9 +3,7 @@ import { productRepository } from '../repositories/product.repository';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 
 export const cartService = {
-  /**
-   * Get user's cart with calculated totals
-   */
+  // Get user's cart with calculated totals
   async getCart(userId: string) {
     const cart = await cartRepository.getOrCreateCart(userId);
 
@@ -63,9 +61,8 @@ export const cartService = {
     };
   },
 
-  /**
-   * Add item to cart with stock validation
-   */
+  // Add item to cart with stock validation
+   
   async addToCart(userId: string, data: AddToCartData) {
     // Validate product exists and is active
     const product = await productRepository.findById(data.productId);
@@ -129,10 +126,8 @@ export const cartService = {
       updatedAt: item.updatedAt,
     };
   },
+// Update cart item quantity with stock validation
 
-  /**
-   * Update cart item quantity with stock validation
-   */
   async updateCartItem(userId: string, itemId: string, data: UpdateCartItemData) {
     // Validate quantity
     if (data.quantity < 1) {
@@ -184,24 +179,18 @@ export const cartService = {
       updatedAt: item.updatedAt,
     };
   },
-
-  /**
-   * Remove item from cart
-   */
+// Remove item from cart
+  
   async removeFromCart(userId: string, itemId: string) {
     await cartRepository.removeItem(userId, itemId);
   },
-
-  /**
-   * Clear all items from cart
-   */
+// Clear all items from cart
+  
   async clearCart(userId: string) {
     await cartRepository.clearCart(userId);
   },
 
-  /**
-   * Get cart item count
-   */
+  //Get cart item count
   async getCartItemCount(userId: string) {
     return cartRepository.getItemCount(userId);
   },
