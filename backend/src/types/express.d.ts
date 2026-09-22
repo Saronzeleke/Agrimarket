@@ -1,8 +1,4 @@
-/**
- * Express Type Extensions
- * 
- * Extends Express Request type to include custom properties.
- */
+// Extends Express Request type to include custom properties.
 
 import { User as PrismaUser } from '@prisma/client'
 
