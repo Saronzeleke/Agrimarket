@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-/**
- * Validation schemas for seller analytics endpoints
- */
+// Validation schemas for seller analytics endpoints
 
 export const dashboardOverviewSchema = z.object({
   period: z.enum(['today', 'week', 'month', 'year']).optional().default('month'),
