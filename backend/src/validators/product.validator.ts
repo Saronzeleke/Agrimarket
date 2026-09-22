@@ -1,15 +1,10 @@
-/**
- * Product Validation Schemas
- * 
- * Zod schemas for product endpoints.
- */
+// Product Validation Schemas
 
 import { z } from 'zod'
 import { CONSTANTS } from '../config/constants'
 
-/**
- * Create product schema
- */
+//  Create product schema
+ 
 export const createProductSchema = z.object({
   categoryId: z.string().uuid('Invalid category ID'),
   name: z
@@ -41,9 +36,8 @@ export const createProductSchema = z.object({
   qualityGrade: z.enum(['A', 'B', 'C', 'Premium']).optional(),
 })
 
-/**
- * Update product schema
- */
+// Update product schema
+ 
 export const updateProductSchema = z.object({
   categoryId: z.string().uuid('Invalid category ID').optional(),
   name: z
@@ -64,9 +58,8 @@ export const updateProductSchema = z.object({
   active: z.boolean().optional(),
 })
 
-/**
- * Product query filters schema
- */
+// Product query filters schema
+ 
 export const productFiltersSchema = z.object({
   categoryId: z.string().uuid().optional(),
   sellerId: z.string().uuid().optional(),
@@ -83,9 +76,8 @@ export const productFiltersSchema = z.object({
   limit: z.string().transform(Number).optional(),
 })
 
-/**
- * Category create schema
- */
+// Category create schema
+ 
 export const createCategorySchema = z.object({
   name: z.string().min(2).max(50),
   description: z.string().max(500).optional(),
@@ -93,9 +85,8 @@ export const createCategorySchema = z.object({
   order: z.number().int().min(0).optional(),
 })
 
-/**
- * Category update schema
- */
+// Category update schema
+ 
 export const updateCategorySchema = z.object({
   name: z.string().min(2).max(50).optional(),
   description: z.string().max(500).optional().nullable(),
