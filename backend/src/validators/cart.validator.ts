@@ -1,9 +1,6 @@
+// Validation schemas for cart endpoints
+
 import { z } from 'zod';
-
-/**
- * Validation schemas for cart endpoints
- */
-
 export const addToCartSchema = z.object({
   productId: z.string().uuid('Invalid product ID'),
   variantId: z.string().uuid('Invalid variant ID').optional(),
