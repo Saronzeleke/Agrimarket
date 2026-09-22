@@ -1,23 +1,15 @@
-/**
- * Password Utilities
- * 
- * Bcrypt-based password hashing and verification.
- */
+// Password Utilities ,Bcrypt-based password hashing and verification.
 
 import bcrypt from 'bcrypt'
 import config from '../config/env'
 import { CONSTANTS } from '../config/constants'
 
-/**
- * Hash a password
- */
+// Hash a passwor
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, config.bcrypt.saltRounds)
 }
 
-/**
- * Verify a password against a hash
- */
+// Verify a password against a hash
 export async function verifyPassword(
   password: string,
   hash: string
@@ -25,9 +17,7 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash)
 }
 
-/**
- * Validate password strength
- */
+// Validate password strength
 export function validatePasswordStrength(password: string): {
   valid: boolean
   errors: string[]
