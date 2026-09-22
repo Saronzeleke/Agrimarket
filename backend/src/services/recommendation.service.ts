@@ -1,16 +1,9 @@
-/**
- * Recommendation Service
- * 
- * Intelligent product recommendation engine using multiple strategies.
- */
-
+// Recommendation Service, Intelligent product recommendation engine using multiple strategies.
 import prisma from '../config/database';
 import { OrderStatus } from '@prisma/client';
 
 export const recommendationService = {
-  /**
-   * Get personalized recommendations for a user
-   */
+ // Get personalized recommendations for a user
   async getPersonalizedRecommendations(userId: string, limit: number = 20) {
     // Get user's purchase history
     const purchasedProducts = await prisma.orderItem.findMany({
@@ -116,10 +109,7 @@ export const recommendationService = {
         : 'From a seller you like',
     }));
   },
-
-  /**
-   * Get similar products to a given product
-   */
+// Get similar products to a given product
   async getSimilarProducts(productId: string, limit: number = 10) {
     // Get the source product
     const sourceProduct = await prisma.product.findUnique({
@@ -183,10 +173,7 @@ export const recommendationService = {
       reason: 'Similar product',
     }));
   },
-
-  /**
-   * Get "Customers also bought" recommendations
-   */
+// Get "Customers also bought" recommendations
   async getCustomersAlsoBought(productId: string, limit: number = 10) {
     // Find orders that contain the given product
     const ordersWithProduct = await prisma.orderItem.findMany({
@@ -269,10 +256,7 @@ export const recommendationService = {
       reason: 'Customers also bought',
     }));
   },
-
-  /**
-   * Get trending products (most viewed/purchased recently)
-   */
+//  Get trending products (most viewed/purchased recently)
   async getTrendingProducts(limit: number = 20, days: number = 7) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -346,10 +330,7 @@ export const recommendationService = {
       reason: 'Trending now',
     }));
   },
-
-  /**
-   * Get best-selling products
-   */
+//  Get best-selling products
   async getBestSellers(limit: number = 20) {
     const bestSellerIds = await prisma.orderItem.groupBy({
       by: ['productId'],
@@ -411,10 +392,7 @@ export const recommendationService = {
       reason: 'Best seller',
     }));
   },
-
-  /**
-   * Get new arrivals
-   */
+// Get new arrivals
   async getNewArrivals(limit: number = 20, days: number = 30) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -458,10 +436,7 @@ export const recommendationService = {
       reason: 'New arrival',
     }));
   },
-
-  /**
-   * Get top-rated products
-   */
+//  Get top-rated products
   async getTopRatedProducts(limit: number = 20) {
     const products = await prisma.product.findMany({
       where: {
@@ -503,10 +478,7 @@ export const recommendationService = {
       reason: 'Top rated',
     }));
   },
-
-  /**
-   * Get popular products in a category
-   */
+// Get popular products in a category
   async getPopularInCategory(categoryId: string, limit: number = 20) {
     const products = await prisma.product.findMany({
       where: {
@@ -546,10 +518,7 @@ export const recommendationService = {
       reason: 'Popular in category',
     }));
   },
-
-  /**
-   * Get "For You" recommendations (mixed strategies)
-   */
+// Get "For You" recommendations (mixed strategies)
   async getForYouFeed(userId: string, limit: number = 30) {
     const results: any[] = [];
 
@@ -585,10 +554,7 @@ export const recommendationService = {
 
     return uniqueResults.slice(0, limit);
   },
-
-  /**
-   * Get recently viewed products (from user's order history and wishlist)
-   */
+//  Get recently viewed products (from user's order history and wishlist)
   async getRecentlyViewed(userId: string, limit: number = 10) {
     // Get products from recent wishlist additions
     const recentWishlist = await prisma.wishlistItem.findMany({
@@ -635,10 +601,7 @@ export const recommendationService = {
         reason: 'Recently viewed',
       }));
   },
-
-  /**
-   * Get products from favorite sellers
-   */
+//  Get products from favorite sellers
   async getFromFavoriteSellers(userId: string, limit: number = 20) {
     // Find sellers user has purchased from most
     const sellerPurchases = await prisma.orderItem.groupBy({
