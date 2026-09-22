@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-/**
- * Validation schemas for search endpoints
- */
-
+// Validation schemas for search endpoints
 export const searchQuerySchema = z.object({
   query: z.string().optional(),
   categoryId: z.string().uuid().optional(),
