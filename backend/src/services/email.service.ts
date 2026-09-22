@@ -1,9 +1,4 @@
-/**
- * Email Service
- * 
- * Handles sending emails through the email provider.
- */
-
+// Email Service , Handles sending emails through the email provider.
 import { MockEmailProvider } from '../providers/email/MockEmailProvider';
 import { NotificationType } from '@prisma/client';
 import prisma from '../config/database';
@@ -13,9 +8,8 @@ import logger from '../config/logger';
 const emailProvider = new MockEmailProvider();
 
 export const emailService = {
-  /**
-   * Send notification email
-   */
+  // Send notification email
+ 
   async sendNotificationEmail(
     userId: string,
     notification: {
@@ -54,10 +48,7 @@ export const emailService = {
       throw error;
     }
   },
-
-  /**
-   * Format notification email content
-   */
+// Format notification email content
   formatNotificationEmail(
     notification: {
       type: NotificationType;
@@ -107,10 +98,8 @@ export const emailService = {
 
     return { subject, text, html };
   },
-
-  /**
-   * Get notification type-specific content for emails
-   */
+// Get notification type-specific content for emails
+  
   getNotificationTypeSpecificContent(notification: {
     type: NotificationType;
     metadata?: any;
@@ -139,10 +128,7 @@ export const emailService = {
         return '';
     }
   },
-
-  /**
-   * Send welcome email
-   */
+ // Send welcome email
   async sendWelcomeEmail(email: string, firstName: string) {
     try {
       await emailProvider.send({
@@ -192,10 +178,7 @@ export const emailService = {
       logger.error('Failed to send welcome email:', error);
     }
   },
-
-  /**
-   * Send order confirmation email
-   */
+// Send order confirmation email
   async sendOrderConfirmationEmail(
     email: string,
     firstName: string,
