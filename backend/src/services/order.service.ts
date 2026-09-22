@@ -3,9 +3,7 @@ import { OrderStatus } from '@prisma/client';
 import { BadRequestError } from '../utils/errors';
 
 export const orderService = {
-  /**
-   * Get order by ID
-   */
+  // Get order by ID
   async getOrder(orderId: string, userId: string) {
     const order = await orderRepository.findById(orderId, userId);
 
@@ -49,19 +47,13 @@ export const orderService = {
       cancelledAt: order.cancelledAt,
     };
   },
-
-  /**
-   * Get order by order number
-   */
+//  Get order by order number
   async getOrderByNumber(orderNumber: string, userId: string) {
     const order = await orderRepository.findByOrderNumber(orderNumber, userId);
 
     return this.formatOrder(order);
   },
-
-  /**
-   * Get all orders for customer
-   */
+//  Get all orders for customer
   async getCustomerOrders(
     userId: string,
     options?: {
@@ -117,10 +109,7 @@ export const orderService = {
       },
     };
   },
-
-  /**
-   * Cancel order
-   */
+//  Cancel order
   async cancelOrder(orderId: string, userId: string) {
     const order = await orderRepository.findById(orderId, userId);
 
@@ -154,17 +143,11 @@ export const orderService = {
 
     return this.formatOrder(cancelledOrder);
   },
-
-  /**
-   * Get order statistics
-   */
+// Get order statistics
   async getOrderStats(userId: string) {
     return orderRepository.getCustomerStats(userId);
   },
-
-  /**
-   * Format order for response
-   */
+//  Format order for response
   private formatOrder(order: any) {
     return {
       id: order.id,
