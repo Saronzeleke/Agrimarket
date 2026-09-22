@@ -1,14 +1,9 @@
-/**
- * Recommendation Validators
- * 
- * Zod schemas for validating recommendation request parameters.
- */
-
+//  Recommendation Validators
+ 
 import { z } from 'zod';
 
-/**
- * Recommendation query parameters
- */
+// Recommendation query parameters
+ 
 export const recommendationQuerySchema = z.object({
   limit: z
     .string()
