@@ -1,9 +1,7 @@
 /**
  * Authentication Service
- * 
  * Handles user registration, login, email verification, and password reset.
  */
-
 import userRepository from '../repositories/user.repository'
 import emailVerificationRepository from '../repositories/email-verification.repository'
 import passwordResetRepository from '../repositories/password-reset.repository'
@@ -27,9 +25,7 @@ import config from '../config/env'
 import logger from '../config/logger'
 
 export class AuthService {
-  /**
-   * Register a new user
-   */
+  // Register a new user
   async register(data: RegisterData): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
     // Validate password strength
     const passwordValidation = validatePasswordStrength(data.password)
@@ -96,9 +92,8 @@ export class AuthService {
     }
   }
 
-  /**
-   * Login user
-   */
+  // Login user
+ 
   async login(credentials: LoginCredentials): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
     // Find user by email
     const user = await userRepository.findByEmail(credentials.email)
@@ -142,10 +137,7 @@ export class AuthService {
       tokens,
     }
   }
-
-  /**
-   * Refresh access token
-   */
+   // Refresh access token
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     try {
       // Verify refresh token
@@ -179,9 +171,7 @@ export class AuthService {
     }
   }
 
-  /**
-   * Verify email
-   */
+  // Verify email
   async verifyEmail(token: string): Promise<void> {
     const hashedToken = hashToken(token)
 
@@ -221,9 +211,7 @@ export class AuthService {
     })
   }
 
-  /**
-   * Resend verification email
-   */
+  // Resend verification email
   async resendVerificationEmail(email: string): Promise<void> {
     // Find user
     const user = await userRepository.findByEmail(email)
@@ -262,9 +250,8 @@ export class AuthService {
     })
   }
 
-  /**
-   * Request password reset
-   */
+  // Request password reset
+  
   async requestPasswordReset(email: string): Promise<void> {
     // Find user
     const user = await userRepository.findByEmail(email)
@@ -294,9 +281,7 @@ export class AuthService {
     })
   }
 
-  /**
-   * Reset password
-   */
+  // Reset password
   async resetPassword(token: string, newPassword: string): Promise<void> {
     // Validate password strength
     const passwordValidation = validatePasswordStrength(newPassword)
@@ -350,9 +335,7 @@ export class AuthService {
     })
   }
 
-  /**
-   * Change password (authenticated user)
-   */
+  // Change password (authenticated user)
   async changePassword(
     userId: string,
     currentPassword: string,
@@ -390,9 +373,7 @@ export class AuthService {
     })
   }
 
-  /**
-   * Get current user
-   */
+  // Get current user
   async getCurrentUser(userId: string): Promise<Omit<User, 'password'>> {
     const user = await userRepository.findById(userId)
     if (!user) {
