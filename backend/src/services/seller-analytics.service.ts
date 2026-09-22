@@ -3,9 +3,7 @@ import prisma from '../config/database';
 import { ValidationError } from '../utils/errors';
 
 export const sellerAnalyticsService = {
-  /**
-   * Get dashboard overview statistics
-   */
+  // Get dashboard overview statistics
   async getDashboardOverview(sellerId: string, period: 'today' | 'week' | 'month' | 'year' = 'month') {
     const now = new Date();
     let startDate: Date;
@@ -101,10 +99,7 @@ export const sellerAnalyticsService = {
       },
     };
   },
-
-  /**
-   * Get sales over time (daily/weekly/monthly)
-   */
+// Get sales over time (daily/weekly/monthly)
   async getSalesOverTime(
     sellerId: string,
     options: {
@@ -182,10 +177,7 @@ export const sellerAnalyticsService = {
       sales,
     };
   },
-
-  /**
-   * Get product performance metrics
-   */
+// Get product performance metrics
   async getProductPerformance(sellerId: string, options?: { limit?: number; sortBy?: 'revenue' | 'quantity' | 'orders' }) {
     const limit = options?.limit || 10;
     const sortBy = options?.sortBy || 'revenue';
@@ -260,10 +252,7 @@ export const sellerAnalyticsService = {
 
     return productMetrics.slice(0, limit);
   },
-
-  /**
-   * Get revenue breakdown by category
-   */
+// Get revenue breakdown by category
   async getRevenueByCategory(sellerId: string, startDate?: Date, endDate?: Date) {
     const where: any = {
       sellerId,
@@ -330,10 +319,7 @@ export const sellerAnalyticsService = {
       }))
       .sort((a, b) => b.revenue - a.revenue);
   },
-
-  /**
-   * Get customer insights
-   */
+// Get customer insights
   async getCustomerInsights(sellerId: string, options?: { limit?: number }) {
     const limit = options?.limit || 10;
 
@@ -418,10 +404,7 @@ export const sellerAnalyticsService = {
       },
     };
   },
-
-  /**
-   * Get recent activity feed
-   */
+// Get recent activity feed
   async getRecentActivity(sellerId: string, limit: number = 20) {
     const activities: Array<{
       type: string;
