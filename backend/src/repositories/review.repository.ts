@@ -1,16 +1,11 @@
-/**
- * Review Repository
- * 
- * Database operations for product reviews and ratings.
- */
+//Database operations for product reviews and ratings.
 
 import prisma from '../config/database';
 import { Prisma } from '@prisma/client';
 
 export const reviewRepository = {
-  /**
-   * Create a new review
-   */
+ //Create a new review
+  
   async create(data: {
     userId: string;
     productId: string;
@@ -34,10 +29,8 @@ export const reviewRepository = {
       },
     });
   },
-
-  /**
-   * Find review by ID
-   */
+// Find review by ID
+ 
   async findById(id: string) {
     return prisma.review.findUnique({
       where: { id },
@@ -64,10 +57,8 @@ export const reviewRepository = {
       },
     });
   },
-
-  /**
-   * Find review by user and product
-   */
+//Find review by user and product
+  
   async findByUserAndProduct(userId: string, productId: string) {
     return prisma.review.findUnique({
       where: {
@@ -78,10 +69,8 @@ export const reviewRepository = {
       },
     });
   },
-
-  /**
-   * Get reviews for a product with pagination
-   */
+// Get reviews for a product with pagination
+  
   async findByProduct(
     productId: string,
     options: {
@@ -142,10 +131,8 @@ export const reviewRepository = {
 
     return { reviews, total };
   },
-
-  /**
-   * Get review statistics for a product
-   */
+// Get review statistics for a product
+  
   async getProductStats(productId: string) {
     const [stats, distribution] = await Promise.all([
       prisma.review.aggregate({
@@ -185,10 +172,8 @@ export const reviewRepository = {
         : 0,
     };
   },
-
-  /**
-   * Update a review
-   */
+// Update a review
+  
   async update(id: string, data: Prisma.ReviewUpdateInput) {
     return prisma.review.update({
       where: { id },
@@ -204,19 +189,15 @@ export const reviewRepository = {
       },
     });
   },
-
-  /**
-   * Delete a review
-   */
+// Delete a review
+ 
   async delete(id: string) {
     return prisma.review.delete({
       where: { id },
     });
   },
-
-  /**
-   * Add seller response to a review
-   */
+//Add seller response to a review
+  
   async addSellerResponse(id: string, response: string) {
     return prisma.review.update({
       where: { id },
@@ -226,10 +207,8 @@ export const reviewRepository = {
       },
     });
   },
-
-  /**
-   * Check if user has purchased a product
-   */
+// Check if user has purchased a product
+  
   async hasUserPurchasedProduct(userId: string, productId: string): Promise<boolean> {
     const orderItem = await prisma.orderItem.findFirst({
       where: {
@@ -243,10 +222,8 @@ export const reviewRepository = {
 
     return !!orderItem;
   },
-
-  /**
-   * Mark/unmark review as helpful
-   */
+// Mark/unmark review as helpful
+   
   async toggleHelpful(reviewId: string, userId: string) {
     const existing = await prisma.helpfulVote.findUnique({
       where: {
@@ -286,10 +263,8 @@ export const reviewRepository = {
       return { added: true };
     }
   },
-
-  /**
-   * Check if user has voted a review as helpful
-   */
+// Check if user has voted a review as helpful
+  
   async hasUserVotedHelpful(userId: string, reviewId: string): Promise<boolean> {
     const vote = await prisma.helpfulVote.findUnique({
       where: {
@@ -302,20 +277,16 @@ export const reviewRepository = {
 
     return !!vote;
   },
-
-  /**
-   * Flag a review for moderation
-   */
+// Flag a review for moderation
+   
   async flag(id: string) {
     return prisma.review.update({
       where: { id },
       data: { flagged: true },
     });
   },
-
-  /**
-   * Moderate a review (approve/reject)
-   */
+// Moderate a review (approve/reject)
+  
   async moderate(id: string, approved: boolean) {
     return prisma.review.update({
       where: { id },
@@ -325,10 +296,8 @@ export const reviewRepository = {
       },
     });
   },
-
-  /**
-   * Get flagged reviews for admin review
-   */
+// Get flagged reviews for admin review
+  
   async getFlaggedReviews(skip: number = 0, limit: number = 20) {
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
@@ -359,10 +328,8 @@ export const reviewRepository = {
 
     return { reviews, total };
   },
-
-  /**
-   * Get seller's product reviews
-   */
+//Get seller's product reviews
+   
   async getSellerReviews(
     sellerId: string,
     options: {
