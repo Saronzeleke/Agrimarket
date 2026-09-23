@@ -1,16 +1,11 @@
-/**
- * Notification Repository
- * 
- * Database operations for user notifications.
- */
+//Database operations for user notifications.
 
 import prisma from '../config/database';
 import { NotificationType, Prisma } from '@prisma/client';
 
 export const notificationRepository = {
-  /**
-   * Create a new notification
-   */
+  // Create a new notification
+  
   async create(data: {
     userId: string;
     type: NotificationType;
@@ -28,10 +23,8 @@ export const notificationRepository = {
       },
     });
   },
-
-  /**
-   * Create multiple notifications (bulk)
-   */
+// Create multiple notifications (bulk)
+  
   async createMany(notifications: Array<{
     userId: string;
     type: NotificationType;
@@ -49,10 +42,8 @@ export const notificationRepository = {
       })),
     });
   },
-
-  /**
-   * Get notifications for a user with pagination
-   */
+//Get notifications for a user with pagination
+ 
   async findByUser(
     userId: string,
     options: {
@@ -82,19 +73,15 @@ export const notificationRepository = {
 
     return { notifications, total };
   },
-
-  /**
-   * Get notification by ID
-   */
+//Get notification by ID
+  
   async findById(id: string) {
     return prisma.notification.findUnique({
       where: { id },
     });
   },
-
-  /**
-   * Get unread notification count for a user
-   */
+// Get unread notification count for a user
+  
   async getUnreadCount(userId: string): Promise<number> {
     return prisma.notification.count({
       where: {
@@ -103,20 +90,16 @@ export const notificationRepository = {
       },
     });
   },
-
-  /**
-   * Mark notification as read
-   */
+//Mark notification as read
+  
   async markAsRead(id: string) {
     return prisma.notification.update({
       where: { id },
       data: { read: true },
     });
   },
-
-  /**
-   * Mark all notifications as read for a user
-   */
+//Mark all notifications as read for a user
+  
   async markAllAsRead(userId: string) {
     return prisma.notification.updateMany({
       where: {
@@ -126,38 +109,30 @@ export const notificationRepository = {
       data: { read: true },
     });
   },
-
-  /**
-   * Mark notification as unread
-   */
+// Mark notification as unread
+  
   async markAsUnread(id: string) {
     return prisma.notification.update({
       where: { id },
       data: { read: false },
     });
   },
-
-  /**
-   * Delete a notification
-   */
+// Delete a notification
+  
   async delete(id: string) {
     return prisma.notification.delete({
       where: { id },
     });
   },
-
-  /**
-   * Delete all notifications for a user
-   */
+//Delete all notifications for a user
+  
   async deleteAllForUser(userId: string) {
     return prisma.notification.deleteMany({
       where: { userId },
     });
   },
-
-  /**
-   * Delete old read notifications (cleanup)
-   */
+// Delete old read notifications (cleanup)
+  
   async deleteOldReadNotifications(daysOld: number = 30) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
@@ -171,10 +146,8 @@ export const notificationRepository = {
       },
     });
   },
-
-  /**
-   * Get recent notifications for a user
-   */
+// Get recent notifications for a user
+  
   async getRecent(userId: string, limit: number = 10) {
     return prisma.notification.findMany({
       where: { userId },
@@ -182,18 +155,14 @@ export const notificationRepository = {
       take: limit,
     });
   },
-
-  /**
-   * Check if user has unread notifications
-   */
+//Check if user has unread notifications
+  
   async hasUnread(userId: string): Promise<boolean> {
     const count = await this.getUnreadCount(userId);
     return count > 0;
   },
-
-  /**
-   * Get notifications by type for a user
-   */
+//Get notifications by type for a user
+  
   async findByType(userId: string, type: NotificationType, limit: number = 20) {
     return prisma.notification.findMany({
       where: {
