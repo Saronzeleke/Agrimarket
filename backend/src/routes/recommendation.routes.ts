@@ -1,8 +1,4 @@
-/**
- * Recommendation Routes
- * 
- * Product recommendation endpoints with caching.
- */
+//Product recommendation endpoints with caching.
 
 import { Router } from 'express';
 import { recommendationController } from '../controllers/recommendation.controller';
@@ -11,10 +7,7 @@ import { asyncHandler } from '../utils/helpers';
 import { cacheMiddleware, userCacheMiddleware } from '../middleware/cache.middleware';
 
 const router = Router();
-
-/**
- * Public recommendation routes (with caching - 10 minutes)
- */
+// Public recommendation routes (with caching - 10 minutes)
 
 // GET /api/v1/recommendations/similar/:productId - Get similar products
 router.get('/similar/:productId', cacheMiddleware(600), asyncHandler(recommendationController.getSimilar));
@@ -36,10 +29,8 @@ router.get('/top-rated', cacheMiddleware(600), asyncHandler(recommendationContro
 
 // GET /api/v1/recommendations/popular-in-category/:categoryId - Popular in category
 router.get('/popular-in-category/:categoryId', cacheMiddleware(600), asyncHandler(recommendationController.getPopularInCategory));
+// Protected routes (authentication required, per-user caching)
 
-/**
- * Protected routes (authentication required, per-user caching)
- */
 router.use(authenticate);
 
 // GET /api/v1/recommendations/for-you - Personalized "For You" feed (cache 5 minutes per user)
