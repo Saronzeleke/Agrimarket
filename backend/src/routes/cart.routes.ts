@@ -5,10 +5,7 @@ import { asyncHandler } from '../utils/helpers';
 import { userCacheMiddleware, invalidateUserCacheMiddleware } from '../middleware/cache.middleware';
 
 const router = Router();
-
-/**
- * All cart routes require authentication (with user-specific caching)
- */
+// All cart routes require authentication (with user-specific caching)
 
 // Get cart - cache 1 hour per user
 router.get('/', authenticate, userCacheMiddleware(3600), asyncHandler(cartController.getCart));
