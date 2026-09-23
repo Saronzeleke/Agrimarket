@@ -17,9 +17,8 @@ export interface InventoryHistoryData {
 }
 
 export const inventoryRepository = {
-  /**
-   * Create inventory for product
-   */
+  //Create inventory for product
+  
   async create(productId: string, data: { currentStock?: number; lowStockThreshold?: number }) {
     return prisma.inventory.create({
       data: {
@@ -29,10 +28,8 @@ export const inventoryRepository = {
       },
     });
   },
-
-  /**
-   * Get inventory by product ID
-   */
+//Get inventory by product ID
+ 
   async findByProductId(productId: string) {
     return prisma.inventory.findUnique({
       where: { productId },
@@ -49,10 +46,8 @@ export const inventoryRepository = {
       },
     });
   },
+// Get inventory by ID
 
-  /**
-   * Get inventory by ID
-   */
   async findById(inventoryId: string) {
     const inventory = await prisma.inventory.findUnique({
       where: { id: inventoryId },
@@ -76,20 +71,16 @@ export const inventoryRepository = {
 
     return inventory;
   },
-
-  /**
-   * Update inventory
-   */
+// Update inventory
+ 
   async update(inventoryId: string, data: UpdateInventoryData) {
     return prisma.inventory.update({
       where: { id: inventoryId },
       data,
     });
   },
-
-  /**
-   * Adjust stock (add/subtract)
-   */
+// Adjust stock (add/subtract)
+ 
   async adjustStock(inventoryId: string, quantity: number, historyData: InventoryHistoryData) {
     return prisma.$transaction(async (tx) => {
       // Update inventory
@@ -116,10 +107,8 @@ export const inventoryRepository = {
       return inventory;
     });
   },
-
-  /**
-   * Get inventory history
-   */
+// Get inventory history
+ 
   async getHistory(inventoryId: string, options?: { limit?: number; offset?: number }) {
     const limit = options?.limit || 50;
     const offset = options?.offset || 0;
@@ -136,10 +125,8 @@ export const inventoryRepository = {
 
     return { history, total };
   },
-
-  /**
-   * Get low stock products for seller
-   */
+// Get low stock products for seller
+ 
   async getLowStockBySeller(sellerId: string) {
     return prisma.inventory.findMany({
       where: {
@@ -171,10 +158,8 @@ export const inventoryRepository = {
       },
     });
   },
-
-  /**
-   * Get out of stock products for seller
-   */
+//Get out of stock products for seller
+  
   async getOutOfStockBySeller(sellerId: string) {
     return prisma.inventory.findMany({
       where: {
@@ -197,10 +182,8 @@ export const inventoryRepository = {
       },
     });
   },
+// Bulk update stock
 
-  /**
-   * Bulk update stock
-   */
   async bulkUpdateStock(updates: Array<{ inventoryId: string; quantity: number }>) {
     return prisma.$transaction(
       updates.map((update) =>
@@ -215,10 +198,8 @@ export const inventoryRepository = {
       )
     );
   },
-
-  /**
-   * Get inventory statistics for seller
-   */
+//Get inventory statistics for seller
+  
   async getSellerStats(sellerId: string) {
     const inventories = await prisma.inventory.findMany({
       where: {
@@ -247,10 +228,8 @@ export const inventoryRepository = {
       stockValue: 0, // Will be calculated in service with product prices
     };
   },
-
-  /**
-   * Reserve stock for order
-   */
+// Reserve stock for order
+   
   async reserveStock(productId: string, quantity: number) {
     return prisma.inventory.update({
       where: { productId },
@@ -261,10 +240,8 @@ export const inventoryRepository = {
       },
     });
   },
-
-  /**
-   * Release reserved stock
-   */
+// Release reserved stock
+ 
   async releaseStock(productId: string, quantity: number) {
     const inventory = await prisma.inventory.findUnique({
       where: { productId },
@@ -283,10 +260,8 @@ export const inventoryRepository = {
       },
     });
   },
-
-  /**
-   * Deduct stock on order fulfillment
-   */
+//Deduct stock on order fulfillment
+  
   async deductStock(productId: string, quantity: number, orderId: string) {
     return prisma.$transaction(async (tx) => {
       const inventory = await tx.inventory.findUnique({
