@@ -248,10 +248,8 @@ export const searchRepository = {
       suggestions,
     };
   },
-
-  /**
-   * Get autocomplete suggestions based on partial query
-   */
+//Get autocomplete suggestions based on partial query
+ 
   async getSearchSuggestions(
     query: string,
     limit: number = 10
@@ -274,10 +272,8 @@ export const searchRepository = {
 
     return products.map((p) => p.name);
   },
-
-  /**
-   * Log search query for analytics
-   */
+// Log search query for analytics
+   
   async logSearch(query: string, userId?: string, resultCount?: number): Promise<void> {
     try {
       await prisma.$executeRawUnsafe(
@@ -294,10 +290,8 @@ export const searchRepository = {
       console.error('Failed to log search:', error);
     }
   },
-
-  /**
-   * Get popular search terms
-   */
+// Get popular search terms
+  
   async getPopularSearches(limit: number = 10): Promise<{ query: string; count: number }[]> {
     try {
       const results: any[] = await prisma.$queryRawUnsafe(
@@ -323,10 +317,8 @@ export const searchRepository = {
       return [];
     }
   },
-
-  /**
-   * Get user's recent searches
-   */
+// Get user's recent searches
+  
   async getUserRecentSearches(userId: string, limit: number = 10): Promise<string[]> {
     try {
       const results: any[] = await prisma.$queryRawUnsafe(
