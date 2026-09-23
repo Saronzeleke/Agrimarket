@@ -1,8 +1,4 @@
-/**
- * Email Provider Interface
- * 
- * Abstract interface for email sending implementations.
- */
+// Abstract interface for email sending implementations.
 
 export interface EmailOptions {
   to: string
@@ -12,23 +8,16 @@ export interface EmailOptions {
 }
 
 export interface IEmailProvider {
-  /**
-   * Send an email
-   */
+  // Send an email
+  
   send(options: EmailOptions): Promise<void>
-
-  /**
-   * Send verification email
-   */
+// Send verification email
+ 
   sendVerificationEmail(email: string, token: string): Promise<void>
-
-  /**
-   * Send password reset email
-   */
+// Send password reset email
+  
   sendPasswordResetEmail(email: string, token: string): Promise<void>
-
-  /**
-   * Send welcome email
-   */
+//Send welcome email
+ 
   sendWelcomeEmail(email: string, firstName: string): Promise<void>
 }
