@@ -14,9 +14,7 @@ export interface UpdateCartItemData {
 }
 
 export const cartRepository = {
-  /**
-   * Get or create user's cart
-   */
+  //Get or create user's cart
   async getOrCreateCart(userId: string) {
     let cart = await prisma.cart.findUnique({
       where: { userId },
@@ -108,10 +106,7 @@ export const cartRepository = {
 
     return cart;
   },
-
-  /**
-   * Add item to cart or update quantity if already exists
-   */
+// Add item to cart or update quantity if already exists
   async addItem(userId: string, data: AddToCartData) {
     const cart = await this.getOrCreateCart(userId);
 
@@ -202,10 +197,7 @@ export const cartRepository = {
       },
     });
   },
-
-  /**
-   * Update cart item quantity
-   */
+//Update cart item quantity
   async updateItem(userId: string, itemId: string, data: UpdateCartItemData) {
     const cart = await this.getOrCreateCart(userId);
 
@@ -254,10 +246,7 @@ export const cartRepository = {
       },
     });
   },
-
-  /**
-   * Remove item from cart
-   */
+//Remove item from cart
   async removeItem(userId: string, itemId: string): Promise<void> {
     const cart = await this.getOrCreateCart(userId);
 
@@ -277,10 +266,7 @@ export const cartRepository = {
       where: { id: itemId },
     });
   },
-
-  /**
-   * Clear all items from cart
-   */
+//Clear all items from cart
   async clearCart(userId: string): Promise<void> {
     const cart = await this.getOrCreateCart(userId);
 
@@ -288,10 +274,7 @@ export const cartRepository = {
       where: { cartId: cart.id },
     });
   },
-
-  /**
-   * Get cart item count
-   */
+// Get cart item count
   async getItemCount(userId: string): Promise<number> {
     const cart = await this.getOrCreateCart(userId);
 
@@ -304,10 +287,7 @@ export const cartRepository = {
 
     return result._sum.quantity || 0;
   },
-
-  /**
-   * Check if product is in cart
-   */
+// Check if product is in cart
   async isProductInCart(userId: string, productId: string, variantId?: string): Promise<boolean> {
     const cart = await this.getOrCreateCart(userId);
 
