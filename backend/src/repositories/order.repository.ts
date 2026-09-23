@@ -22,9 +22,8 @@ export interface CreateOrderData {
 }
 
 export const orderRepository = {
-  /**
-   * Create new order with items
-   */
+  // Create new order with items
+  
   async create(data: CreateOrderData) {
     const { items, ...orderData } = data;
 
@@ -58,10 +57,8 @@ export const orderRepository = {
       },
     });
   },
-
-  /**
-   * Find order by ID
-   */
+// Find order by ID
+  
   async findById(orderId: string, customerId: string) {
     const order = await prisma.order.findFirst({
       where: { id: orderId, customerId },
@@ -94,10 +91,8 @@ export const orderRepository = {
 
     return order;
   },
-
-  /**
-   * Find order by order number
-   */
+// Find order by order number
+  
   async findByOrderNumber(orderNumber: string, customerId: string) {
     const order = await prisma.order.findFirst({
       where: { orderNumber, customerId },
@@ -130,10 +125,8 @@ export const orderRepository = {
 
     return order;
   },
-
-  /**
-   * Find all orders for customer
-   */
+// Find all orders for customer
+  
   async findByCustomerId(
     customerId: string,
     options?: {
@@ -184,10 +177,8 @@ export const orderRepository = {
 
     return { orders, total };
   },
-
-  /**
-   * Update order status
-   */
+// Update order status
+  
   async updateStatus(orderId: string, status: OrderStatus) {
     const updateData: Prisma.OrderUpdateInput = { status };
 
@@ -211,20 +202,16 @@ export const orderRepository = {
       },
     });
   },
-
-  /**
-   * Cancel order
-   */
+// Cancel order
+  
   async cancel(orderId: string, customerId: string) {
     // Verify order belongs to customer
     await this.findById(orderId, customerId);
 
     return this.updateStatus(orderId, OrderStatus.CANCELLED);
   },
-
-  /**
-   * Generate unique order number
-   */
+// Generate unique order number
+   
   async generateOrderNumber(): Promise<string> {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
@@ -248,10 +235,8 @@ export const orderRepository = {
 
     return `ORD${year}${month}${day}${sequence}`;
   },
-
-  /**
-   * Get order statistics for customer
-   */
+// Get order statistics for customer
+   
   async getCustomerStats(customerId: string) {
     const [total, pending, confirmed, processing, shipped, delivered, cancelled] = await Promise.all([
       prisma.order.count({ where: { customerId } }),
