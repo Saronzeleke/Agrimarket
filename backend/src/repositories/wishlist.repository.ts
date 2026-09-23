@@ -4,9 +4,8 @@ import { NotFoundError } from '../utils/errors';
 const prisma = new PrismaClient();
 
 export const wishlistRepository = {
-  /**
-   * Get or create user's wishlist
-   */
+  // Get or create user's wishlist
+  
   async getOrCreateWishlist(userId: string) {
     let wishlist = await prisma.wishlist.findUnique({
       where: { userId },
@@ -106,10 +105,8 @@ export const wishlistRepository = {
 
     return wishlist;
   },
-
-  /**
-   * Add item to wishlist
-   */
+// Add item to wishlist
+  
   async addItem(userId: string, productId: string) {
     const wishlist = await this.getOrCreateWishlist(userId);
 
@@ -196,10 +193,8 @@ export const wishlistRepository = {
       },
     });
   },
+// Remove item from wishlist
 
-  /**
-   * Remove item from wishlist
-   */
   async removeItem(userId: string, itemId: string): Promise<void> {
     const wishlist = await this.getOrCreateWishlist(userId);
 
@@ -219,10 +214,8 @@ export const wishlistRepository = {
       where: { id: itemId },
     });
   },
-
-  /**
-   * Remove item by product ID
-   */
+// Remove item by product ID
+ 
   async removeItemByProductId(userId: string, productId: string): Promise<void> {
     const wishlist = await this.getOrCreateWishlist(userId);
 
@@ -243,10 +236,8 @@ export const wishlistRepository = {
       where: { id: item.id },
     });
   },
-
-  /**
-   * Clear all items from wishlist
-   */
+// Clear all items from wishlist
+  
   async clearWishlist(userId: string): Promise<void> {
     const wishlist = await this.getOrCreateWishlist(userId);
 
@@ -254,10 +245,8 @@ export const wishlistRepository = {
       where: { wishlistId: wishlist.id },
     });
   },
-
-  /**
-   * Check if product is in wishlist
-   */
+// Check if product is in wishlist
+  
   async isProductInWishlist(userId: string, productId: string): Promise<boolean> {
     const wishlist = await this.getOrCreateWishlist(userId);
 
@@ -272,10 +261,8 @@ export const wishlistRepository = {
 
     return !!item;
   },
-
-  /**
-   * Get wishlist item count
-   */
+// Get wishlist item count
+ 
   async getItemCount(userId: string): Promise<number> {
     const wishlist = await this.getOrCreateWishlist(userId);
 
