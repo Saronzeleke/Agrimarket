@@ -4,7 +4,7 @@ import { authenticate } from '../middleware/auth.middleware';
 import { asyncHandler } from '../utils/helpers';
 
 const router = Router();
-// All wishlist routes require authentication
+//All wishlist routes require authentication
 
 // Get wishlist
 router.get('/', authenticate, asyncHandler(wishlistController.getWishlist));
