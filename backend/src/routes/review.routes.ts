@@ -1,9 +1,5 @@
-/**
- * Review Routes
- * 
- * Product review and rating endpoints.
- */
-
+ //Product review and rating endpoints.
+ 
 import { Router } from 'express';
 import { reviewController } from '../controllers/review.controller';
 import { authenticate } from '../middleware/auth.middleware';
@@ -11,20 +7,15 @@ import { asyncHandler } from '../utils/helpers';
 import { reviewLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
-
-/**
- * Public routes (no authentication required)
- */
+// Public routes (no authentication required)
 
 // GET /api/v1/products/:productId/reviews - Get product reviews
 router.get('/products/:productId/reviews', asyncHandler(reviewController.getProductReviews));
 
 // GET /api/v1/products/:productId/reviews/stats - Get product review statistics
 router.get('/products/:productId/reviews/stats', asyncHandler(reviewController.getProductStats));
+//Protected routes (authentication required)
 
-/**
- * Protected routes (authentication required)
- */
 router.use(authenticate);
 
 // POST /api/v1/reviews - Submit a review (with rate limiting)
