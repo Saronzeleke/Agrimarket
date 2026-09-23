@@ -7,16 +7,11 @@ import { requireAdmin } from '../middleware/rbac.middleware';
 import { asyncHandler } from '../utils/helpers';
 
 const router = Router();
+//All admin routes require authentication and admin role
 
-/**
- * All admin routes require authentication and admin role
- */
 router.use(authenticate);
 router.use(requireAdmin);
-
-/**
- * Order management
- */
+//Order management
 
 // GET /api/v1/admin/orders/stats/platform - Get platform statistics
 router.get('/orders/stats/platform', asyncHandler(adminOrderController.getPlatformStats));
@@ -35,11 +30,8 @@ router.get('/orders/:orderId', asyncHandler(adminOrderController.getOrderDetails
 
 // PATCH /api/v1/admin/orders/:orderId/status - Update order status
 router.patch('/orders/:orderId/status', asyncHandler(adminOrderController.updateOrderStatus));
-
-/**
- * Analytics & Dashboard
- */
-
+// Analytics & Dashboard
+ 
 // GET /api/v1/admin/analytics/overview - Get platform overview
 router.get('/analytics/overview', asyncHandler(adminAnalyticsController.getPlatformOverview));
 
@@ -63,10 +55,7 @@ router.get('/analytics/demographics', asyncHandler(adminAnalyticsController.getU
 
 // GET /api/v1/admin/analytics/payment-methods - Get payment method analytics
 router.get('/analytics/payment-methods', asyncHandler(adminAnalyticsController.getPaymentMethodAnalytics));
-
-/**
- * Review Moderation
- */
+//Review Moderation
 
 // GET /api/v1/admin/reviews/flagged - Get flagged reviews
 router.get('/reviews/flagged', asyncHandler(reviewController.getFlaggedReviews));
