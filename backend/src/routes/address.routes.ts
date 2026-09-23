@@ -4,10 +4,7 @@ import { authenticate } from '../middleware/auth.middleware';
 import { asyncHandler } from '../utils/helpers';
 
 const router = Router();
-
-/**
- * All address routes require authentication
- */
+//All address routes require authentication
 
 // Get default address (must be before /:addressId)
 router.get('/default', authenticate, asyncHandler(addressController.getDefaultAddress));
