@@ -17,9 +17,8 @@ export interface SavedSearchData {
 }
 
 export const savedSearchRepository = {
-  /**
-   * Create a saved search for a user
-   */
+  //Create a saved search for a user
+   
   async create(userId: string, data: SavedSearchData) {
     const savedSearch = await prisma.$executeRawUnsafe(
       `
@@ -36,10 +35,8 @@ export const savedSearchRepository = {
 
     return savedSearch;
   },
-
-  /**
-   * Get all saved searches for a user
-   */
+// Get all saved searches for a user
+  
   async findByUserId(userId: string) {
     try {
       const searches: any[] = await prisma.$queryRawUnsafe(
@@ -61,10 +58,8 @@ export const savedSearchRepository = {
       return [];
     }
   },
-
-  /**
-   * Get a specific saved search
-   */
+// Get a specific saved search
+  
   async findById(id: string, userId: string) {
     try {
       const searches: any[] = await prisma.$queryRawUnsafe(
@@ -91,10 +86,8 @@ export const savedSearchRepository = {
       throw new NotFoundError('Saved search not found');
     }
   },
-
-  /**
-   * Update a saved search
-   */
+//Update a saved search
+   
   async update(id: string, userId: string, data: Partial<SavedSearchData>) {
     const updates: string[] = [];
     const params: any[] = [];
@@ -157,10 +150,8 @@ export const savedSearchRepository = {
       throw new NotFoundError('Saved search not found');
     }
   },
-
-  /**
-   * Delete a saved search
-   */
+// Delete a saved search
+ 
   async delete(id: string, userId: string): Promise<void> {
     try {
       const result: any = await prisma.$queryRawUnsafe(
@@ -181,10 +172,8 @@ export const savedSearchRepository = {
       throw new NotFoundError('Saved search not found');
     }
   },
-
-  /**
-   * Execute a saved search
-   */
+// Execute a saved search
+  
   async execute(id: string, userId: string, { limit, offset }: { limit?: number; offset?: number }) {
     const savedSearch = await this.findById(id, userId);
 
