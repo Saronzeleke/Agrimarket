@@ -1,8 +1,4 @@
-/**
- * Seller Routes
- * 
- * Seller dashboard endpoints.
- */
+// Seller dashboard endpoints.
 
 import { Router } from 'express'
 import productController from '../controllers/product.controller'
@@ -15,16 +11,10 @@ import { requireSeller } from '../middleware/rbac.middleware'
 import { asyncHandler } from '../utils/helpers'
 
 const router = Router()
-
-/**
- * All seller routes require authentication
- */
+// All seller routes require authentication
 router.use(authenticate)
 router.use(requireSeller)
-
-/**
- * Product management
- */
+// Product management
 
 // GET /api/v1/seller/products - Get seller's products
 router.get('/products', productController.getSellerProducts)
@@ -34,10 +24,7 @@ router.get('/products/stats', productController.getStats)
 
 // GET /api/v1/seller/products/low-stock - Get low stock products
 router.get('/products/low-stock', productController.getLowStock)
-
-/**
- * Order management
- */
+// Order management
 
 // GET /api/v1/seller/orders/stats - Get order statistics
 router.get('/orders/stats', asyncHandler(sellerOrderController.getStats))
@@ -53,10 +40,7 @@ router.get('/orders/:orderId', asyncHandler(sellerOrderController.getOrder))
 
 // PATCH /api/v1/seller/orders/:orderId/status - Update order status
 router.patch('/orders/:orderId/status', asyncHandler(sellerOrderController.updateOrderStatus))
-
-/**
- * Inventory management
- */
+// Inventory management
 
 // GET /api/v1/seller/inventory/stats - Get inventory statistics
 router.get('/inventory/stats', asyncHandler(inventoryController.getStats))
@@ -84,20 +68,14 @@ router.post('/inventory/:inventoryId/adjust', asyncHandler(inventoryController.a
 
 // GET /api/v1/seller/inventory/:inventoryId/history - Get inventory history
 router.get('/inventory/:inventoryId/history', asyncHandler(inventoryController.getHistory))
-
-/**
- * Reviews & Ratings
- */
+// Reviews & Ratings
 
 // GET /api/v1/seller/reviews - Get seller's product reviews
 router.get('/reviews', asyncHandler(reviewController.getSellerReviews))
 
 // POST /api/v1/seller/reviews/:reviewId/respond - Respond to a review
 router.post('/reviews/:reviewId/respond', asyncHandler(reviewController.addSellerResponse))
-
-/**
- * Analytics & Dashboard
- */
+//Analytics & Dashboard
 
 // GET /api/v1/seller/analytics/dashboard - Get dashboard overview
 router.get('/analytics/dashboard', asyncHandler(sellerAnalyticsController.getDashboardOverview))
