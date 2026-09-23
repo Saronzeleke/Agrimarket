@@ -1,25 +1,17 @@
-/**
- * Category Repository
- * 
- * Database operations for Category entity.
- */
+// Database operations for Category entity.
 
 import prisma from '../config/database'
 import { Category, Prisma } from '@prisma/client'
 
 export class CategoryRepository {
-  /**
-   * Find category by ID
-   */
+  //Find category by ID
+
   async findById(id: string): Promise<Category | null> {
     return prisma.category.findUnique({
       where: { id },
     })
   }
-
-  /**
-   * Find category by slug
-   */
+// Find category by slug
   async findBySlug(slug: string) {
     return prisma.category.findUnique({
       where: { slug },
@@ -34,10 +26,7 @@ export class CategoryRepository {
       },
     })
   }
-
-  /**
-   * Find all active categories
-   */
+// Find all active categories
   async findAll() {
     return prisma.category.findMany({
       where: { active: true },
@@ -53,10 +42,7 @@ export class CategoryRepository {
       },
     })
   }
-
-  /**
-   * Find all categories (admin)
-   */
+// Find all categories (admin)
   async findAllAdmin() {
     return prisma.category.findMany({
       orderBy: { order: 'asc' },
@@ -69,38 +55,26 @@ export class CategoryRepository {
       },
     })
   }
-
-  /**
-   * Create category
-   */
+//Create category
   async create(data: Prisma.CategoryCreateInput): Promise<Category> {
     return prisma.category.create({
       data,
     })
   }
-
-  /**
-   * Update category
-   */
+// Update category
   async update(id: string, data: Prisma.CategoryUpdateInput): Promise<Category> {
     return prisma.category.update({
       where: { id },
       data,
     })
   }
-
-  /**
-   * Delete category
-   */
+// Delete category
   async delete(id: string): Promise<void> {
     await prisma.category.delete({
       where: { id },
     })
   }
-
-  /**
-   * Check if slug exists
-   */
+// Check if slug exists
   async slugExists(slug: string, excludeId?: string): Promise<boolean> {
     const count = await prisma.category.count({
       where: {
@@ -110,10 +84,7 @@ export class CategoryRepository {
     })
     return count > 0
   }
-
-  /**
-   * Check if category has products
-   */
+//Check if category has products
   async hasProducts(id: string): Promise<boolean> {
     const count = await prisma.product.count({
       where: { categoryId: id },
