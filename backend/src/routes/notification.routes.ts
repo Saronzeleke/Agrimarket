@@ -1,19 +1,11 @@
-/**
- * Notification Routes
- * 
- * User notification endpoints.
- */
-
+// User notification endpoints.
 import { Router } from 'express';
 import { notificationController } from '../controllers/notification.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { asyncHandler } from '../utils/helpers';
 
 const router = Router();
-
-/**
- * All notification routes require authentication
- */
+//All notification routes require authentication
 router.use(authenticate);
 
 // GET /api/v1/notifications/unread/count - Get unread notification count
