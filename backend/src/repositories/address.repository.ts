@@ -28,9 +28,8 @@ export interface UpdateAddressData {
 }
 
 export const addressRepository = {
-  /**
-   * Create new address
-   */
+  // Create new address
+  
   async create(userId: string, data: CreateAddressData) {
     // If this is set as default, unset others
     if (data.isDefault) {
@@ -47,20 +46,15 @@ export const addressRepository = {
       },
     });
   },
-
-  /**
-   * Find all addresses for user
-   */
+// Find all addresses for user
+  
   async findByUserId(userId: string) {
     return prisma.address.findMany({
       where: { userId },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   },
-
-  /**
-   * Find address by ID
-   */
+// Find address by ID
   async findById(id: string, userId: string) {
     const address = await prisma.address.findFirst({
       where: { id, userId },
@@ -72,19 +66,14 @@ export const addressRepository = {
 
     return address;
   },
-
-  /**
-   * Get default address
-   */
+// Get default address
   async findDefault(userId: string) {
     return prisma.address.findFirst({
       where: { userId, isDefault: true },
     });
   },
-
-  /**
-   * Update address
-   */
+//Update address
+ 
   async update(id: string, userId: string, data: UpdateAddressData) {
     // Verify address belongs to user
     await this.findById(id, userId);
@@ -102,10 +91,7 @@ export const addressRepository = {
       data,
     });
   },
-
-  /**
-   * Set address as default
-   */
+//Set address as default
   async setDefault(id: string, userId: string) {
     // Verify address belongs to user
     await this.findById(id, userId);
@@ -122,10 +108,7 @@ export const addressRepository = {
       data: { isDefault: true },
     });
   },
-
-  /**
-   * Delete address
-   */
+// Delete address
   async delete(id: string, userId: string) {
     // Verify address belongs to user
     await this.findById(id, userId);
@@ -134,10 +117,7 @@ export const addressRepository = {
       where: { id },
     });
   },
-
-  /**
-   * Count user addresses
-   */
+//Count user addresses
   async count(userId: string) {
     return prisma.address.count({
       where: { userId },
