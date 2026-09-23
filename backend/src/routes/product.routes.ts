@@ -1,8 +1,4 @@
-/**
- * Product Routes
- * 
- * Product catalog endpoints with caching.
- */
+//Product catalog endpoints with caching.
 
 import { Router } from 'express'
 import productController from '../controllers/product.controller'
@@ -12,10 +8,7 @@ import { Role } from '@prisma/client'
 import { cacheMiddleware, invalidateCacheMiddleware } from '../middleware/cache.middleware'
 
 const router = Router()
-
-/**
- * Public routes (with caching)
- */
+//Public routes (with caching)
 
 // GET /api/v1/products - List products with filters (cache 10 minutes)
 router.get('/', cacheMiddleware(600), optionalAuthenticate, productController.list)
@@ -28,10 +21,7 @@ router.get('/:id', cacheMiddleware(900), optionalAuthenticate, productController
 
 // GET /api/v1/products/:id/related - Get related products (cache 15 minutes)
 router.get('/:id/related', cacheMiddleware(900), productController.getRelated)
-
-/**
- * Seller routes (protected, with cache invalidation)
- */
+// Seller routes (protected, with cache invalidation)
 
 // POST /api/v1/products - Create product (invalidate product caches)
 router.post('/', authenticate, requireSeller, invalidateCacheMiddleware('response:/api/v1/products*'), productController.create)
