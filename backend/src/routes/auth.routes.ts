@@ -1,8 +1,4 @@
-/**
- * Auth Routes
- * 
- * Authentication and authorization endpoints.
- */
+// Auth Routes, Authentication and authorization endpoints.
 
 import { Router } from 'express'
 import authController from '../controllers/auth.controller'
@@ -13,10 +9,7 @@ import {
 } from '../middleware/rate-limit.middleware'
 
 const router = Router()
-
-/**
- * Public routes
- */
+//Public routes
 
 // POST /api/v1/auth/register - Register new user
 router.post('/register', authLimiter, authController.register)
@@ -39,9 +32,7 @@ router.post('/forgot-password', passwordResetLimiter, authController.requestPass
 // POST /api/v1/auth/reset-password - Reset password with token
 router.post('/reset-password', passwordResetLimiter, authController.resetPassword)
 
-/**
- * Protected routes (require authentication)
- */
+// Protected routes (require authentication)
 
 // GET /api/v1/auth/me - Get current user
 router.get('/me', authenticate, authController.getCurrentUser)
