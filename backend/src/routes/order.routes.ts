@@ -5,10 +5,7 @@ import { asyncHandler } from '../utils/helpers';
 import { orderCreationLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
-
-/**
- * All order routes require authentication
- */
+//All order routes require authentication
 
 // Get order statistics (must be before /:orderId)
 router.get('/stats', authenticate, asyncHandler(orderController.getOrderStats));
