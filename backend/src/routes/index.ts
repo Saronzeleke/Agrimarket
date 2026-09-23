@@ -1,8 +1,4 @@
-/**
- * API Routes Index
- * 
- * Aggregates all route modules.
- */
+// Aggregates all route modules.
 
 import { Router } from 'express'
 import authRoutes from './auth.routes'
