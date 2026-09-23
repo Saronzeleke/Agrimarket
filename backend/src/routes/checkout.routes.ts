@@ -5,10 +5,7 @@ import { asyncHandler } from '../utils/helpers';
 import { orderCreationLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
-
-/**
- * All checkout routes require authentication
- */
+// All checkout routes require authentication
 
 // Get checkout summary
 router.get('/summary', authenticate, asyncHandler(checkoutController.getCheckoutSummary));
