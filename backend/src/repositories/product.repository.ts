@@ -1,17 +1,12 @@
-/**
- * Product Repository
- * 
- * Database operations for Product entity.
- */
+// Database operations for Product entity.
 
 import prisma from '../config/database'
 import { Product, Prisma } from '@prisma/client'
 import { ProductFilters, PaginationParams } from '../types'
 
 export class ProductRepository {
-  /**
-   * Find product by ID
-   */
+ //Find product by ID
+  
   async findById(id: string) {
     return prisma.product.findUnique({
       where: { id },
@@ -41,10 +36,8 @@ export class ProductRepository {
       },
     })
   }
-
-  /**
-   * Find product by slug
-   */
+// Find product by slug
+ 
   async findBySlug(slug: string) {
     return prisma.product.findUnique({
       where: { slug },
@@ -88,10 +81,8 @@ export class ProductRepository {
       },
     })
   }
+// Find all products with filters and pagination
 
-  /**
-   * Find all products with filters and pagination
-   */
   async findMany(filters: ProductFilters, pagination: PaginationParams) {
     const where: Prisma.ProductWhereInput = {
       active: true,
@@ -196,10 +187,8 @@ export class ProductRepository {
 
     return { products, total }
   }
-
-  /**
-   * Build order by clause
-   */
+// Build order by clause
+  
   private buildOrderBy(filters: ProductFilters): Prisma.ProductOrderByWithRelationInput[] {
     // Default: newest first
     const orderBy: Prisma.ProductOrderByWithRelationInput[] = []
@@ -215,10 +204,8 @@ export class ProductRepository {
 
     return orderBy
   }
-
-  /**
-   * Create product
-   */
+// Create product
+  
   async create(data: Prisma.ProductCreateInput): Promise<Product> {
     return prisma.product.create({
       data,
@@ -228,10 +215,8 @@ export class ProductRepository {
       },
     })
   }
-
-  /**
-   * Update product
-   */
+// Update product
+  
   async update(id: string, data: Prisma.ProductUpdateInput): Promise<Product> {
     return prisma.product.update({
       where: { id },
@@ -243,19 +228,15 @@ export class ProductRepository {
       },
     })
   }
-
-  /**
-   * Delete product
-   */
+// Delete product
+  
   async delete(id: string): Promise<void> {
     await prisma.product.delete({
       where: { id },
     })
   }
-
-  /**
-   * Check if slug exists
-   */
+// Check if slug exists
+  
   async slugExists(slug: string, excludeId?: string): Promise<boolean> {
     const count = await prisma.product.count({
       where: {
@@ -265,10 +246,8 @@ export class ProductRepository {
     })
     return count > 0
   }
-
-  /**
-   * Increment view count
-   */
+// Increment view count
+   
   async incrementViewCount(id: string): Promise<void> {
     await prisma.product.update({
       where: { id },
@@ -279,10 +258,8 @@ export class ProductRepository {
       },
     })
   }
-
-  /**
-   * Update rating
-   */
+// Update rating
+  
   async updateRating(productId: string): Promise<void> {
     const result = await prisma.review.aggregate({
       where: { productId },
@@ -298,10 +275,8 @@ export class ProductRepository {
       },
     })
   }
-
-  /**
-   * Get seller products
-   */
+// Get seller products
+  
   async findBySeller(sellerId: string, pagination: PaginationParams) {
     const [products, total] = await Promise.all([
       prisma.product.findMany({
@@ -327,10 +302,8 @@ export class ProductRepository {
 
     return { products, total }
   }
+// Get low stock products for seller
 
-  /**
-   * Get low stock products for seller
-   */
   async findLowStock(sellerId: string) {
     return prisma.product.findMany({
       where: {
@@ -352,10 +325,8 @@ export class ProductRepository {
       },
     })
   }
-
-  /**
-   * Get related products (same category)
-   */
+// Get related products (same category)
+  
   async findRelated(productId: string, categoryId: string, limit: number = 6) {
     return prisma.product.findMany({
       where: {
@@ -381,10 +352,8 @@ export class ProductRepository {
       ],
     })
   }
-
-  /**
-   * Get product inventory
-   */
+// Get product inventory
+  
   async getInventory(productId: string) {
     return prisma.inventory.findUnique({
       where: { productId },
