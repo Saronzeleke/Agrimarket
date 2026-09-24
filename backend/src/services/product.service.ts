@@ -6,10 +6,7 @@ import { ProductFilters, PaginationParams } from '../types'
 import {
   NotFoundError,
   AuthorizationError,
-  ConflictError,
-  BusinessLogicError,
 } from '../utils/errors'
-import { CONSTANTS } from '../config/constants'
 import { Role } from '@prisma/client'
 import logger from '../config/logger'
 
@@ -20,9 +17,9 @@ interface CreateProductData {
   description: string
   price: number
   unit: string
-  productionLocation?: string
-  harvestDate?: Date
-  qualityGrade?: string
+  productionLocation?: string | null
+  harvestDate?: Date | null
+  qualityGrade?: string | null
 }
 
 interface UpdateProductData {
@@ -30,9 +27,9 @@ interface UpdateProductData {
   description?: string
   price?: number
   unit?: string
-  productionLocation?: string
-  harvestDate?: Date
-  qualityGrade?: string
+  productionLocation?: string | null
+  harvestDate?: Date | null
+  qualityGrade?: string | null
   categoryId?: string
   active?: boolean
 }

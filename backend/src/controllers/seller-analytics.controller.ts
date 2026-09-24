@@ -56,10 +56,10 @@ export const sellerAnalyticsController = {
       throw new ValidationError('User is not a seller');
     }
 
-    const { startDate, endDate, interval } = validation.data;
+    const { startDate, endDate, groupBy } = validation.data;
     const result = await sellerAnalyticsService.getSalesOverTime(
       sellerId,
-      { startDate, endDate, groupBy: interval }
+      { startDate, endDate, groupBy }
     );
 
     return sendSuccess(res, result);

@@ -9,7 +9,7 @@ export const recommendationService = {
     const purchasedProducts = await prisma.orderItem.findMany({
       where: {
         order: {
-          userId,
+          customerId: userId,
           status: OrderStatus.DELIVERED,
         },
       },
@@ -587,9 +587,9 @@ export const recommendationService = {
           },
         },
       },
-      orderBy: {
-        addedAt: 'desc',
-      },
+        orderBy: {
+          createdAt: 'desc',
+        },
       take: limit,
     });
 
@@ -608,7 +608,7 @@ export const recommendationService = {
       by: ['sellerId'],
       where: {
         order: {
-          userId,
+          customerId: userId,
           status: OrderStatus.DELIVERED,
         },
       },
@@ -633,7 +633,7 @@ export const recommendationService = {
     const purchasedProductIds = await prisma.orderItem.findMany({
       where: {
         order: {
-          userId,
+          customerId: userId,
         },
       },
       select: {

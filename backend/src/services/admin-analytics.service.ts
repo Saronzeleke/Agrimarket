@@ -1,7 +1,7 @@
 // Admin Analytics Service, Provides platform-wide analytics and monitoring for administrators.
-import { OrderStatus, PaymentStatus, Role } from '@prisma/client';
+import { OrderStatus, Role } from '@prisma/client';
 import prisma from '../config/database';
-import { ValidationError, NotFoundError } from '../utils/errors';
+import { ValidationError } from '../utils/errors';
 
 export const adminAnalyticsService = {
   // Get platform overview dashboard
@@ -288,14 +288,13 @@ export const adminAnalyticsService = {
         },
       },
       include: {
-        seller: {
+        product: {
           include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
+            seller: {
+              include: {
+                user: {
+                  select: { id: true, firstName: true, lastName: true, email: true },
+                },
               },
             },
           },
@@ -314,7 +313,7 @@ export const adminAnalyticsService = {
     orderItems.forEach((item) => {
       const sellerId = item.sellerId;
       const existing = sellerMetrics.get(sellerId) || {
-        seller: item.seller,
+        seller: item.product.seller,
         revenue: 0,
         orders: new Set<string>(),
         itemsSold: 0,
@@ -496,7 +495,7 @@ export const adminAnalyticsService = {
       take: Math.min(limit, 20),
       orderBy: { createdAt: 'desc' },
       include: {
-        user: {
+        customer: {
           select: { firstName: true, lastName: true },
         },
       },
@@ -505,7 +504,7 @@ export const adminAnalyticsService = {
     recentOrders.forEach((order) => {
       activities.push({
         type: 'order_created',
-        description: `New order #${order.id.slice(0, 8)} by ${order.user.firstName} ${order.user.lastName}`,
+        description: `New order #${order.id.slice(0, 8)} by ${order.customer.firstName} ${order.customer.lastName}`,
         timestamp: order.createdAt,
         metadata: { orderId: order.id, total: Number(order.subtotal) + Number(order.deliveryFee) },
       });
@@ -575,31 +574,28 @@ export const adminAnalyticsService = {
       throw new ValidationError('Start date must be before end date');
     }
 
-    const orders = await prisma.order.groupBy({
-      by: ['paymentMethod'],
+    const payments = await prisma.payment.findMany({
       where: {
         createdAt: { gte: startDate, lte: endDate },
-        status: { notIn: [OrderStatus.CANCELLED, OrderStatus.REFUNDED] },
+        order: { status: { notIn: [OrderStatus.CANCELLED, OrderStatus.REFUNDED] } },
       },
-      _count: true,
-      _sum: {
-        subtotal: true,
-        deliveryFee: true,
-      },
+      select: { provider: true, amount: true },
     });
+    const grouped = new Map<string, { orderCount: number; revenue: number }>();
+    for (const payment of payments) {
+      const current = grouped.get(payment.provider) || { orderCount: 0, revenue: 0 };
+      current.orderCount += 1;
+      current.revenue += Number(payment.amount);
+      grouped.set(payment.provider, current);
+    }
+    const totalRevenue = Array.from(grouped.values()).reduce((sum, item) => sum + item.revenue, 0);
 
-    const totalRevenue = orders.reduce(
-      (sum, order) => sum + Number(order._sum.subtotal || 0) + Number(order._sum.deliveryFee || 0),
-      0
-    );
-
-    return orders.map((order) => {
-      const revenue = Number(order._sum.subtotal || 0) + Number(order._sum.deliveryFee || 0);
+    return Array.from(grouped.entries()).map(([paymentMethod, metrics]) => {
       return {
-        paymentMethod: order.paymentMethod,
-        orderCount: order._count,
-        revenue,
-        percentage: totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0,
+        paymentMethod,
+        orderCount: metrics.orderCount,
+        revenue: metrics.revenue,
+        percentage: totalRevenue > 0 ? (metrics.revenue / totalRevenue) * 100 : 0,
       };
     }).sort((a, b) => b.revenue - a.revenue);
   },

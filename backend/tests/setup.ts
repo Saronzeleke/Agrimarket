@@ -5,18 +5,26 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const databaseUrl = process.env['TEST_DATABASE_URL'];
 
 // Mock Prisma client for tests
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
+      url: databaseUrl || 'postgresql://test:test@localhost:5432/test',
     },
   },
 });
 
 // Setup before all tests
 beforeAll(async () => {
+  if (!databaseUrl) {
+    return;
+  }
   // Connect to test database
   await prisma.$connect();
   
@@ -26,11 +34,17 @@ beforeAll(async () => {
 
 // Cleanup after all tests
 afterAll(async () => {
+  if (!databaseUrl) {
+    return;
+  }
   await prisma.$disconnect();
 });
 
 // Clean database before each test
 beforeEach(async () => {
+  if (!databaseUrl) {
+    return;
+  }
   await cleanDatabase();
 });
 

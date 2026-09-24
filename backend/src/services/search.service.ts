@@ -1,6 +1,6 @@
 import { searchRepository, SearchFilters } from '../repositories/search.repository';
 import { savedSearchRepository, SavedSearchData } from '../repositories/saved-search.repository';
-import { BadRequestError, NotFoundError } from '../utils/errors';
+import { BadRequestError } from '../utils/errors';
 
 export const searchService = {
   // Search products with advanced filtering

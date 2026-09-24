@@ -1,6 +1,5 @@
 import { OrderStatus } from '@prisma/client';
 import prisma from '../config/database';
-import { ValidationError } from '../utils/errors';
 
 export const sellerAnalyticsService = {
   // Get dashboard overview statistics

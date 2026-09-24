@@ -1,5 +1,5 @@
 import { cartRepository, AddToCartData, UpdateCartItemData } from '../repositories/cart.repository';
-import { productRepository } from '../repositories/product.repository';
+import productRepository from '../repositories/product.repository';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 
 export const cartService = {

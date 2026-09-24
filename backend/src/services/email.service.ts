@@ -1,11 +1,8 @@
 // Email Service , Handles sending emails through the email provider.
-import { MockEmailProvider } from '../providers/email/MockEmailProvider';
 import { NotificationType } from '@prisma/client';
 import prisma from '../config/database';
 import logger from '../config/logger';
-
-// Use mock provider for now (can be swapped with real provider like SendGrid, AWS SES, etc.)
-const emailProvider = new MockEmailProvider();
+import emailProvider from '../providers/email';
 
 export const emailService = {
   // Send notification email

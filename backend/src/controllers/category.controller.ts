@@ -13,7 +13,7 @@ import {
   createCategorySchema,
   updateCategorySchema,
 } from '../validators/product.validator'
-import { NotFoundError, ConflictError, BusinessLogicError } from '../utils/errors'
+import { NotFoundError, BusinessLogicError } from '../utils/errors'
 import logger from '../config/logger'
 
 export class CategoryController {

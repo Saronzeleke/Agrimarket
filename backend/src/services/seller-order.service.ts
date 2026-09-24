@@ -1,6 +1,6 @@
 import { OrderStatus, Prisma } from '@prisma/client';
 import prisma from '../config/database';
-import { BadRequestError, ForbiddenError, NotFoundError } from '../utils/errors';
+import { BadRequestError, NotFoundError } from '../utils/errors';
 
 export const sellerOrderService = {
   // Get seller's orders (orders containing their products)
@@ -28,7 +28,7 @@ export const sellerOrderService = {
 
     if (options?.search) {
       where.order = {
-        ...where.order,
+        ...(where.order && 'status' in where.order ? { status: where.order.status } : {}),
         OR: [
           { orderNumber: { contains: options.search, mode: 'insensitive' } },
           { customer: { firstName: { contains: options.search, mode: 'insensitive' } } },
@@ -238,7 +238,8 @@ export const sellerOrderService = {
     const order = orderItems[0].order;
 
     // Sellers can only update to PROCESSING or SHIPPED
-    if (![OrderStatus.PROCESSING, OrderStatus.SHIPPED].includes(newStatus)) {
+    const sellerStatuses: OrderStatus[] = [OrderStatus.PROCESSING, OrderStatus.SHIPPED];
+    if (!sellerStatuses.includes(newStatus)) {
       throw new BadRequestError(
         'Sellers can only update order status to PROCESSING or SHIPPED'
       );
@@ -256,7 +257,8 @@ export const sellerOrderService = {
     }
 
     if (newStatus === OrderStatus.SHIPPED) {
-      if (![OrderStatus.CONFIRMED, OrderStatus.PROCESSING].includes(currentStatus)) {
+      const shippableFrom: OrderStatus[] = [OrderStatus.CONFIRMED, OrderStatus.PROCESSING];
+      if (!shippableFrom.includes(currentStatus)) {
         throw new BadRequestError(
           'Can only move to SHIPPED from CONFIRMED or PROCESSING status'
         );

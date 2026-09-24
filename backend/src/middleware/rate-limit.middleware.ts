@@ -123,7 +123,7 @@ export const orderCreationLimiter = rateLimit({
   max: 10,
   keyGenerator: (req: Request) => {
     // Use user ID if authenticated, otherwise IP
-    return req.user?.id || req.ip;
+    return req.user?.id || req.ip || 'unknown';
   },
   message: {
     success: false,
@@ -153,7 +153,7 @@ export const reviewLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
   keyGenerator: (req: Request) => {
-    return req.user?.id || req.ip;
+    return req.user?.id || req.ip || 'unknown';
   },
   message: {
     success: false,

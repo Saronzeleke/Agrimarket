@@ -1,5 +1,5 @@
 import { wishlistRepository } from '../repositories/wishlist.repository';
-import { productRepository } from '../repositories/product.repository';
+import productRepository from '../repositories/product.repository';
 import { cartRepository } from '../repositories/cart.repository';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 
@@ -55,6 +55,10 @@ export const wishlistService = {
 
     // Add to wishlist
     const item = await wishlistRepository.addItem(userId, productId);
+
+    if (!item) {
+      throw new BadRequestError('Unable to add product to wishlist');
+    }
 
     return {
       id: item.id,

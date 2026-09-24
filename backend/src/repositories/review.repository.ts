@@ -214,7 +214,7 @@ export const reviewRepository = {
       where: {
         productId,
         order: {
-          userId,
+          customerId: userId,
           status: 'DELIVERED', // Only delivered orders count
         },
       },

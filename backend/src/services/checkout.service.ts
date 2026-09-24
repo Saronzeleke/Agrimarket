@@ -1,8 +1,7 @@
 import { cartService } from './cart.service';
 import { addressRepository } from '../repositories/address.repository';
 import { orderRepository } from '../repositories/order.repository';
-import { productRepository } from '../repositories/product.repository';
-import { BadRequestError, NotFoundError } from '../utils/errors';
+import { BadRequestError } from '../utils/errors';
 import prisma from '../config/database';
 
 interface CheckoutData {
@@ -134,7 +133,7 @@ export const checkoutService = {
       sellerId: item.seller.id,
       quantity: item.quantity,
       price: item.price,
-      variantInfo: item.variantId ? { variantId: item.variantId } : null,
+      variantInfo: item.variantId ? { variantId: item.variantId } : undefined,
     }));
 
     // Use transaction to ensure data consistency
@@ -189,7 +188,7 @@ export const checkoutService = {
           const availableStock = inventory.currentStock - inventory.reservedStock;
           if (availableStock < item.quantity) {
             throw new BadRequestError(
-              `Insufficient stock for ${item.product.name}. Available: ${availableStock}, Requested: ${item.quantity}`
+              `Insufficient stock for ${item.name}. Available: ${availableStock}, Requested: ${item.quantity}`
             );
           }
 
@@ -253,7 +252,7 @@ export const checkoutService = {
         notes: result.order.notes,
         items: result.order.items.map((item) => ({
           id: item.id,
-          productId: item.product.id,
+          productId: item.productId,
           name: item.product.name,
           slug: item.product.slug,
           unit: item.product.unit,

@@ -76,6 +76,8 @@ export class AuthorizationError extends AppError {
   }
 }
 
+export class ForbiddenError extends AuthorizationError {}
+
 export class NotFoundError extends AppError {
   constructor(resource: string = 'Resource') {
     super(

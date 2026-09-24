@@ -111,13 +111,11 @@ export const cartRepository = {
     const cart = await this.getOrCreateCart(userId);
 
     // Check if item already exists
-    const existingItem = await prisma.cartItem.findUnique({
+    const existingItem = await prisma.cartItem.findFirst({
       where: {
-        cartId_productId_variantId: {
-          cartId: cart.id,
-          productId: data.productId,
-          variantId: data.variantId || null,
-        },
+        cartId: cart.id,
+        productId: data.productId,
+        variantId: data.variantId || null,
       },
     });
 
@@ -291,13 +289,11 @@ export const cartRepository = {
   async isProductInCart(userId: string, productId: string, variantId?: string): Promise<boolean> {
     const cart = await this.getOrCreateCart(userId);
 
-    const item = await prisma.cartItem.findUnique({
+    const item = await prisma.cartItem.findFirst({
       where: {
-        cartId_productId_variantId: {
-          cartId: cart.id,
-          productId,
-          variantId: variantId || null,
-        },
+        cartId: cart.id,
+        productId,
+        variantId: variantId || null,
       },
     });
 

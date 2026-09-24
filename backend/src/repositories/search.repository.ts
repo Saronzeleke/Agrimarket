@@ -125,7 +125,7 @@ export const searchRepository = {
           ? `AND ${additionalConditions.join(' AND ')}`
           : '';
 
-      const query = `
+      const sqlQuery = `
         SELECT 
           p.*,
           json_build_object(
@@ -158,7 +158,7 @@ export const searchRepository = {
       `;
 
       products = await prisma.$queryRawUnsafe(
-        query,
+        sqlQuery,
         searchQuery,
         searchQuery,
         searchPattern,

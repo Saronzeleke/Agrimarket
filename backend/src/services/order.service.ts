@@ -115,7 +115,8 @@ export const orderService = {
     const order = await orderRepository.findById(orderId, userId);
 
     // Only allow cancellation of pending/confirmed orders
-    if (![OrderStatus.PENDING, OrderStatus.CONFIRMED].includes(order.status)) {
+    const cancellableStatuses: OrderStatus[] = [OrderStatus.PENDING, OrderStatus.CONFIRMED];
+    if (!cancellableStatuses.includes(order.status)) {
       throw new BadRequestError(
         `Cannot cancel order with status: ${order.status}. Only PENDING or CONFIRMED orders can be cancelled.`
       );
@@ -183,7 +184,7 @@ export const orderService = {
     return orderRepository.getCustomerStats(userId);
   },
 //  Format order for response
-  private formatOrder(order: any) {
+  formatOrder(order: any) {
     return {
       id: order.id,
       orderNumber: order.orderNumber,

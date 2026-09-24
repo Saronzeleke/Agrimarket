@@ -45,8 +45,15 @@ export function sendSuccess<T>(
   return res.status(statusCode).json(response)
 }
 
-// Alias for sendSuccess (for backward compatibility)
-export const successResponse = sendSuccess
+// Backward-compatible helper used by controllers that include a message.
+export function successResponse<T>(
+  res: Response,
+  data: T,
+  _message?: string,
+  statusCode: number = CONSTANTS.HTTP_STATUS.OK
+): Response {
+  return sendSuccess(res, data, statusCode)
+}
 
 // Send success response with pagination
 export function sendSuccessWithPagination<T>(
