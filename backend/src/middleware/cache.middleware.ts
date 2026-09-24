@@ -1,16 +1,11 @@
-/**
- * Cache Middleware
- * 
- * Middleware for caching HTTP responses.
- */
+//Middleware for caching HTTP responses.
 
 import { Request, Response, NextFunction } from 'express';
 import cacheService from '../services/cache.service';
 import logger from '../config/logger';
 
 /**
- * Cache middleware factory
- * Caches GET requests only
+ * Cache middleware factory, Caches GET requests only
  */
 export const cacheMiddleware = (ttl?: number) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -68,8 +63,7 @@ export const cacheMiddleware = (ttl?: number) => {
 };
 
 /**
- * Cache invalidation middleware
- * Invalidates cache on write operations (POST, PUT, PATCH, DELETE)
+ * Cache invalidation middleware, Invalidates cache on write operations (POST, PUT, PATCH, DELETE)
  */
 export const invalidateCacheMiddleware = (pattern: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -97,8 +91,7 @@ export const invalidateCacheMiddleware = (pattern: string) => {
 };
 
 /**
- * User-specific cache middleware
- * Caches data per user (requires authentication)
+ * User-specific cache middleware, Caches data per user (requires authentication)
  */
 export const userCacheMiddleware = (ttl?: number) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -166,10 +159,8 @@ export const userCacheMiddleware = (ttl?: number) => {
     }
   };
 };
+// Invalidate user-specific cache
 
-/**
- * Invalidate user-specific cache
- */
 export const invalidateUserCacheMiddleware = (userId?: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     // Only invalidate on write operations
