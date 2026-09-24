@@ -1,16 +1,10 @@
-/**
- * Performance Monitoring Middleware
- * 
- * Tracks request performance and logs slow requests.
- */
+//Tracks request performance and logs slow requests.
 
 import { Request, Response, NextFunction } from 'express';
 import logger from '../config/logger';
 import cacheService from '../services/cache.service';
+// Performance metrics interface
 
-/**
- * Performance metrics interface
- */
 interface PerformanceMetrics {
   totalRequests: number;
   totalDuration: number;
@@ -19,10 +13,8 @@ interface PerformanceMetrics {
   errorRequests: number;
   lastReset: string;
 }
-
-/**
- * Request performance tracking middleware
- */
+// Request performance tracking middleware
+ 
 export const performanceMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   const startMemory = process.memoryUsage().heapUsed;
@@ -68,10 +60,8 @@ export const performanceMiddleware = (req: Request, res: Response, next: NextFun
 
   next();
 };
-
-/**
- * Update performance metrics in cache
- */
+//Update performance metrics in cache
+ 
 async function updateMetrics(data: {
   duration: number;
   isError: boolean;
@@ -115,10 +105,8 @@ async function updateMetrics(data: {
     logger.error('Failed to update metrics', { error });
   }
 }
+// Get performance metrics
 
-/**
- * Get performance metrics
- */
 export async function getPerformanceMetrics(): Promise<PerformanceMetrics | null> {
   try {
     return await cacheService.get<PerformanceMetrics>('metrics:performance');
@@ -127,10 +115,8 @@ export async function getPerformanceMetrics(): Promise<PerformanceMetrics | null
     return null;
   }
 }
-
-/**
- * Reset performance metrics
- */
+// Reset performance metrics
+ 
 export async function resetPerformanceMetrics(): Promise<void> {
   try {
     await cacheService.del('metrics:performance');
@@ -138,10 +124,8 @@ export async function resetPerformanceMetrics(): Promise<void> {
     logger.error('Failed to reset performance metrics', { error });
   }
 }
-
-/**
- * Get system health metrics
- */
+// Get system health metrics
+ 
 export async function getSystemHealthMetrics() {
   const memory = process.memoryUsage();
   const uptime = process.uptime();
