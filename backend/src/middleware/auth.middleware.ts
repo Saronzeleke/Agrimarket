@@ -1,9 +1,6 @@
 /**
- * Authentication Middleware
- * 
- * Verifies JWT tokens and attaches user info to request.
+ * Authentication Middleware, Verifies JWT tokens and attaches user info to request.
  */
-
 import { Request, Response, NextFunction } from 'express'
 import { verifyAccessToken } from '../utils/jwt.utils'
 import { AuthenticationError } from '../utils/errors'
@@ -12,8 +9,7 @@ import prisma from '../config/database'
 import logger from '../config/logger'
 
 /**
- * Authenticate request
- * Verifies JWT token and attaches user to request
+ * Authenticate request, Verifies JWT token and attaches user to request
  */
 export async function authenticate(
   req: Request,
@@ -80,11 +76,8 @@ export async function authenticate(
     }
   }
 }
+// Tries to authenticate but doesn't fail if no token
 
-/**
- * Optional authentication
- * Tries to authenticate but doesn't fail if no token
- */
 export async function optionalAuthenticate(
   req: Request,
   res: Response,
