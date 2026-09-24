@@ -1,7 +1,5 @@
 /**
- * Rate Limiting Middleware
- * 
- * Prevent brute force attacks and API abuse.
+ * Rate Limiting Middleware, Prevent brute force attacks and API abuse.
  */
 
 import rateLimit from 'express-rate-limit';
