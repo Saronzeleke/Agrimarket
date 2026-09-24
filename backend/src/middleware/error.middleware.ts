@@ -1,9 +1,4 @@
-/**
- * Error Handling Middleware
- * 
- * Global error handler for Express application.
- * Catches and formats all errors consistently.
- */
+// Catches and formats all errors consistently.
 
 import { Request, Response, NextFunction } from 'express'
 import { AppError } from '../utils/errors'
@@ -13,10 +8,8 @@ import logger from '../config/logger'
 import config from '../config/env'
 import { Prisma } from '@prisma/client'
 import { ZodError } from 'zod'
+//Handle Prisma errors
 
-/**
- * Handle Prisma errors
- */
 function handlePrismaError(error: any): AppError {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     // Unique constraint violation
@@ -55,10 +48,8 @@ function handlePrismaError(error: any): AppError {
     CONSTANTS.ERROR_CODES.DATABASE_ERROR
   )
 }
+// Handle Zod validation errors
 
-/**
- * Handle Zod validation errors
- */
 function handleZodError(error: ZodError): AppError {
   const errors = error.errors.map((err) => ({
     field: err.path.join('.'),
@@ -73,10 +64,8 @@ function handleZodError(error: ZodError): AppError {
     { errors }
   )
 }
+// Global error handler middleware
 
-/**
- * Global error handler middleware
- */
 export function errorHandler(
   error: Error,
   req: Request,
@@ -131,10 +120,8 @@ export function errorHandler(
     config.dev.detailedErrors ? appError.details : undefined
   )
 }
+// Handle 404 errors
 
-/**
- * Handle 404 errors
- */
 export function notFoundHandler(
   req: Request,
   res: Response,
@@ -148,10 +135,8 @@ export function notFoundHandler(
 
   next(error)
 }
+// Handle unhandled promise rejections
 
-/**
- * Handle unhandled promise rejections
- */
 export function setupUnhandledRejectionHandler(): void {
   process.on('unhandledRejection', (reason: any) => {
     logger.error('Unhandled Promise Rejection', {
@@ -163,10 +148,8 @@ export function setupUnhandledRejectionHandler(): void {
     process.exit(1)
   })
 }
+// Handle uncaught exceptions
 
-/**
- * Handle uncaught exceptions
- */
 export function setupUncaughtExceptionHandler(): void {
   process.on('uncaughtException', (error: Error) => {
     logger.error('Uncaught Exception', {
