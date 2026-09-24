@@ -1,6 +1,7 @@
 import { orderRepository } from '../repositories/order.repository';
 import { OrderStatus } from '@prisma/client';
 import { BadRequestError } from '../utils/errors';
+import prisma from '../config/database';
 
 export const orderService = {
   // Get order by ID
@@ -120,26 +121,60 @@ export const orderService = {
       );
     }
 
-    // Cancel order
-    const cancelledOrder = await orderRepository.cancel(orderId, userId);
-
-    // Release reserved stock
-    for (const item of cancelledOrder.items) {
-      const inventory = await prisma.inventory.findUnique({
-        where: { productId: item.productId },
-      });
-
-      if (inventory) {
-        await prisma.inventory.update({
-          where: { id: inventory.id },
-          data: {
-            reservedStock: {
-              decrement: Math.min(item.quantity, inventory.reservedStock),
+    // Use transaction to ensure order cancellation and stock release are atomic
+    const cancelledOrder = await prisma.$transaction(async (tx) => {
+      // Cancel order
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.CANCELLED,
+          cancelledAt: new Date(),
+        },
+        include: {
+          items: {
+            include: {
+              product: {
+                include: {
+                  images: true,
+                },
+              },
             },
           },
+          payment: true,
+        },
+      });
+
+      // Release reserved stock
+      for (const item of updatedOrder.items) {
+        const inventory = await tx.inventory.findUnique({
+          where: { productId: item.productId },
         });
+
+        if (inventory && inventory.reservedStock > 0) {
+          await tx.inventory.update({
+            where: { id: inventory.id },
+            data: {
+              reservedStock: {
+                decrement: Math.min(item.quantity, inventory.reservedStock),
+              },
+            },
+          });
+
+          // Log inventory change
+          await tx.inventoryHistory.create({
+            data: {
+              inventoryId: inventory.id,
+              type: 'CANCELLATION',
+              quantity: item.quantity,
+              orderId: order.id,
+              notes: `Stock released from cancelled order ${order.orderNumber}`,
+            },
+          });
+        }
       }
-    }
+
+      return updatedOrder;
+    });
 
     return this.formatOrder(cancelledOrder);
   },
@@ -190,6 +225,3 @@ export const orderService = {
     };
   },
 };
-
-// Import prisma for inventory updates
-import prisma from '../config/database';

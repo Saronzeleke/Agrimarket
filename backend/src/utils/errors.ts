@@ -42,6 +42,18 @@ export class ValidationError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message: string, details?: any) {
+    super(
+      message,
+      CONSTANTS.HTTP_STATUS.BAD_REQUEST,
+      CONSTANTS.ERROR_CODES.INVALID_INPUT,
+      true,
+      details
+    )
+  }
+}
+
 export class AuthenticationError extends AppError {
   constructor(message: string = 'Authentication required') {
     super(

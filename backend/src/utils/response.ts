@@ -45,6 +45,9 @@ export function sendSuccess<T>(
   return res.status(statusCode).json(response)
 }
 
+// Alias for sendSuccess (for backward compatibility)
+export const successResponse = sendSuccess
+
 // Send success response with pagination
 export function sendSuccessWithPagination<T>(
   res: Response,

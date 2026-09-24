@@ -13,7 +13,7 @@ export function generateAccessToken(payload: {
 }): string {
   return jwt.sign(payload, config.jwt.accessSecret, {
     expiresIn: config.jwt.accessExpiry,
-  })
+  } as jwt.SignOptions)
 }
 
 // Generate refresh token
@@ -24,7 +24,7 @@ export function generateRefreshToken(payload: {
 }): string {
   return jwt.sign(payload, config.jwt.refreshSecret, {
     expiresIn: config.jwt.refreshExpiry,
-  })
+  } as jwt.SignOptions)
 }
 
 // Generate both access and refresh token

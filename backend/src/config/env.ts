@@ -102,7 +102,13 @@ const envSchema = z.object({
   DETAILED_ERRORS: z.string().transform((val) => val === 'true').default('false'),
   LOG_QUERIES: z.string().transform((val) => val === 'true').default('false'),
   LOG_REQUESTS: z.string().transform((val) => val === 'true').default('true'),
-})
+}).refine(
+  (data) => data.JWT_ACCESS_SECRET !== data.JWT_REFRESH_SECRET,
+  {
+    message: 'JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be different for security',
+    path: ['JWT_REFRESH_SECRET'],
+  }
+)
 
 // Parse and validate environment variables
 let env: z.infer<typeof envSchema>

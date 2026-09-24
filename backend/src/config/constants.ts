@@ -8,7 +8,7 @@
 export const CONSTANTS = {
   // User
   PASSWORD_MIN_LENGTH: 8,
-  PASSWORD_REGEX: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+  PASSWORD_REGEX: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
   
   // Product
   PRODUCT_NAME_MIN_LENGTH: 3,

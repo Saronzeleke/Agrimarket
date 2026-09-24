@@ -17,9 +17,7 @@ import {
   logSuspiciousActivity,
 } from './middleware/security.middleware'
 import {
-  authLimiter,
   apiLimiter,
-  passwordResetLimiter,
 } from './middleware/rate-limit.middleware'
 import { performanceMiddleware, getSystemHealthMetrics } from './middleware/performance.middleware'
 
@@ -78,8 +76,8 @@ app.use(
       }
     },
     credentials: config.cors.credentials,
-    methods: CONSTANTS.ALLOWED_METHODS as string[],
-    allowedHeaders: CONSTANTS.ALLOWED_HEADERS as string[],
+    methods: [...CONSTANTS.ALLOWED_METHODS],
+    allowedHeaders: [...CONSTANTS.ALLOWED_HEADERS],
     maxAge: 600, // 10 minutes
   })
 )
@@ -120,6 +118,36 @@ if (config.dev.logRequests) {
   )
 }
 
+// Request Timeout Configuration
+// Prevent hanging requests
+app.use((req, res, next) => {
+  // Set 30-second timeout for all requests
+  req.setTimeout(30000, () => {
+    logger.warn('Request timeout', {
+      method: req.method,
+      url: req.url,
+      ip: req.ip,
+    })
+    res.status(408).json({
+      success: false,
+      error: {
+        code: 'REQUEST_TIMEOUT',
+        message: 'Request took too long to process',
+      },
+    })
+  })
+
+  res.setTimeout(30000, () => {
+    logger.warn('Response timeout', {
+      method: req.method,
+      url: req.url,
+      ip: req.ip,
+    })
+  })
+
+  next()
+})
+
 // Performance monitoring
 app.use(performanceMiddleware)
 
@@ -130,7 +158,7 @@ app.use('/uploads', express.static(config.upload.dir))
 
 // Health Check
 
-app.get('/health', async (req, res) => {
+app.get('/health', async (_req, res) => {
   try {
     const healthMetrics = await getSystemHealthMetrics();
     
@@ -157,7 +185,7 @@ import routes from './routes'
 app.use(CONSTANTS.API_PREFIX, routes)
 
 // API root endpoint
-app.get(CONSTANTS.API_PREFIX, (req, res) => {
+app.get(CONSTANTS.API_PREFIX, (_req, res) => {
   res.status(200).json({
     success: true,
     data: {

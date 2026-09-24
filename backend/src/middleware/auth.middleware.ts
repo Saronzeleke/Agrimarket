@@ -6,7 +6,6 @@ import { verifyAccessToken } from '../utils/jwt.utils'
 import { AuthenticationError } from '../utils/errors'
 import userRepository from '../repositories/user.repository'
 import prisma from '../config/database'
-import logger from '../config/logger'
 
 /**
  * Authenticate request, Verifies JWT token and attaches user to request

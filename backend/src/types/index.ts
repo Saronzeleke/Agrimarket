@@ -1,7 +1,7 @@
 // Common Type Definitions , Shared types used across the application.
 
 
-import { Role, OrderStatus, PaymentStatus } from '@prisma/client'
+import { Role, PaymentStatus } from '@prisma/client'
 // API Types
 export interface ApiResponse<T> {
   success: boolean

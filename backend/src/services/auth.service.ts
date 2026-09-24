@@ -20,7 +20,7 @@ import {
 } from '../utils/errors'
 import { CONSTANTS } from '../config/constants'
 import { User } from '@prisma/client'
-import emailProvider from '../providers/email/MockEmailProvider'
+import emailProvider from '../providers/email'
 import config from '../config/env'
 import logger from '../config/logger'
 

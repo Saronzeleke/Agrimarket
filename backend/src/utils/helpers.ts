@@ -1,5 +1,17 @@
 // Common utility functions used throughout the application.
 import crypto from 'crypto'
+import { Request, Response, NextFunction } from 'express'
+
+/**
+ * Async Handler Wrapper
+ * Wraps async route handlers to automatically catch errors and pass to error middleware
+ */
+export const asyncHandler = (fn: Function) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next)
+  }
+}
+
 // Generate a slug from a string
 export function generateSlug(text: string): string {
   return text

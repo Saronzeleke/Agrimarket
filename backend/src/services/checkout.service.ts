@@ -3,6 +3,7 @@ import { addressRepository } from '../repositories/address.repository';
 import { orderRepository } from '../repositories/order.repository';
 import { productRepository } from '../repositories/product.repository';
 import { BadRequestError, NotFoundError } from '../utils/errors';
+import prisma from '../config/database';
 
 interface CheckoutData {
   addressId: string;
@@ -136,69 +137,121 @@ export const checkoutService = {
       variantInfo: item.variantId ? { variantId: item.variantId } : null,
     }));
 
-    // Create order
-    const order = await orderRepository.create({
-      customerId: userId,
-      orderNumber,
-      subtotal,
-      deliveryFee,
-      discount,
-      total,
-      shippingAddress: {
-        fullName: shippingAddress.fullName,
-        phone: shippingAddress.phone,
-        region: shippingAddress.region,
-        zone: shippingAddress.zone,
-        woreda: shippingAddress.woreda,
-        kebele: shippingAddress.kebele,
-        specificLocation: shippingAddress.specificLocation,
-        addressType: shippingAddress.addressType,
-      },
-      notes: data.notes,
-      items: orderItems,
-    });
-
-    // Reserve stock for order items
-    for (const item of cart.items) {
-      const inventory = await productRepository.getInventory(item.productId);
-      if (inventory) {
-        await prisma.inventory.update({
-          where: { id: inventory.id },
-          data: {
-            reservedStock: {
-              increment: item.quantity,
+    // Use transaction to ensure data consistency
+    // If any operation fails, everything is rolled back
+    const result = await prisma.$transaction(async (tx) => {
+      // Create order
+      const order = await tx.order.create({
+        data: {
+          customerId: userId,
+          orderNumber,
+          status: 'PENDING',
+          subtotal,
+          deliveryFee,
+          discount,
+          total,
+          shippingAddress: {
+            fullName: shippingAddress.fullName,
+            phone: shippingAddress.phone,
+            region: shippingAddress.region,
+            zone: shippingAddress.zone,
+            woreda: shippingAddress.woreda,
+            kebele: shippingAddress.kebele,
+            specificLocation: shippingAddress.specificLocation,
+            addressType: shippingAddress.addressType,
+          },
+          notes: data.notes,
+          items: {
+            create: orderItems,
+          },
+        },
+        include: {
+          items: {
+            include: {
+              product: {
+                include: {
+                  images: true,
+                },
+              },
             },
           },
-        });
-      }
-    }
+        },
+      });
 
-    // Create payment record
-    const payment = await prisma.payment.create({
-      data: {
-        orderId: order.id,
-        amount: total,
-        provider: data.paymentMethod,
-        status: 'PENDING',
-      },
+      // Reserve stock for order items
+      for (const item of cart.items) {
+        const inventory = await tx.inventory.findUnique({
+          where: { productId: item.productId },
+        });
+
+        if (inventory) {
+          // Check if enough stock available
+          const availableStock = inventory.currentStock - inventory.reservedStock;
+          if (availableStock < item.quantity) {
+            throw new BadRequestError(
+              `Insufficient stock for ${item.product.name}. Available: ${availableStock}, Requested: ${item.quantity}`
+            );
+          }
+
+          // Reserve stock
+          await tx.inventory.update({
+            where: { id: inventory.id },
+            data: {
+              reservedStock: {
+                increment: item.quantity,
+              },
+            },
+          });
+
+          // Log inventory change
+          await tx.inventoryHistory.create({
+            data: {
+              inventoryId: inventory.id,
+              type: 'SALE',
+              quantity: -item.quantity,
+              orderId: order.id,
+              notes: `Stock reserved for order ${orderNumber}`,
+            },
+          });
+        }
+      }
+
+      // Create payment record
+      const payment = await tx.payment.create({
+        data: {
+          orderId: order.id,
+          amount: total,
+          provider: data.paymentMethod,
+          status: 'PENDING',
+        },
+      });
+
+      // Clear cart after successful order
+      await tx.cartItem.deleteMany({
+        where: {
+          cart: {
+            userId,
+          },
+        },
+      });
+
+      return { order, payment };
     });
 
-    // Clear cart after successful order
-    await cartService.clearCart(userId);
-
+    // Return order with payment info
     // Return order with payment info
     return {
       order: {
-        id: order.id,
-        orderNumber: order.orderNumber,
-        status: order.status,
-        subtotal: Number(order.subtotal),
-        deliveryFee: Number(order.deliveryFee),
-        discount: Number(order.discount),
-        total: Number(order.total),
-        shippingAddress: order.shippingAddress,
-        notes: order.notes,
-        items: order.items.map((item) => ({
+        id: result.order.id,
+        orderNumber: result.order.orderNumber,
+        status: result.order.status,
+        subtotal: Number(result.order.subtotal),
+        deliveryFee: Number(result.order.deliveryFee),
+        discount: Number(result.order.discount),
+        total: Number(result.order.total),
+        shippingAddress: result.order.shippingAddress,
+        notes: result.order.notes,
+        items: result.order.items.map((item) => ({
           id: item.id,
           productId: item.product.id,
           name: item.product.name,
@@ -209,13 +262,13 @@ export const checkoutService = {
           total: Number(item.price) * item.quantity,
           image: item.product.images[0]?.url || null,
         })),
-        createdAt: order.createdAt,
+        createdAt: result.order.createdAt,
       },
       payment: {
-        id: payment.id,
-        amount: Number(payment.amount),
-        status: payment.status,
-        provider: payment.provider,
+        id: result.payment.id,
+        amount: Number(result.payment.amount),
+        status: result.payment.status,
+        provider: result.payment.provider,
       },
     };
   },
@@ -253,6 +306,3 @@ export const checkoutService = {
     ];
   },
 };
-
-// Import prisma for inventory update
-import prisma from '../config/database';
