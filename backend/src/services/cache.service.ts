@@ -9,13 +9,15 @@ import config from '../config/env';
 import logger from '../config/logger';
 
 export class CacheService {
-  private redis: Redis | null;
   private prefix: string = 'agrimarket:';
   private enabled: boolean;
 
   constructor() {
-    this.redis = getRedisClient();
     this.enabled = config.cache.enabled && this.redis !== null;
+  }
+
+  private get redis(): Redis | null {
+    return getRedisClient();
   }
 // Check if cache is enabled and connected
   isEnabled(): boolean {

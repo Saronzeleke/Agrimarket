@@ -16,7 +16,7 @@ router.get('/products/:productId/reviews', asyncHandler(reviewController.getProd
 router.get('/products/:productId/reviews/stats', asyncHandler(reviewController.getProductStats));
 //Protected routes (authentication required)
 
-router.use(authenticate);
+router.use('/reviews', authenticate);
 
 // POST /api/v1/reviews - Submit a review (with rate limiting)
 router.post('/reviews', reviewLimiter, asyncHandler(reviewController.submitReview));
