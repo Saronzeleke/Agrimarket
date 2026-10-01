@@ -1,0 +1,50 @@
+{
+  "id": "FEAT-005",
+  "type": "feat",
+  "description": "Implement remaining Phase 3 screens and polish: Search results page (app/search/page.tsx from GET /products with q param), Wishlist page (app/wishlist/page.tsx from GET /wishlist with move-to-cart/remove actions), Order tracking (app/orders/[id]/track/page.tsx from GET /orders/:id with status timeline), Notifications page (app/notifications/page.tsx from GET /notifications with mark-as-read), Settings page (app/settings/page.tsx with tabs for Profile/Addresses/Password/Preferences), Messages placeholder. Add final polish: loading states (Skeleton components), error boundaries, toast notifications for all actions (success: green, error: red), image optimization (next/image), SEO metadata for all pages, 404 and error pages, accessibility improvements (ARIA labels, keyboard nav, focus states).",
+  "status": "pending",
+  "steps": [
+    "Create frontend/app/search/page.tsx: read 'q' query param, fetch GET /products?q=:query with same filters as marketplace, display search query in heading 'Search results for: :query', show result count, product grid (same as marketplace), filters sidebar, sort dropdown, pagination, if no results show EmptyState 'No products found' with 'Browse all products' button to /marketplace",
+    "Create frontend/app/wishlist/page.tsx: fetch GET /wishlist, if empty show EmptyState with heart icon 'Your wishlist is empty', else render product grid (ProductCard variant with additional buttons: Remove from wishlist icon button calls DELETE /wishlist/items/:id, Move to cart button calls POST /wishlist/items/:id/move-to-cart then removes from UI), 'Move All to Cart' button at top calls POST /wishlist/move-all-to-cart, pagination if items > 12",
+    "Create frontend/app/orders/[id]/page.tsx: fetch GET /orders/:orderId, display order header (order number, date, status badge), status timeline (vertical stepper: Pending -> Confirmed -> Processing -> Shipped -> Delivered with checkmarks on completed, current step highlighted, dates for each), items list (product image/name/quantity/price per item), delivery address card, payment info card, order summary (subtotal/delivery/total), Cancel Order button if status is PENDING calls POST /orders/:orderId/cancel",
+    "Create frontend/app/notifications/page.tsx: fetch GET /notifications with pagination, tab filters (All, Unread, Read), notification list (each: icon based on type ORDER_CREATED/PAYMENT_CONFIRMED/etc with color, title, message, timestamp relative 'just now'/'2 hours ago', unread has blue dot indicator, click marks as read via PATCH /notifications/:id/read and shows detail), 'Mark all as read' button calls PATCH /notifications/read-all, Delete icon calls DELETE /notifications/:id",
+    "Create frontend/app/settings/page.tsx: tabs (Profile, Addresses, Security, Preferences), Profile tab: form with firstName/lastName/email(disabled)/phone, submit PUT /auth/me, Addresses tab: list from GET /addresses with Edit/Delete/Set Default buttons, Add Address button, Security tab: change password form (currentPassword, newPassword, confirmNewPassword) calls POST /auth/change-password, Preferences tab: email notifications toggles, language select (English/Amharic), theme toggle (Light/Dark - future)",
+    "Create frontend/app/messages/page.tsx: placeholder page with construction icon, 'Messaging coming soon' heading, 'Contact support at support@agrimarket.et' text",
+    "Add loading states: wrap all async fetches in try/catch, show Skeleton components while loading (SkeletonProductCard, SkeletonTable), use uiStore.setLoading() for full-page loading spinner overlay",
+    "Add error handling: wrap components in ErrorBoundary, display toast on API errors via uiStore.showToast('Error message', 'error'), add retry buttons on failed fetches, create frontend/app/error.tsx global error page, create frontend/app/not-found.tsx custom 404 page with 'Page not found' and 'Back to home' button",
+    "Add success toasts: after successful actions (product added to cart, address saved, order placed, etc.) call uiStore.showToast('Success message', 'success') with green checkmark icon, toast auto-dismisses after 3s",
+    "Optimize images: replace all <img> with next/image Image component, set width/height, use quality=80, loading='lazy', placeholder='blur' for static imports, ensure 4:3 aspect ratio for product images",
+    "Add SEO metadata: in each page.tsx export metadata object with title, description, openGraph for social sharing, ensure unique titles per page (Product name - AgriMarket, Marketplace - AgriMarket, etc.)",
+    "Accessibility improvements: add ARIA labels to icon buttons (aria-label='Add to cart'), ensure form inputs have associated labels, add focus:ring-2 focus:ring-primary to all interactive elements, ensure color contrast meets WCAG AA (all text on backgrounds passes), add skip-to-main-content link, ensure keyboard navigation works (Tab through forms, Enter submits, Escape closes modals), test with screen reader basics"
+  ],
+  "acceptance_criteria": [
+    "Search page (/search?q=coffee) shows results from GET /products?q=coffee, displays query and count, filters work",
+    "Wishlist page (/wishlist) lists items from GET /wishlist, Move to cart button works, Remove button works, empty state shows if no items",
+    "Order detail page (/orders/:id) shows order info, status timeline with checkmarks, Cancel button works if status PENDING",
+    "Notifications page (/notifications) lists notifications from GET /notifications, mark as read works, tabs filter correctly",
+    "Settings page (/settings) has 4 tabs, Profile form updates user info, Addresses CRUD works, Change password form works",
+    "All pages show Skeleton loading states while fetching",
+    "Error boundary catches errors and displays fallback UI",
+    "Success/error toasts appear on actions (green success, red error, auto-dismiss 3s)",
+    "All images use next/image with optimization",
+    "All pages have unique SEO metadata",
+    "All interactive elements have focus states and keyboard navigation works",
+    "Color contrast meets WCAG AA standards"
+  ],
+  "verification": [
+    "Search: navigate to /search?q=teff, verify GET /products?q=teff called, results display, change filters updates URL and refetches",
+    "Wishlist: navigate to /wishlist, verify GET /wishlist, click Move to cart -> POST /wishlist/items/:id/move-to-cart, item disappears, cart badge updates, click Remove -> DELETE /wishlist/items/:id, item removed",
+    "Order tracking: navigate to /orders/:id, verify GET /orders/:id, status timeline shows correct steps checked, click Cancel Order -> POST /orders/:id/cancel, order status updates to CANCELLED",
+    "Notifications: navigate to /notifications, verify GET /notifications, unread has blue dot, click notification -> PATCH /notifications/:id/read, dot disappears, click Mark all as read -> PATCH /notifications/read-all, Delete works",
+    "Settings: Profile tab update name -> PUT /auth/me, Addresses tab Add/Edit/Delete work, Security tab change password -> POST /auth/change-password with current/new passwords",
+    "Loading states: throttle network in DevTools to Slow 3G, navigate to /marketplace, verify SkeletonProductCard renders during fetch",
+    "Error handling: stop backend server, try to load /marketplace, verify error boundary catches, retry button appears, restart backend, click retry",
+    "Success toasts: add product to cart, verify green toast 'Product added to cart' appears top-right, auto-dismisses after 3s",
+    "Images: inspect Network tab, verify images served as next/image optimized (WebP format, correct sizes)",
+    "SEO: view page source of /products/:slug, verify <title> has product name, <meta name='description'>, <meta property='og:title'>",
+    "Accessibility: Tab through login form (all inputs focusable with visible focus ring), Enter submits, icon buttons have aria-label, check contrast with Chrome DevTools (all text passes)",
+    "npm run build (confirm no errors, no accessibility warnings)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

@@ -1,0 +1,43 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Build complete UI component library and layout system. Create all reusable components in components/ui/ (Button, Input, Select, Textarea, Badge, Card, Modal, Skeleton, Spinner, Toast, Avatar, Breadcrumb, Pagination, EmptyState, ErrorBoundary) following exact design system specs (48px input height, 8px border-radius, primary green buttons, shadow levels). Build layout components (Header with logo/nav/search/cart icon/user menu, Footer with links/copyright, Sidebar for marketplace filters). Set up Zustand stores (auth.store.ts for user/token/login/logout, cart.store.ts for items/add/remove/sync, ui.store.ts for toasts/modals/loading). Create API endpoint wrappers in lib/api/endpoints.ts for all backend routes. Create middleware.ts for Next.js route protection.",
+  "status": "pending",
+  "steps": [
+    "Create frontend/components/ui/Button.tsx: variants (primary bg-primary text-white, secondary border-2 border-primary text-primary, text transparent underline-on-hover), sizes (default h-12 desktop h-11, sm h-10, lg h-14), rounded-lg, font-semibold, disabled:opacity-50, hover:darken-10%",
+    "Create frontend/components/ui/Input.tsx: h-12, px-4, border border-border rounded-lg, focus:ring-2 focus:ring-primary, error state with border-error, label (text-sm font-medium text-textSecondary), helperText (text-xs text-textSecondary), errorText (text-xs text-error)",
+    "Create frontend/components/ui/Select.tsx, Textarea.tsx following same pattern as Input",
+    "Create frontend/components/ui/Badge.tsx: variants (default bg-primary text-white, secondary bg-secondary, accent bg-accent text-textPrimary, success bg-success, warning bg-warning, error bg-error), sizes (sm px-2 py-0.5 text-xs, md px-3 py-1 text-sm), rounded-md",
+    "Create frontend/components/ui/Card.tsx: bg-surface border border-border rounded-xl p-4 md:p-6, shadow-sm hover:shadow-md transition-shadow",
+    "Create frontend/components/ui/Modal.tsx: fixed inset-0 z-50, backdrop bg-black/50, content max-w-lg mx-auto mt-20 bg-surface rounded-xl p-6, close button top-right",
+    "Create frontend/components/ui/Skeleton.tsx, Spinner.tsx, Toast.tsx (notification system with Zustand), Avatar.tsx (circular image with fallback initials), Breadcrumb.tsx, Pagination.tsx (prev/next + page numbers), EmptyState.tsx (icon + message + optional CTA), ErrorBoundary.tsx (class component catching errors)",
+    "Create frontend/components/layout/Header.tsx: sticky top-0 bg-surface border-b, container with logo (link to /), nav links (Marketplace, Categories), search bar (icon + input + category dropdown), cart icon with count badge (from cart store), user menu dropdown (authenticated: Dashboard/Orders/Settings/Logout, unauthenticated: Login/Register)",
+    "Create frontend/components/layout/Footer.tsx: bg-primary text-white, 4 columns (About, Categories, Support, Contact), social icons, copyright '© 2024 AgriMarket. Built for Ethiopian farmers.'",
+    "Create frontend/components/layout/Sidebar.tsx: filters panel for marketplace (Categories checkboxes, Price range slider, Region select, Rating filter, In Stock toggle), Apply/Clear buttons",
+    "Create frontend/lib/store/auth.store.ts: Zustand store with state (user: User|null, token: string|null, isAuthenticated: boolean), actions (login(token, user) - save to localStorage, logout() - clear localStorage + redirect, hydrate() - read from localStorage on mount, updateUser(user))",
+    "Create frontend/lib/store/cart.store.ts: state (items: CartItem[], isLoading: boolean, error: string|null), actions (addItem(productId, quantity), updateItem(itemId, quantity), removeItem(itemId), clearCart(), syncWithBackend() - fetch from GET /cart and update state, validateCart() - call GET /cart/validate)",
+    "Create frontend/lib/store/ui.store.ts: state (toasts: Toast[], modals: Modal[], isLoading: boolean), actions (showToast(message, severity), hideToast(id), openModal(id, content), closeModal(id), setLoading(isLoading))",
+    "Create frontend/lib/api/endpoints.ts: export const authApi = { login: (email, password) => axiosClient.post('/auth/login', {email, password}), register: (data) => axiosClient.post('/auth/register', data), getMe: () => axiosClient.get('/auth/me'), logout: () => axiosClient.post('/auth/logout') }, productApi = { list: (params) => axiosClient.get('/products', {params}), getBySlug: (slug) => axiosClient.get(`/products/slug/${slug}`), getById: (id) => axiosClient.get(`/products/${id}`) }, cartApi = { get: () => axiosClient.get('/cart'), add: (productId, quantity) => axiosClient.post('/cart/items', {productId, quantity}), update: (itemId, quantity) => axiosClient.patch(`/cart/items/${itemId}`, {quantity}), remove: (itemId) => axiosClient.delete(`/cart/items/${itemId}`) }, orderApi, categoryApi, addressApi, checkoutApi, wishlistApi, notificationApi - all matching backend routes",
+    "Create frontend/middleware.ts: export middleware function that checks for token in cookies/localStorage for protected routes (/dashboard*, /checkout, /orders*), redirect to /auth/login if unauthenticated, allow public routes (/, /marketplace, /products/*, /auth/*)"
+  ],
+  "acceptance_criteria": [
+    "All 14 UI components render correctly with design system styling (primary green #166534, 48px inputs, 8px radius, Inter font)",
+    "Header displays logo, nav, search bar, cart icon with count from Zustand store, user menu dropdown",
+    "Footer has 4 columns with links and copyright text",
+    "Sidebar renders filter controls (will wire up to marketplace in next feature)",
+    "Zustand stores export correct types and actions: authStore.login(), cartStore.addItem(), uiStore.showToast()",
+    "lib/api/endpoints.ts has typed wrappers for auth, product, cart, order, category, address, checkout, wishlist, notification APIs",
+    "middleware.ts protects /dashboard and /checkout routes (redirects to /auth/login if no token)"
+  ],
+  "verification": [
+    "npm run dev, navigate to http://localhost:3000",
+    "Manually import and render each UI component on a test page to verify styling: Button variants, Input with label/error, Badge colors, Card with shadow, Modal open/close, Skeleton animations, Spinner, Toast notifications, Avatar with initials, Breadcrumb, Pagination, EmptyState, ErrorBoundary",
+    "Create test page that imports Header, Footer, Sidebar and verifies they render with correct structure",
+    "Test Zustand stores in browser console: import useAuthStore; useAuthStore.getState().login('test-token', {user data}); verify localStorage.getItem('accessToken') === 'test-token'",
+    "Test API client: import {authApi} from lib/api/endpoints; await authApi.getMe() (should send GET to http://localhost:3001/api/v1/auth/me with Authorization header)",
+    "Test middleware: create protected route /dashboard/test, navigate without token -> should redirect to /auth/login",
+    "npm run build (confirm successful build)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+:root {
+  /* AgriMarket Design System */
+  --primary: #166534;
+  --secondary: #65A30D;
+  --accent: #F59E0B;
+  --background: #F8FAF5;
+  --surface: #FFFFFF;
+  --border: #E5E7EB;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  
+  /* Spacing scale */
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* Typography */
+h1 {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Utilities */
+.container-custom {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 768px) {
+  .container-custom {
+    max-width: 768px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .container-custom {
+    max-width: 1440px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* Animations */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}

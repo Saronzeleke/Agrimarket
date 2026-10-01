@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Bootstrap Next.js 14 project with TypeScript, Tailwind CSS, and complete design system foundation. Install all required dependencies (zustand, axios, react-hook-form, zod, @heroicons/react, date-fns). Configure tailwind.config.ts with exact design system colors (primary #166534, secondary #65A30D, accent #F59E0B, background #F8FAF5), Inter font, and 8px spacing scale. Create foundation files: lib/constants.ts (API base URL, route constants, color tokens), types/index.ts (Product, Category, User, Order, Cart, ApiResponse interfaces matching Prisma schema), lib/api/client.ts (Axios instance with JWT interceptor reading from localStorage), app/layout.tsx (Inter font, metadata), app/globals.css (Tailwind imports, CSS variables for design system).",
+  "status": "pending",
+  "steps": [
+    "Run 'npx create-next-app@latest frontend --typescript --tailwind --app --eslint --no-src-dir' in c:\\Users\\admin\\Kuperfume to bootstrap Next.js 14 app in frontend/ subdirectory",
+    "Install additional dependencies: cd frontend && npm install zustand axios react-hook-form zod @heroicons/react date-fns @hookform/resolvers clsx tailwind-merge",
+    "Configure frontend/tailwind.config.ts: extend theme with colors (primary.DEFAULT: '#166534', secondary.DEFAULT: '#65A30D', accent.DEFAULT: '#F59E0B', background: '#F8FAF5', surface: '#FFFFFF'), fontFamily (sans: ['var(--font-inter)', 'system-ui', 'sans-serif']), spacing 8px grid (xs:4px, sm:8px, md:16px, lg:24px, xl:32px, 2xl:48px, 3xl:64px)",
+    "Create frontend/lib/constants.ts with API_BASE_URL='http://localhost:3001/api/v1', ROUTES object (HOME:'/', MARKETPLACE:'/marketplace', LOGIN:'/auth/login', etc.), COLORS object matching design system",
+    "Create frontend/types/index.ts with interfaces: User (id, email, firstName, lastName, role: 'CUSTOMER'|'SELLER'|'ADMIN', emailVerified, sellerProfile?), Product (id, name, slug, description, price, unit, categoryId, sellerId, rating, reviewCount, images: ProductImage[], category, seller: SellerProfile, inventory?), Category (id, name, slug, icon), CartItem (id, productId, quantity, product), Order (id, orderNumber, status, total, items, createdAt), ApiResponse<T> (success, data?: T, error?: string)",
+    "Create frontend/lib/api/client.ts: export axiosClient (axios.create with baseURL from constants), add request interceptor to inject 'Authorization: Bearer ${token}' from localStorage.getItem('accessToken'), add response interceptor for 401 to redirect to /auth/login",
+    "Update frontend/app/layout.tsx: import Inter from 'next/font/google', configure font variable, add to <html className={inter.variable}>, set metadata (title: 'AgriMarket - Ethiopian Agricultural Marketplace', description)",
+    "Create frontend/app/globals.css: import Tailwind (@tailwind base/components/utilities), add CSS variables in :root for design colors, add base layer styles (body: text-textPrimary bg-background font-sans)"
+  ],
+  "acceptance_criteria": [
+    "Running 'npm run dev' in frontend/ starts Next.js on http://localhost:3000",
+    "Frontend builds successfully with 'npm run build' (no TypeScript or ESLint errors)",
+    "Tailwind CSS is configured with all design system colors, Inter font loads correctly",
+    "All foundation files exist with correct exports: lib/constants.ts, types/index.ts, lib/api/client.ts",
+    "app/layout.tsx renders with Inter font and correct metadata"
+  ],
+  "verification": [
+    "cd frontend && npm run dev (confirm server starts on localhost:3000)",
+    "npm run build (confirm successful production build)",
+    "Open http://localhost:3000 in browser (confirm default Next.js page renders with Inter font)",
+    "Inspect Tailwind config: check tailwind.config.ts has all custom colors and spacing"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
