@@ -74,18 +74,18 @@ function MarketplaceContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAF5] py-8">
+    <div className="min-h-screen bg-[var(--background)] py-8">
       <div className="container-custom">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1F2937] mb-2">Marketplace</h1>
-          <p className="text-[#6B7280]">Discover fresh products from local farmers</p>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Marketplace</h1>
+          <p className="text-[var(--text-secondary)]">Discover fresh products from local farmers</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <aside className="lg:w-64">
-            <div className="bg-white rounded-xl p-6 sticky top-24">
+            <div className="bg-[var(--surface)] rounded-xl p-6 sticky top-24 border border-[var(--border)]">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-semibold text-lg">Filters</h2>
                 <button onClick={() => setShowFilters(!showFilters)} className="lg:hidden">
@@ -95,13 +95,13 @@ function MarketplaceContent() {
 
               <div className={`space-y-6 ${showFilters ? "block" : "hidden lg:block"}`}>
                 <div>
-                  <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                     Category
                   </label>
                   <select
                     value={category}
                     onChange={(e) => handleFilterChange("category", e.target.value)}
-                    className="w-full h-10 px-3 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#166534]"
+                    className="w-full h-10 px-3 border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                   >
                     <option value="">All Categories</option>
                     {categories.map((cat) => (
@@ -113,13 +113,13 @@ function MarketplaceContent() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                     Sort By
                   </label>
                   <select
                     value={sort}
                     onChange={(e) => handleFilterChange("sort", e.target.value)}
-                    className="w-full h-10 px-3 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#166534]"
+                    className="w-full h-10 px-3 border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                   >
                     <option value="-createdAt">Newest First</option>
                     <option value="price">Price: Low to High</option>
@@ -171,7 +171,7 @@ function MarketplaceContent() {
 
 export default function MarketplacePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F8FAF5] flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[var(--background)] flex items-center justify-center">Loading...</div>}>
       <MarketplaceContent />
     </Suspense>
   );

@@ -28,7 +28,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div
       className={cn(
-        "rounded-full bg-[#166534] flex items-center justify-center text-white font-semibold overflow-hidden",
+        "rounded-full bg-[var(--primary)] flex items-center justify-center text-white font-semibold overflow-hidden",
         sizes[size],
         className
       )}

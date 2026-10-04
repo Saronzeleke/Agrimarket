@@ -15,7 +15,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = "md", className }) => {
 
   return (
     <svg
-      className={cn("animate-spin text-[#166534]", sizes[size], className)}
+      className={cn("animate-spin text-[var(--primary)]", sizes[size], className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

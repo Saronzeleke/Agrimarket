@@ -20,10 +20,10 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = "font-medium rounded-lg transition-all duration-200 inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
-    primary: "bg-[#166534] text-white hover:bg-[#134e28] active:bg-[#0f3a1e]",
-    secondary: "bg-[#65A30D] text-white hover:bg-[#4d7a0a] active:bg-[#3d5f08]",
-    text: "bg-transparent text-[#166534] hover:bg-[#166534]/10 active:bg-[#166534]/20",
-    danger: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
+    primary: "bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2",
+    secondary: "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2",
+    text: "bg-transparent text-[var(--primary)] hover:bg-[var(--primary)]/10 focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2",
+    danger: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-2 focus:ring-red-600 focus:ring-offset-2",
   };
 
   const sizes = {

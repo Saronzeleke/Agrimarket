@@ -32,11 +32,11 @@ export class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F8FAF5] p-4">
-          <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] p-4">
+          <div className="max-w-md w-full bg-[var(--surface)] rounded-xl shadow-lg p-8 text-center border border-[var(--border)]">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-8 h-8 text-red-600"
+                className="w-8 h-8 text-[var(--error)]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -49,10 +49,10 @@ export class ErrorBoundary extends React.Component<
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-[#1F2937] mb-2">
+            <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
               Oops! Something went wrong
             </h2>
-            <p className="text-[#6B7280] mb-6">
+            <p className="text-[var(--text-secondary)] mb-6">
               We encountered an unexpected error. Please try refreshing the page.
             </p>
             <Button

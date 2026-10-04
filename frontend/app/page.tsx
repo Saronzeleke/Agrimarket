@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRightIcon, CheckCircleIcon, TruckIcon, ShieldCheckIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { Product, Category } from "@/types";
 import { productApi, categoryApi } from "@/lib/api/endpoints";
@@ -24,15 +23,60 @@ export default function HomePage() {
           productApi.getProducts({ limit: 8, sort: "-rating" }),
         ]);
 
-        if (categoriesRes.data.success && categoriesRes.data.data) {
-          setCategories(categoriesRes.data.data.slice(0, 6));
+        // Handle categories with defensive checks
+        if (categoriesRes?.data?.success && categoriesRes.data.data) {
+          const categoriesData = categoriesRes.data.data;
+          if (Array.isArray(categoriesData)) {
+            setCategories(categoriesData.slice(0, 6));
+          } else {
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('[Categories] Unexpected response format:', categoriesData);
+            }
+            setCategories([]);
+          }
+        } else {
+          setCategories([]);
         }
 
-        if (productsRes.data.success && productsRes.data.data) {
-          setFeaturedProducts(productsRes.data.data.data);
+        // Handle products with defensive checks and nested data extraction
+        if (productsRes?.data?.success && productsRes.data.data) {
+          // Handle both { data: { data: [...] } } and { data: [...] } formats
+          let productsData = productsRes.data.data;
+          
+          // If data has a nested 'data' property (paginated response)
+          if (productsData && typeof productsData === 'object' && 'data' in productsData) {
+            productsData = (productsData as any).data;
+          }
+          
+          // Validate it's an array
+          if (Array.isArray(productsData)) {
+            // Additional safety: filter out invalid products
+            const validProducts = productsData.filter(
+              (p): p is Product => 
+                p != null && 
+                typeof p === 'object' && 
+                'id' in p && 
+                'name' in p
+            );
+            setFeaturedProducts(validProducts);
+          } else {
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('[Products] Unexpected response format:', productsData);
+            }
+            setFeaturedProducts([]);
+          }
+        } else {
+          setFeaturedProducts([]);
         }
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        // Log full error in development, minimal in production
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[HomePage] Failed to fetch data:', error);
+        } else {
+          console.error('[HomePage] Failed to fetch data');
+        }
+        setCategories([]);
+        setFeaturedProducts([]);
       } finally {
         setLoading(false);
       }
@@ -43,41 +87,66 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#166534] to-[#65A30D] text-white">
-        <div className="container-custom py-20 md:py-32">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+      {/* Hero Section - Redesigned */}
+      <section className="bg-[var(--background)] py-12 md:py-20 transition-colors duration-200">
+        <div className="container-custom">
+          <div className="grid md:grid-cols-[60%_40%] gap-8 md:gap-12 items-center">
+            {/* Left Column - Content */}
+            <div className="space-y-6 md:space-y-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] leading-tight">
                 Fresh Produce from Ethiopian Farmers to Your Doorstep
               </h1>
-              <p className="text-xl mb-8 text-white/90">
-                Connect directly with local farmers. Get the freshest agricultural products at fair prices while supporting sustainable farming.
+              <p className="text-lg md:text-xl text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+                Experience the convenience of farm-fresh produce delivered directly to you. Connect with Ethiopian farmers and enjoy premium quality agricultural products at fair prices.
               </p>
+              
+              {/* CTAs */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href={ROUTES.MARKETPLACE}>
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto bg-white text-[#166534] hover:bg-gray-100">
+                  <button className="w-full sm:w-auto bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-semibold px-8 py-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 shadow-sm hover:shadow-md flex items-center justify-center">
                     Explore Marketplace
                     <ArrowRightIcon className="w-5 h-5 ml-2" />
-                  </Button>
+                  </button>
                 </Link>
                 <Link href="/sell">
-                  <Button variant="text" size="lg" className="w-full sm:w-auto border-2 border-white text-white hover:bg-white/10">
+                  <button className="w-full sm:w-auto bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold px-8 py-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 shadow-sm hover:shadow-md flex items-center justify-center">
                     Become a Seller
-                  </Button>
+                    <ArrowRightIcon className="w-5 h-5 ml-2" />
+                  </button>
                 </Link>
               </div>
+
+              {/* Trust Indicators */}
+              <div className="flex flex-wrap items-center gap-6 pt-4">
+                <div className="flex items-center space-x-2">
+                  <CheckCircleIcon className="w-5 h-5 text-[var(--primary)]" />
+                  <span className="text-sm text-[var(--text-secondary)]">10K+ Active Users</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircleIcon className="w-5 h-5 text-[var(--primary)]" />
+                  <span className="text-sm text-[var(--text-secondary)]">500+ Verified Farmers</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircleIcon className="w-5 h-5 text-[var(--primary)]" />
+                  <span className="text-sm text-[var(--text-secondary)]">Quality Guaranteed</span>
+                </div>
+              </div>
             </div>
+
+            {/* Right Column - Visual */}
             <div className="hidden md:block">
-              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#F59E0B]/20 to-transparent" />
-                <Image
-                  src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&h=600&fit=crop"
-                  alt="Ethiopian Agriculture"
-                  fill
-                  className="object-cover"
-                  priority
-                />
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-[#0F6B3C]/10 to-[#E85D04]/10 dark:from-[#0F6B3C]/20 dark:to-[#E85D04]/20">
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                  <div className="text-8xl mb-4" role="img" aria-label="Ethiopian agriculture">
+                    🌾
+                  </div>
+                  <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+                    Ethiopian Agriculture
+                  </h3>
+                  <p className="text-[var(--text-secondary)]">
+                    Fresh from Farm to Table
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -85,13 +154,13 @@ export default function HomePage() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16">
+      <section className="py-16 bg-[var(--surface)] transition-colors duration-200">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1F2937] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
               Shop by Category
             </h2>
-            <p className="text-lg text-[#6B7280]">
+            <p className="text-lg text-[var(--text-secondary)]">
               Browse our wide selection of fresh produce and agricultural products
             </p>
           </div>
@@ -110,9 +179,9 @@ export default function HomePage() {
                   href={`${ROUTES.MARKETPLACE}?category=${category.slug}`}
                   className="group"
                 >
-                  <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 text-center hover:shadow-lg transition-all duration-200 hover:border-[#166534]">
+                  <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6 text-center hover:shadow-lg transition-all duration-200 hover:border-[var(--primary)]">
                     <div className="text-4xl mb-3">{category.icon || "🌾"}</div>
-                    <h3 className="font-semibold text-[#1F2937] group-hover:text-[#166534]">
+                    <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--primary)] transition-colors">
                       {category.name}
                     </h3>
                   </div>
@@ -124,14 +193,14 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 bg-[#F8FAF5]">
+      <section className="py-16 bg-[var(--background)] transition-colors duration-200">
         <div className="container-custom">
           <div className="flex justify-between items-center mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1F2937] mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
                 Featured Products
               </h2>
-              <p className="text-lg text-[#6B7280]">
+              <p className="text-lg text-[var(--text-secondary)]">
                 Top-rated products from our trusted sellers
               </p>
             </div>
@@ -149,53 +218,70 @@ export default function HomePage() {
                 <Skeleton key={i} className="h-96" />
               ))}
             </div>
-          ) : (
+          ) : featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-[var(--primary)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">No products yet</h3>
+              <p className="text-[var(--text-secondary)] mb-6">
+                Check back soon as our sellers add more products
+              </p>
+              <Link href={ROUTES.MARKETPLACE}>
+                <Button variant="primary">
+                  Browse Marketplace
+                </Button>
+              </Link>
             </div>
           )}
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16">
+      <section className="py-16 bg-[var(--surface)] transition-colors duration-200">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1F2937] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
               How It Works
             </h2>
-            <p className="text-lg text-[#6B7280]">
+            <p className="text-lg text-[var(--text-secondary)]">
               Simple steps to get fresh produce delivered
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-[#166534] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-white">1</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Browse Products</h3>
-              <p className="text-[#6B7280]">
+              <h3 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Browse Products</h3>
+              <p className="text-[var(--text-secondary)]">
                 Explore our marketplace and find fresh produce from local farmers
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-[#166534] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-white">2</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Place Order</h3>
-              <p className="text-[#6B7280]">
+              <h3 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Place Order</h3>
+              <p className="text-[var(--text-secondary)]">
                 Add items to cart and complete your purchase securely
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-[#166534] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-white">3</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Get Delivered</h3>
-              <p className="text-[#6B7280]">
+              <h3 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Get Delivered</h3>
+              <p className="text-[var(--text-secondary)]">
                 Receive fresh products at your doorstep within days
               </p>
             </div>
@@ -204,7 +290,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-[#166534] text-white">
+      <section className="py-16 bg-[var(--primary)] text-white transition-colors duration-200">
         <div className="container-custom">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
@@ -228,42 +314,42 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16">
+      <section className="py-16 bg-[var(--background)] transition-colors duration-200">
         <div className="container-custom">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-[#166534]/10 rounded-lg flex items-center justify-center mb-4">
-                <TruckIcon className="w-6 h-6 text-[#166534]" />
+              <div className="w-12 h-12 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center mb-4">
+                <TruckIcon className="w-6 h-6 text-[var(--primary)]" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Fast Delivery</h3>
-              <p className="text-[#6B7280] text-sm">
+              <h3 className="font-semibold text-lg mb-2 text-[var(--text-primary)]">Fast Delivery</h3>
+              <p className="text-[var(--text-secondary)] text-sm">
                 Quick and reliable delivery to your location
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-[#166534]/10 rounded-lg flex items-center justify-center mb-4">
-                <ShieldCheckIcon className="w-6 h-6 text-[#166534]" />
+              <div className="w-12 h-12 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center mb-4">
+                <ShieldCheckIcon className="w-6 h-6 text-[var(--primary)]" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Quality Assured</h3>
-              <p className="text-[#6B7280] text-sm">
+              <h3 className="font-semibold text-lg mb-2 text-[var(--text-primary)]">Quality Assured</h3>
+              <p className="text-[var(--text-secondary)] text-sm">
                 Only verified sellers with quality products
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-[#166534]/10 rounded-lg flex items-center justify-center mb-4">
-                <CheckCircleIcon className="w-6 h-6 text-[#166534]" />
+              <div className="w-12 h-12 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center mb-4">
+                <CheckCircleIcon className="w-6 h-6 text-[var(--primary)]" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Secure Payment</h3>
-              <p className="text-[#6B7280] text-sm">
+              <h3 className="font-semibold text-lg mb-2 text-[var(--text-primary)]">Secure Payment</h3>
+              <p className="text-[var(--text-secondary)] text-sm">
                 Safe and secure payment processing
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-[#166534]/10 rounded-lg flex items-center justify-center mb-4">
-                <UserGroupIcon className="w-6 h-6 text-[#166534]" />
+              <div className="w-12 h-12 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center mb-4">
+                <UserGroupIcon className="w-6 h-6 text-[var(--primary)]" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Support Farmers</h3>
-              <p className="text-[#6B7280] text-sm">
+              <h3 className="font-semibold text-lg mb-2 text-[var(--text-primary)]">Support Farmers</h3>
+              <p className="text-[var(--text-secondary)] text-sm">
                 Direct connection with local farmers
               </p>
             </div>
@@ -272,9 +358,9 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-[#F8FAF5]">
+      <section className="py-16 bg-[var(--surface)] transition-colors duration-200">
         <div className="container-custom">
-          <div className="bg-gradient-to-r from-[#166534] to-[#65A30D] rounded-2xl p-12 text-center text-white">
+          <div className="bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] rounded-2xl p-12 text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to Start Selling?
             </h2>
@@ -282,7 +368,7 @@ export default function HomePage() {
               Join thousands of farmers already selling on AgriMarket
             </p>
             <Link href="/sell">
-              <Button variant="secondary" size="lg" className="bg-white text-[#166534] hover:bg-gray-100">
+              <Button variant="secondary" size="lg" className="bg-[var(--surface)] text-[var(--primary)] hover:bg-[var(--background)] border border-[var(--border)]">
                 Get Started Today
                 <ArrowRightIcon className="w-5 h-5 ml-2" />
               </Button>

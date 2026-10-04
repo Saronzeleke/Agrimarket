@@ -39,7 +39,7 @@ interface ToastProps {
 const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   const icons = {
     success: <CheckCircleIcon className="w-6 h-6 text-green-600" />,
-    error: <XCircleIcon className="w-6 h-6 text-red-600" />,
+    error: <XCircleIcon className="w-6 h-6 text-[var(--error)]" />,
     info: <InformationCircleIcon className="w-6 h-6 text-blue-600" />,
     warning: <ExclamationTriangleIcon className="w-6 h-6 text-amber-600" />,
   };
@@ -59,10 +59,10 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
       )}
     >
       {icons[type]}
-      <p className="flex-1 text-sm font-medium text-[#1F2937]">{message}</p>
+      <p className="flex-1 text-sm font-medium text-[var(--text-primary)]">{message}</p>
       <button
         onClick={onClose}
-        className="text-[#6B7280] hover:text-[#1F2937] transition-colors"
+        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
       >
         <XMarkIcon className="w-5 h-5" />
       </button>

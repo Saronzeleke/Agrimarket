@@ -9,9 +9,9 @@ export default function WishlistPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#F8FAF5] py-8">
+    <div className="min-h-screen bg-[var(--background)] py-8">
       <div className="container-custom">
-        <h1 className="text-3xl font-bold text-[#1F2937] mb-8">My Wishlist</h1>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-8">My Wishlist</h1>
         
         <EmptyState
           icon={<HeartIcon className="w-16 h-16" />}

@@ -1,15 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  /* AgriMarket Design System */
-  --primary: #166534;
-  --secondary: #65A30D;
-  --accent: #F59E0B;
-  --background: #F8FAF5;
-  --surface: #FFFFFF;
-  --border: #E5E7EB;
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
+  /* Light Theme - Premium Marketplace Palette */
+  --primary: #1E3A5F;        /* Deep Navy */
+  --primary-hover: #152B47;  /* Darker Navy */
+  --accent: #D97706;         /* Muted Orange */
+  --accent-hover: #B45309;   /* Darker Orange */
+  --background: #FAF8F5;     /* Warm Cream */
+  --surface: #FFFFFF;        /* Pure White */
+  --navbar-bg: #FEFDFB;      /* Off-White for navbar */
+  --text-primary: #1E3A5F;   /* Deep Navy for text */
+  --text-secondary: #64748B; /* Muted Slate */
+  --border: #E2E0DC;         /* Soft Border */
+  --error: #DC2626;
+}
+
+[data-theme="dark"] {
+  /* Dark Theme */
+  --background: #0F172A;
+  --surface: #1E293B;
+  --navbar-bg: #1E293B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border: #334155;
+  --error: #EF4444;
 }
 
 @theme inline {

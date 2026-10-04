@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:3001/api/v1";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api/v1";
 
 export const ROUTES = {
   HOME: "/",
@@ -20,15 +20,17 @@ export const ROUTES = {
   MESSAGES: "/messages",
 } as const;
 
+// Use CSS variables instead of hardcoded colors for theme support
 export const COLORS = {
-  PRIMARY: "#166534",
-  SECONDARY: "#65A30D",
-  ACCENT: "#F59E0B",
-  BACKGROUND: "#F8FAF5",
-  SURFACE: "#FFFFFF",
-  BORDER: "#E5E7EB",
-  TEXT_PRIMARY: "#1F2937",
-  TEXT_SECONDARY: "#6B7280",
+  PRIMARY: "var(--primary)",
+  PRIMARY_HOVER: "var(--primary-hover)",
+  ACCENT: "var(--accent)",
+  ACCENT_HOVER: "var(--accent-hover)",
+  BACKGROUND: "var(--background)",
+  SURFACE: "var(--surface)",
+  BORDER: "var(--border)",
+  TEXT_PRIMARY: "var(--text-primary)",
+  TEXT_SECONDARY: "var(--text-secondary)",
 } as const;
 
 export const ETHIOPIAN_REGIONS = [

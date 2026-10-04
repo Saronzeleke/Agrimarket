@@ -5,6 +5,7 @@
 import userRepository from '../repositories/user.repository'
 import emailVerificationRepository from '../repositories/email-verification.repository'
 import passwordResetRepository from '../repositories/password-reset.repository'
+import auditLogRepository from '../repositories/audit-log.repository'
 import { hashPassword, verifyPassword, validatePasswordStrength } from '../utils/password.utils'
 import { generateTokens, verifyRefreshToken } from '../utils/jwt.utils'
 import { generateToken, hashToken, addHours, isExpired } from '../utils/helpers'
@@ -217,7 +218,7 @@ export class AuthService {
 
   // Login user
  
-  async login(credentials: LoginCredentials): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
+  async login(credentials: LoginCredentials, ipAddress?: string, userAgent?: string): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
     // Find user by email
     const user = await userRepository.findByEmail(credentials.email)
     if (!user) {
@@ -268,6 +269,17 @@ export class AuthService {
       email: user.email,
       role: user.role,
     })
+
+    // Audit log: USER_LOGIN
+    await auditLogRepository.logUserAction(
+      user.id,
+      'USER_LOGIN',
+      'USER',
+      user.id,
+      { email: user.email },
+      ipAddress,
+      userAgent
+    );
 
     logger.info('User logged in', {
       userId: user.id,
@@ -439,7 +451,7 @@ export class AuthService {
   }
 
   // Reset password
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  async resetPassword(token: string, newPassword: string, ipAddress?: string, userAgent?: string): Promise<void> {
     // Validate password strength
     const passwordValidation = validatePasswordStrength(newPassword)
     if (!passwordValidation.valid) {
@@ -486,6 +498,17 @@ export class AuthService {
     // Mark token as used
     await passwordResetRepository.markAsUsed(reset.id)
 
+    // Audit log: PASSWORD_RESET
+    await auditLogRepository.logUserAction(
+      user.id,
+      'PASSWORD_RESET',
+      'USER',
+      user.id,
+      { email: user.email },
+      ipAddress,
+      userAgent
+    );
+
     logger.info('Password reset successfully', {
       userId: user.id,
       email: user.email,
@@ -496,7 +519,9 @@ export class AuthService {
   async changePassword(
     userId: string,
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
+    ipAddress?: string,
+    userAgent?: string
   ): Promise<void> {
     // Validate new password strength
     const passwordValidation = validatePasswordStrength(newPassword)
@@ -525,6 +550,17 @@ export class AuthService {
     // Update password
     await userRepository.updatePassword(user.id, hashedPassword)
 
+    // Audit log: PASSWORD_CHANGED
+    await auditLogRepository.logUserAction(
+      userId,
+      'PASSWORD_CHANGED',
+      'USER',
+      userId,
+      { email: user.email },
+      ipAddress,
+      userAgent
+    );
+
     logger.info('Password changed', {
       userId: user.id,
     })
@@ -544,11 +580,22 @@ export class AuthService {
   /**
    * Logout user and blacklist their tokens
    */
-  async logout(userId: string, accessToken: string): Promise<void> {
+  async logout(userId: string, accessToken: string, ipAddress?: string, userAgent?: string): Promise<void> {
     // Blacklist the access token
     // Access tokens expire in 15 minutes by default
     const accessTokenTTL = 15 * 60; // 15 minutes in seconds
     await this.blacklistToken(accessToken, accessTokenTTL);
+
+    // Audit log: USER_LOGOUT
+    await auditLogRepository.logUserAction(
+      userId,
+      'USER_LOGOUT',
+      'USER',
+      userId,
+      null,
+      ipAddress,
+      userAgent
+    );
 
     logger.info('User logged out, token blacklisted', {
       userId,

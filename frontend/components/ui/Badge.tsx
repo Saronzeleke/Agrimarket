@@ -17,12 +17,12 @@ export const Badge: React.FC<BadgeProps> = ({
   const baseStyles = "inline-flex items-center font-medium rounded-full";
 
   const variants = {
-    primary: "bg-[#166534]/10 text-[#166534]",
-    secondary: "bg-[#65A30D]/10 text-[#65A30D]",
-    success: "bg-green-100 text-green-800",
-    warning: "bg-[#F59E0B]/10 text-[#F59E0B]",
-    danger: "bg-red-100 text-red-800",
-    info: "bg-blue-100 text-blue-800",
+    primary: "bg-[var(--primary)]/10 text-[var(--primary)]",
+    secondary: "bg-[var(--accent)]/10 text-[var(--accent)]",
+    success: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+    warning: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+    danger: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+    info: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   };
 
   const sizes = {

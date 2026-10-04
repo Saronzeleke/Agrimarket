@@ -1,6 +1,7 @@
 import { cartService } from './cart.service';
 import { addressRepository } from '../repositories/address.repository';
 import { orderRepository } from '../repositories/order.repository';
+import auditLogRepository from '../repositories/audit-log.repository';
 import { BadRequestError } from '../utils/errors';
 import prisma from '../config/database';
 
@@ -101,7 +102,7 @@ export const checkoutService = {
   },
  //  Process checkout and create order
 
-  async processCheckout(userId: string, data: CheckoutData) {
+  async processCheckout(userId: string, data: CheckoutData, ipAddress?: string, userAgent?: string) {
     // Validate cart
     const cart = await cartService.getCart(userId);
 
@@ -236,6 +237,21 @@ export const checkoutService = {
 
       return { order, payment };
     });
+
+    // Audit log: ORDER_CREATED
+    await auditLogRepository.logUserAction(
+      userId,
+      'ORDER_CREATED',
+      'ORDER',
+      result.order.id,
+      {
+        orderNumber: result.order.orderNumber,
+        total: Number(result.order.total),
+        itemCount: result.order.items.length,
+      },
+      ipAddress,
+      userAgent
+    );
 
     // Return order with payment info
     // Return order with payment info

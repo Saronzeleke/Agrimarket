@@ -8,17 +8,17 @@ function SearchContent() {
   const query = searchParams.get("q");
 
   return (
-    <div className="min-h-screen bg-[#F8FAF5] py-8">
+    <div className="min-h-screen bg-[var(--background)] py-8">
       <div className="container-custom">
-        <h1 className="text-3xl font-bold text-[#1F2937] mb-4">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-4">
           Search Results
         </h1>
-        <p className="text-[#6B7280] mb-8">
-          Showing results for: <span className="font-medium">{query}</span>
+        <p className="text-[var(--text-secondary)] mb-8">
+          Showing results for: <span className="font-medium text-[var(--text-primary)]">{query}</span>
         </p>
         
-        <div className="bg-white rounded-xl p-8 text-center">
-          <p className="text-[#6B7280]">Search functionality coming soon</p>
+        <div className="bg-[var(--surface)] rounded-xl p-8 text-center border border-[var(--border)]">
+          <p className="text-[var(--text-secondary)]">Search functionality coming soon</p>
         </div>
       </div>
     </div>

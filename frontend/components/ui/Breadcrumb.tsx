@@ -19,18 +19,18 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
         return (
           <React.Fragment key={index}>
             {index > 0 && (
-              <ChevronRightIcon className="w-4 h-4 text-[#6B7280]" />
+              <ChevronRightIcon className="w-4 h-4 text-[var(--text-secondary)]" />
             )}
             {item.href && !isLast ? (
               <Link
                 href={item.href}
-                className="text-[#6B7280] hover:text-[#166534] transition-colors"
+                className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
               >
                 {item.label}
               </Link>
             ) : (
               <span
-                className={isLast ? "text-[#1F2937] font-medium" : "text-[#6B7280]"}
+                className={isLast ? "text-[var(--text-primary)] font-medium" : "text-[var(--text-secondary)]"}
               >
                 {item.label}
               </span>

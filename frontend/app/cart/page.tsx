@@ -82,7 +82,7 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8FAF5] py-8">
+      <div className="min-h-screen bg-[var(--background)] py-8 transition-colors duration-200">
         <div className="container-custom">
           <Skeleton className="h-64 mb-4" />
           <Skeleton className="h-32" />
@@ -93,7 +93,7 @@ export default function CartPage() {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#F8FAF5] py-16">
+      <div className="min-h-screen bg-[var(--background)] py-16 transition-colors duration-200">
         <div className="container-custom">
           <EmptyState
             title="Your cart is empty"
@@ -109,9 +109,9 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAF5] py-8">
+    <div className="min-h-screen bg-[var(--background)] py-8 transition-colors duration-200">
       <div className="container-custom">
-        <h1 className="text-3xl font-bold text-[#1F2937] mb-8">Shopping Cart</h1>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-8">Shopping Cart</h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -120,7 +120,7 @@ export default function CartPage() {
               const primaryImage = item.product.images?.find((img) => img.isPrimary) || item.product.images?.[0];
 
               return (
-                <div key={item.id} className="bg-white rounded-xl p-6">
+                <div key={item.id} className="bg-[var(--surface)] rounded-xl p-6 border border-[var(--border)] transition-colors duration-200">
                   <div className="flex gap-4">
                     {/* Product Image */}
                     <div className="relative w-24 h-24 flex-shrink-0">
@@ -132,7 +132,7 @@ export default function CartPage() {
                           className="object-cover rounded-lg"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gray-200 rounded-lg" />
+                        <div className="w-full h-full bg-gray-200 dark:bg-gray-700 rounded-lg" />
                       )}
                     </div>
 
@@ -140,22 +140,22 @@ export default function CartPage() {
                     <div className="flex-1">
                       <Link
                         href={`/products/${item.product.slug}`}
-                        className="font-semibold text-[#1F2937] hover:text-[#166534]"
+                        className="font-semibold text-[var(--text-primary)] hover:text-[var(--primary)] transition-colors"
                       >
                         {item.product.name}
                       </Link>
-                      <p className="text-sm text-[#6B7280] mt-1">
+                      <p className="text-sm text-[var(--text-secondary)] mt-1">
                         {formatCurrency(item.product.price)} per {item.product.unit}
                       </p>
-                      <p className="text-sm text-[#6B7280]">{item.product.productionLocation}</p>
+                      <p className="text-sm text-[var(--text-secondary)]">{item.product.productionLocation}</p>
 
                       <div className="flex items-center gap-4 mt-4">
                         {/* Quantity Controls */}
-                        <div className="flex items-center border border-[#E5E7EB] rounded-lg">
+                        <div className="flex items-center border border-[var(--border)] rounded-lg">
                           <button
                             onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                             disabled={updating === item.id || item.quantity <= 1}
-                            className="p-2 hover:bg-gray-50 disabled:opacity-50"
+                            className="p-2 hover:bg-[var(--background)] disabled:opacity-50 transition-colors"
                           >
                             <MinusIcon className="w-4 h-4" />
                           </button>
@@ -163,7 +163,7 @@ export default function CartPage() {
                           <button
                             onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                             disabled={updating === item.id}
-                            className="p-2 hover:bg-gray-50 disabled:opacity-50"
+                            className="p-2 hover:bg-[var(--background)] disabled:opacity-50 transition-colors"
                           >
                             <PlusIcon className="w-4 h-4" />
                           </button>
@@ -173,14 +173,14 @@ export default function CartPage() {
                         <button
                           onClick={() => handleRemoveItem(item.id)}
                           disabled={updating === item.id}
-                          className="text-red-600 hover:text-red-700 disabled:opacity-50"
+                          className="text-[var(--error)] hover:text-[var(--error)] opacity-70 hover:opacity-100 disabled:opacity-50 transition-opacity"
                         >
                           <TrashIcon className="w-5 h-5" />
                         </button>
 
                         {/* Item Total */}
                         <div className="ml-auto text-right">
-                          <p className="font-bold text-[#1F2937]">
+                          <p className="font-bold text-[var(--text-primary)]">
                             {formatCurrency(item.product.price * item.quantity)}
                           </p>
                         </div>
@@ -194,22 +194,22 @@ export default function CartPage() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-[#1F2937] mb-6">Order Summary</h2>
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 sticky top-24 transition-colors duration-200">
+              <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6">Order Summary</h2>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
-                  <span className="text-[#6B7280]">Subtotal</span>
-                  <span className="font-medium">{formatCurrency(getSubtotal())}</span>
+                  <span className="text-[var(--text-secondary)]">Subtotal</span>
+                  <span className="font-medium text-[var(--text-primary)]">{formatCurrency(getSubtotal())}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#6B7280]">Delivery Fee</span>
-                  <span className="font-medium">{formatCurrency(deliveryFee)}</span>
+                  <span className="text-[var(--text-secondary)]">Delivery Fee</span>
+                  <span className="font-medium text-[var(--text-primary)]">{formatCurrency(deliveryFee)}</span>
                 </div>
-                <div className="border-t border-[#E5E7EB] pt-3">
+                <div className="border-t border-[var(--border)] pt-3">
                   <div className="flex justify-between">
-                    <span className="font-semibold text-lg">Total</span>
-                    <span className="font-bold text-xl text-[#166534]">
+                    <span className="font-semibold text-lg text-[var(--text-primary)]">Total</span>
+                    <span className="font-bold text-xl text-[var(--primary)]">
                       {formatCurrency(getSubtotal() + deliveryFee)}
                     </span>
                   </div>

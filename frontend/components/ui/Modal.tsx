@@ -50,17 +50,17 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       <div
         className={cn(
-          "relative bg-white rounded-xl shadow-2xl w-full",
+          "relative bg-[var(--surface)] rounded-xl shadow-2xl w-full transition-colors duration-200",
           sizes[size]
         )}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB]">
-            <h3 className="text-xl font-semibold text-[#1F2937]">{title}</h3>
+          <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
+            <h3 className="text-xl font-semibold text-[var(--text-primary)]">{title}</h3>
             <button
               onClick={onClose}
-              className="text-[#6B7280] hover:text-[#1F2937] transition-colors"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>

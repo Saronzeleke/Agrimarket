@@ -6,9 +6,9 @@ import { BellIcon } from "@heroicons/react/24/outline";
 
 export default function NotificationsPage() {
   return (
-    <div className="min-h-screen bg-[#F8FAF5] py-8">
+    <div className="min-h-screen bg-[var(--background)] py-8">
       <div className="container-custom">
-        <h1 className="text-3xl font-bold text-[#1F2937] mb-8">Notifications</h1>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-8">Notifications</h1>
         
         <EmptyState
           icon={<BellIcon className="w-16 h-16" />}

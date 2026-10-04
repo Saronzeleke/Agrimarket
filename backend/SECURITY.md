@@ -152,6 +152,148 @@ Rate limiting is configured to prevent abuse:
 
 Configure limits via environment variables in `.env`.
 
+### Rate Limiting Strategy
+
+- **Window-based rate limiting** using Redis for distributed tracking
+- Rate limits applied per IP address and per authenticated user
+- Failed login attempts trigger account lockout (5 attempts within 15 minutes)
+- **Graceful degradation**: If Redis is unavailable, in-memory fallback is used for critical features like account lockout
+
+## XSS (Cross-Site Scripting) Prevention
+
+- All user-generated content is sanitized before storage
+- HTML output encoding applied automatically by frontend frameworks (React)
+- Content-Security-Policy (CSP) headers should be configured on the frontend
+- Never use `dangerouslySetInnerHTML` without sanitization
+- File uploads validated for type and content
+
+## CSRF (Cross-Site Request Forgery) Protection
+
+- JWT tokens in HTTP-only cookies or Authorization headers
+- SameSite cookie attribute set to 'Strict' or 'Lax'
+- CORS policy restricts cross-origin requests
+- State-changing operations require POST/PUT/DELETE methods (never GET)
+
+## Token Management
+
+- **Access tokens**: Short-lived (15 minutes), used for API authentication
+- **Refresh tokens**: Longer-lived (7 days), used to obtain new access tokens
+- **Token rotation**: Old refresh tokens are blacklisted when new ones are issued
+- **Token blacklisting**: Logout immediately invalidates tokens via Redis
+- **Secure storage**: Tokens should never be stored in localStorage - use httpOnly cookies or memory
+
+## Account Lockout Policy
+
+- **Failed login attempts**: 5 failed attempts within 15 minutes triggers account lockout
+- **Lockout duration**: 15 minutes
+- **Tracking**: Uses Redis for distributed systems, with in-memory fallback
+- **Notification**: Users should be notified of failed login attempts (future enhancement)
+
+## Audit Logging
+
+All security-sensitive operations are logged to the `audit_logs` table:
+
+- **USER_LOGIN**: Successful user authentication
+- **USER_LOGOUT**: User session termination
+- **PASSWORD_CHANGED**: Password changed by authenticated user
+- **PASSWORD_RESET**: Password reset via recovery email
+- **ORDER_CREATED**: New order placement
+- **PAYMENT_CONFIRMED**: Payment successfully processed (planned)
+- **ADMIN_ACTION**: Administrative actions (planned)
+
+Audit logs include:
+- User ID
+- Action type
+- Entity type and ID
+- Timestamp
+- IP address
+- User agent string
+- Additional contextual details (JSON)
+
+**Retention**: Audit logs should be retained for at least 1 year for compliance and security investigations.
+
+## Password Requirements
+
+Password strength validation enforced by `validatePasswordStrength()`:
+
+- **Minimum length**: 8 characters
+- **Required character types**:
+  - At least one uppercase letter
+  - At least one lowercase letter
+  - At least one digit
+  - At least one special character (!@#$%^&*(),.?":{}|<>)
+- **Hashing**: bcrypt with 12 rounds (configurable via `BCRYPT_SALT_ROUNDS`)
+- **Common password detection**: Should reject common/weak passwords (future enhancement)
+
+## File Upload Security
+
+File uploads (product images, profile pictures) must be secured:
+
+- **Type validation**: Only allow specific MIME types (image/jpeg, image/png, image/webp)
+- **Size limits**: Maximum 5MB per file
+- **Content validation**: Verify actual file content matches declared MIME type
+- **Storage**: Use cloud storage (Cloudinary, AWS S3) with separate domain
+- **No execution**: Ensure uploaded files cannot be executed as code
+- **Unique filenames**: Generate UUIDs to prevent filename collisions and enumeration
+
+## Database Security
+
+- **Parameterized queries**: All queries use Prisma ORM which prevents SQL injection
+- **Least privilege**: Database user should only have necessary permissions (no DROP, ALTER in production)
+- **Connection pooling**: Prisma manages connection pool efficiently
+- **Encryption at rest**: Enable PostgreSQL transparent data encryption (TDE) in production
+- **Encryption in transit**: Use SSL/TLS for database connections (`?sslmode=require` in DATABASE_URL)
+- **Regular backups**: Automated daily backups with point-in-time recovery
+- **Performance indexes**: Composite indexes on frequently queried columns (see `schema.prisma`)
+
+## Error Handling
+
+- **Production mode** (`NODE_ENV=production`, `DETAILED_ERRORS=false`):
+  - Generic error messages returned to clients
+  - Detailed error information only logged server-side
+  - No stack traces exposed
+- **Development mode**: Detailed errors for debugging
+- **Logging**: All errors logged with context (user ID, request ID, timestamp)
+- **Monitoring**: Set up error tracking (Sentry, Rollbar) for production alerts
+
+## Secrets Management
+
+- **Environment variables**: Store secrets in `.env` file (development) or secrets manager (production)
+- **Never hardcode**: No secrets in source code
+- **Rotation**: Regular credential rotation (every 90 days)
+- **Access control**: Limit who can access production secrets
+- **Encryption**: Secrets should be encrypted at rest in secrets management systems
+- **Recommended tools**:
+  - AWS Secrets Manager
+  - HashiCorp Vault
+  - Azure Key Vault
+  - Google Cloud Secret Manager
+
+## Two-Factor Authentication (2FA) Preparation
+
+The database schema includes fields for 2FA:
+
+- `User.twoFactorEnabled`: Boolean flag (default: false)
+- `User.twoFactorSecret`: Encrypted TOTP secret
+
+**Status**: Fields are present but 2FA is not yet implemented. This is preparation for Phase 2 security enhancements.
+
+**Planned implementation**:
+- TOTP (Time-based One-Time Password) using authenticator apps
+- Backup codes for account recovery
+- Mandatory 2FA for admin accounts
+- Optional 2FA for customer accounts
+
+## Rate Limiting
+
+Rate limiting is configured to prevent abuse:
+
+- General API: 100 requests per 15 minutes
+- Auth endpoints: 5 requests per 15 minutes
+- Search endpoints: 20 requests per 15 minutes
+
+Configure limits via environment variables in `.env`.
+
 ## HTTPS and Transport Security
 
 - **Always use HTTPS in production** - never HTTP
