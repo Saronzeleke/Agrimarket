@@ -7,9 +7,15 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { fileTypeFromBuffer } from 'file-type';
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
 import config from '../config/env';
 import { ValidationError } from '../utils/errors';
 import logger from '../config/logger';
+
+// Initialize DOMPurify for server-side XSS sanitization
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window as any);
 
 /**
  * CSRF Protection using double-submit cookie pattern
@@ -108,19 +114,35 @@ function sanitizeObject(obj: any): any {
 }
 
 /**
- * Sanitize a string to prevent XSS
+ * Sanitize a string to prevent XSS using DOMPurify
+ * Aggressively strips all HTML tags and attributes
  */
 function sanitizeString(str: string): string {
   if (typeof str !== 'string') {
     return str;
   }
 
-  return str
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+  // Use DOMPurify with no allowed tags or attributes (strips all HTML)
+  return DOMPurify.sanitize(str, { 
+    ALLOWED_TAGS: [], 
+    ALLOWED_ATTR: [] 
+  });
+}
+
+/**
+ * Sanitize rich text content (e.g., product descriptions, reviews)
+ * Allows limited safe HTML tags but no attributes
+ */
+export function sanitizeRichText(str: string): string {
+  if (typeof str !== 'string') {
+    return str;
+  }
+
+  // Allow only safe formatting tags, no attributes
+  return DOMPurify.sanitize(str, { 
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li'], 
+    ALLOWED_ATTR: [] 
+  });
 }
 
 /**
@@ -189,7 +211,7 @@ export const validateFileUpload = async (req: Request, res: Response, next: Next
       return next();
     }
 
-    const files = req.file ? [req.file] : (Array.isArray(req.files) ? req.files : Object.values(req.files).flat());
+    const files = req.file ? [req.file] : (Array.isArray(req.files) ? req.files : (req.files ? Object.values(req.files).flat() : []));
 
     for (const file of files) {
       if (!file) continue;

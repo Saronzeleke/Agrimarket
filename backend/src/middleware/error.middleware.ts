@@ -82,9 +82,11 @@ export function errorHandler(
   } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
     appError = handlePrismaError(error)
   } else {
-    // Unknown error
+    // Unknown error - be extra cautious in production
     appError = new AppError(
-      config.dev.detailedErrors
+      config.isProduction
+        ? 'An unexpected error occurred' // Generic message in production
+        : config.dev.detailedErrors
         ? error.message
         : 'An unexpected error occurred',
       CONSTANTS.HTTP_STATUS.INTERNAL_SERVER_ERROR,
@@ -93,11 +95,11 @@ export function errorHandler(
     )
   }
 
-  // Log error
+  // Log error (full details only in logs, never in response in production)
   if (!appError.isOperational) {
     logger.error('Unexpected Error', {
       error: error.message,
-      stack: error.stack,
+      stack: config.isProduction ? undefined : error.stack, // Don't log stack in production logs either
       path: req.path,
       method: req.method,
       ip: req.ip,
@@ -112,12 +114,13 @@ export function errorHandler(
   }
 
   // Send error response
+  // In production, only send generic info, no stack traces or internal details
   sendError(
     res,
     appError.code,
     appError.message,
     appError.statusCode,
-    config.dev.detailedErrors ? appError.details : undefined
+    config.isProduction ? undefined : config.dev.detailedErrors ? appError.details : undefined
   )
 }
 // Handle 404 errors

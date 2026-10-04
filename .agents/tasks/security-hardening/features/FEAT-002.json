@@ -1,0 +1,51 @@
+{
+  "id": "FEAT-002",
+  "type": "fix",
+  "description": "CRITICAL: Move JWT tokens from localStorage to httpOnly cookies to prevent XSS token theft. Update backend auth.controller.ts to set/clear httpOnly SameSite=Strict Secure cookies. Update frontend lib/api/client.ts to remove localStorage token logic and send credentials with requests. Add CSRF protection using double-submit cookie pattern. Enhance file upload validation with magic number checks.",
+  "status": "pending",
+  "steps": [
+    "1. INSECURE STORAGE FIX - backend/src/controllers/auth.controller.ts: In register() method (line ~25), after generating tokens, call res.cookie('accessToken', tokens.accessToken, { httpOnly: true, secure: config.isProduction, sameSite: 'strict', maxAge: 15*60*1000 }). Also set refreshToken cookie with 7d maxAge.",
+    "2. INSECURE STORAGE FIX - auth.controller.ts: In login() method (line ~40), add same cookie setting logic after token generation.",
+    "3. INSECURE STORAGE FIX - auth.controller.ts: In refreshToken() method (line ~55), set new accessToken cookie.",
+    "4. INSECURE STORAGE FIX - auth.controller.ts: In logout() method (line ~135), call res.clearCookie('accessToken') and res.clearCookie('refreshToken').",
+    "5. INSECURE STORAGE FIX - backend/src/middleware/auth.middleware.ts: Update authenticate() middleware to read JWT from req.cookies.accessToken instead of Authorization header. Keep Authorization header as fallback for API clients. Install cookie-parser if not present (check package.json).",
+    "6. INSECURE STORAGE FIX - backend/src/app.ts: Add `import cookieParser from 'cookie-parser'` and `app.use(cookieParser())` before routes (around line 100).",
+    "7. INSECURE STORAGE FIX - backend/package.json: Add `\"cookie-parser\": \"^1.4.6\"` to dependencies if not present. Add `\"@types/cookie-parser\": \"^1.4.7\"` to devDependencies.",
+    "8. INSECURE STORAGE FIX - frontend/lib/api/client.ts: Remove lines 10-14 localStorage.getItem('authToken') logic from request interceptor.",
+    "9. INSECURE STORAGE FIX - frontend/lib/api/client.ts: Add `withCredentials: true` to axios.create() config (line 4) to send cookies cross-origin.",
+    "10. INSECURE STORAGE FIX - frontend/lib/api/client.ts: In response interceptor (line 25), update 401 handler to remove localStorage.removeItem calls, just redirect to /auth/login.",
+    "11. INSECURE STORAGE FIX - Find all frontend files using localStorage.setItem('authToken') or localStorage.getItem('user') - likely in auth pages, components, hooks. Replace with cookie-based flow (cookies set by backend, no frontend storage).",
+    "12. CSRF PROTECTION - backend/src/middleware/security.middleware.ts: Add csrfProtection() middleware using double-submit cookie pattern: generate random token, set as cookie 'XSRF-TOKEN' (not httpOnly so JS can read), require X-XSRF-TOKEN header to match cookie value on state-changing requests.",
+    "13. CSRF PROTECTION - backend/src/app.ts: Apply csrfProtection middleware to all POST/PUT/PATCH/DELETE routes. Add before route mounting (around line 160).",
+    "14. CSRF PROTECTION - frontend/lib/api/client.ts: Add request interceptor to read XSRF-TOKEN cookie and set X-XSRF-TOKEN header on every request.",
+    "15. FILE UPLOAD HARDENING - Install file-type package: `npm install file-type@^16.5.4` in backend (v16 for CommonJS compatibility).",
+    "16. FILE UPLOAD HARDENING - backend/src/middleware/security.middleware.ts: In validateFileUpload() (line ~135), add magic number validation: `import { fileTypeFromBuffer } from 'file-type'; const type = await fileTypeFromBuffer(file.buffer); if (!type || !allowedTypes.includes(type.mime)) throw ValidationError;`",
+    "17. FILE UPLOAD HARDENING - Update multer config to use memoryStorage() instead of diskStorage so file.buffer is available for magic number check.",
+    "18. Update backend/src/config/env.ts to add CSRF_ENABLED flag (default true) if needed for dev/test flexibility."
+  ],
+  "acceptance_criteria": [
+    "Backend sets httpOnly, Secure (in production), SameSite=Strict cookies for accessToken and refreshToken",
+    "Backend clears cookies on logout",
+    "Backend authenticate middleware reads JWT from cookies first, Authorization header as fallback",
+    "Frontend axios client sends withCredentials: true",
+    "Frontend removes all localStorage JWT/token/user storage and retrieval",
+    "CSRF protection middleware validates double-submit token on state-changing requests",
+    "Frontend automatically sends CSRF token in X-XSRF-TOKEN header",
+    "File upload validates magic numbers (file signatures) not just MIME type",
+    "Login flow works end-to-end: user can log in, token in httpOnly cookie, authenticated requests succeed, logout clears cookie",
+    "TypeScript compilation succeeds in both frontend and backend"
+  ],
+  "verification": [
+    "Run `npm run lint` in backend/ and frontend/ - no TypeScript errors",
+    "Install new dependencies: run `npm install` in backend/ after package.json changes",
+    "Start backend dev server: `npm run dev` in backend/",
+    "Start frontend dev server: `npm run dev` in frontend/",
+    "Manual test: Open browser DevTools -> Application -> Cookies. Navigate to http://localhost:3000/auth/login, log in with valid credentials, verify accessToken and refreshToken cookies appear with HttpOnly flag and SameSite=Strict",
+    "Manual test: Make authenticated request (e.g., GET /api/v1/auth/me), verify it succeeds with cookie auth",
+    "Manual test: Check XSRF-TOKEN cookie exists (not httpOnly) and X-XSRF-TOKEN header sent on POST requests",
+    "Manual test: Log out, verify cookies are cleared",
+    "Manual test: Upload an image file, verify it succeeds. Rename a .txt file to .jpg and try upload, verify it's rejected with validation error"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

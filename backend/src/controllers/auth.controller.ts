@@ -237,6 +237,22 @@ export class AuthController {
    */
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      // Get the access token to blacklist it
+      let token = req.cookies?.accessToken;
+      
+      // Fallback to Authorization header
+      if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          token = authHeader.substring(7);
+        }
+      }
+
+      // Blacklist the token if we have it
+      if (token && req.user) {
+        await authService.logout(req.user.id, token);
+      }
+
       // Clear httpOnly cookies
       res.clearCookie('accessToken', {
         httpOnly: true,

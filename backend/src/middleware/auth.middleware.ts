@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express'
 import { verifyAccessToken } from '../utils/jwt.utils'
 import { AuthenticationError } from '../utils/errors'
 import userRepository from '../repositories/user.repository'
+import authService from '../services/auth.service'
 import prisma from '../config/database'
 
 /**
@@ -32,6 +33,12 @@ export async function authenticate(
 
     if (!token) {
       throw new AuthenticationError('No token provided')
+    }
+
+    // Check if token is blacklisted (logout/refresh rotation)
+    const isBlacklisted = await authService.isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      throw new AuthenticationError('Token has been invalidated')
     }
 
     // Verify token
