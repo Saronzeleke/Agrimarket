@@ -5,8 +5,60 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
+import { fileTypeFromBuffer } from 'file-type';
+import config from '../config/env';
 import { ValidationError } from '../utils/errors';
 import logger from '../config/logger';
+
+/**
+ * CSRF Protection using double-submit cookie pattern
+ */
+export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+  // Skip if CSRF protection is disabled (for development/testing)
+  if (!config.csrf.enabled) {
+    return next();
+  }
+
+  // Skip CSRF for GET, HEAD, OPTIONS requests (safe methods)
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    // Generate and set CSRF token cookie for GET requests if not already set
+    if (!req.cookies['XSRF-TOKEN']) {
+      const csrfToken = crypto.randomBytes(32).toString('hex')
+      res.cookie('XSRF-TOKEN', csrfToken, {
+        httpOnly: false, // Must be readable by JavaScript
+        secure: config.isProduction,
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      })
+    }
+    return next()
+  }
+
+  // For state-changing requests (POST, PUT, PATCH, DELETE), validate CSRF token
+  const cookieToken = req.cookies['XSRF-TOKEN']
+  const headerToken = req.headers['x-xsrf-token'] as string
+
+  if (!cookieToken || !headerToken) {
+    logger.warn('CSRF token missing', {
+      ip: req.ip,
+      method: req.method,
+      url: req.url,
+    })
+    throw new ValidationError('CSRF token missing')
+  }
+
+  if (cookieToken !== headerToken) {
+    logger.warn('CSRF token mismatch', {
+      ip: req.ip,
+      method: req.method,
+      url: req.url,
+    })
+    throw new ValidationError('CSRF token invalid')
+  }
+
+  next()
+}
 
 /**
  * Sanitize user input to prevent XSS attacks
@@ -129,37 +181,72 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
 };
 
 /**
- * Validate file upload
+ * Validate file upload with magic number (file signature) validation
  */
-export const validateFileUpload = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.file && !req.files) {
-    return next();
+export const validateFileUpload = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file && !req.files) {
+      return next();
+    }
+
+    const files = req.file ? [req.file] : (Array.isArray(req.files) ? req.files : Object.values(req.files).flat());
+
+    for (const file of files) {
+      if (!file) continue;
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new ValidationError('File size exceeds 5MB limit');
+      }
+
+      // Validate file type using magic numbers (file signatures)
+      if (file.buffer) {
+        const fileType = await fileTypeFromBuffer(file.buffer);
+        
+        // Allowed MIME types
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        
+        if (!fileType || !allowedTypes.includes(fileType.mime)) {
+          logger.warn('File upload rejected - invalid file type', {
+            detectedType: fileType?.mime || 'unknown',
+            claimedType: file.mimetype,
+            filename: file.originalname,
+            ip: req.ip,
+          });
+          throw new ValidationError(
+            `Invalid file type. Only JPEG, PNG, and WebP images are allowed. Detected type: ${fileType?.mime || 'unknown'}`
+          );
+        }
+
+        // Additional check: MIME type should match the detected type
+        if (file.mimetype !== fileType.mime && !allowedTypes.includes(fileType.mime)) {
+          logger.warn('File upload rejected - MIME type mismatch', {
+            detectedType: fileType.mime,
+            claimedType: file.mimetype,
+            filename: file.originalname,
+            ip: req.ip,
+          });
+          throw new ValidationError('File type mismatch detected');
+        }
+      } else {
+        // If buffer is not available, fall back to MIME type check only
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.mimetype)) {
+          throw new ValidationError('Invalid file type. Only JPEG, PNG, and WebP images are allowed');
+        }
+      }
+
+      // Sanitize filename
+      if (file.originalname) {
+        file.originalname = sanitizeFilename(file.originalname);
+      }
+    }
+
+    next();
+  } catch (error) {
+    next(error);
   }
-
-  const file = req.file || (Array.isArray(req.files) ? req.files[0] : null);
-
-  if (!file) {
-    return next();
-  }
-
-  // Validate file size (max 5MB)
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  if (file.size > maxSize) {
-    throw new ValidationError('File size exceeds 5MB limit');
-  }
-
-  // Validate file type (images only)
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  if (!allowedTypes.includes(file.mimetype)) {
-    throw new ValidationError('Invalid file type. Only JPEG, PNG, and WebP images are allowed');
-  }
-
-  // Sanitize filename
-  if (file.originalname) {
-    file.originalname = sanitizeFilename(file.originalname);
-  }
-
-  next();
 };
 
 /**

@@ -5,6 +5,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import compression from 'compression'
 import morgan from 'morgan'
+import cookieParser from 'cookie-parser'
 import config from './config/env'
 import logger, { httpLogStream } from './config/logger'
 import { CONSTANTS } from './config/constants'
@@ -15,6 +16,7 @@ import {
 import {
   sanitizeInput,
   logSuspiciousActivity,
+  csrfProtection,
 } from './middleware/security.middleware'
 import {
   apiLimiter,
@@ -91,7 +93,13 @@ app.use(logSuspiciousActivity)
 // Global API Rate Limiter
 app.use(apiLimiter)
 
+// CSRF Protection
+app.use(csrfProtection)
+
 // Parsing Middleware
+
+// Parse cookies
+app.use(cookieParser())
 
 // Parse JSON bodies
 app.use(express.json({ limit: '10mb' }))

@@ -53,8 +53,9 @@ export default function RegisterPage() {
       const response = await authApi.register(registerData);
       
       if (response.data.success && response.data.data) {
-        const { user, accessToken } = response.data.data;
-        login(user, accessToken);
+        const { user } = response.data.data;
+        // Tokens are now stored in httpOnly cookies, no need to pass token
+        login(user);
         addToast("Registration successful", "success");
         router.push(user.role === "SELLER" ? ROUTES.DASHBOARD_SELLER : ROUTES.DASHBOARD_BUYER);
       }
@@ -66,16 +67,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8FAF5] py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] py-12 px-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-[var(--surface)] rounded-xl shadow-lg p-8 border border-[var(--border)]">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-[#166534] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-white font-bold text-2xl">A</span>
             </div>
-            <h1 className="text-3xl font-bold text-[#1F2937]">Create Account</h1>
-            <p className="text-[#6B7280] mt-2">Join AgriMarket today</p>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Create Account</h1>
+            <p className="text-[var(--text-secondary)] mt-2">Join AgriMarket today</p>
           </div>
 
           {/* Form */}
@@ -142,15 +143,15 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 required
-                className="w-4 h-4 text-[#166534] border-gray-300 rounded focus:ring-[#166534] mt-1"
+                className="w-4 h-4 text-[var(--primary)] border-[var(--border)] rounded focus:ring-[var(--primary)] mt-1"
               />
-              <label className="ml-2 text-sm text-[#6B7280]">
+              <label className="ml-2 text-sm text-[var(--text-secondary)]">
                 I agree to the{" "}
-                <Link href="/terms" className="text-[#166534] hover:underline">
+                <Link href="/terms" className="text-[var(--primary)] hover:underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-[#166534] hover:underline">
+                <Link href="/privacy" className="text-[var(--primary)] hover:underline">
                   Privacy Policy
                 </Link>
               </label>
@@ -168,9 +169,9 @@ export default function RegisterPage() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-[#6B7280]">
+            <p className="text-sm text-[var(--text-secondary)]">
               Already have an account?{" "}
-              <Link href={ROUTES.LOGIN} className="text-[#166534] font-medium hover:underline">
+              <Link href={ROUTES.LOGIN} className="text-[var(--primary)] font-medium hover:underline">
                 Sign in
               </Link>
             </p>

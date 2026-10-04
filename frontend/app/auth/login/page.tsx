@@ -15,7 +15,7 @@ import { ROUTES } from "@/lib/constants";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -40,8 +40,9 @@ function LoginForm() {
     try {
       const response = await authApi.login(data.email, data.password);
       if (response.data.success && response.data.data) {
-        const { user, accessToken } = response.data.data;
-        login(user, accessToken);
+        const { user } = response.data.data;
+        // Tokens are now stored in httpOnly cookies, no need to pass token
+        login(user);
         addToast("Login successful", "success");
         
         const redirect = searchParams.get("redirect");
@@ -55,16 +56,16 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8FAF5] py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] py-12 px-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-[var(--surface)] rounded-xl shadow-lg p-8 border border-[var(--border)]">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-[#166534] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-white font-bold text-2xl">A</span>
             </div>
-            <h1 className="text-3xl font-bold text-[#1F2937]">Welcome Back</h1>
-            <p className="text-[#6B7280] mt-2">Sign in to your account</p>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Welcome Back</h1>
+            <p className="text-[var(--text-secondary)] mt-2">Sign in to your account</p>
           </div>
 
           {/* Form */}
@@ -89,13 +90,13 @@ function LoginForm() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-[#166534] border-gray-300 rounded focus:ring-[#166534]"
+                  className="w-4 h-4 text-[var(--primary)] border-[var(--border)] rounded focus:ring-[var(--primary)]"
                 />
-                <span className="ml-2 text-sm text-[#6B7280]">Remember me</span>
+                <span className="ml-2 text-sm text-[var(--text-secondary)]">Remember me</span>
               </label>
               <Link
                 href="/auth/forgot-password"
-                className="text-sm text-[#166534] hover:underline"
+                className="text-sm text-[var(--primary)] hover:underline"
               >
                 Forgot password?
               </Link>
@@ -113,9 +114,9 @@ function LoginForm() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-[#6B7280]">
+            <p className="text-sm text-[var(--text-secondary)]">
               Don't have an account?{" "}
-              <Link href={ROUTES.REGISTER} className="text-[#166534] font-medium hover:underline">
+              <Link href={ROUTES.REGISTER} className="text-[var(--primary)] font-medium hover:underline">
                 Sign up
               </Link>
             </p>
@@ -128,7 +129,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F8FAF5]">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[var(--background)]">Loading...</div>}>
       <LoginForm />
     </Suspense>
   );

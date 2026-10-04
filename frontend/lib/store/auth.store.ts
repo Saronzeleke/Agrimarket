@@ -3,54 +3,32 @@ import { User } from "@/types";
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
-  login: (user: User, token: string) => void;
+  login: (user: User) => void;
   logout: () => void;
   updateUser: (user: User) => void;
-  hydrate: () => void;
+  setUser: (user: User | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: null,
   isAuthenticated: false,
 
-  login: (user, token) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("user", JSON.stringify(user));
-    }
-    set({ user, token, isAuthenticated: true });
+  login: (user) => {
+    // Tokens are now stored in httpOnly cookies by backend, no localStorage needed
+    set({ user, isAuthenticated: true });
   },
 
   logout: () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("user");
-    }
-    set({ user: null, token: null, isAuthenticated: false });
+    // Cookies will be cleared by backend logout endpoint
+    set({ user: null, isAuthenticated: false });
   },
 
   updateUser: (user) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(user));
-    }
     set({ user });
   },
 
-  hydrate: () => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("authToken");
-      const userStr = localStorage.getItem("user");
-      if (token && userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          set({ user, token, isAuthenticated: true });
-        } catch (error) {
-          console.error("Failed to hydrate auth state:", error);
-        }
-      }
-    }
+  setUser: (user) => {
+    set({ user, isAuthenticated: !!user });
   },
 }));

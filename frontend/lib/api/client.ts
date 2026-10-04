@@ -6,15 +6,21 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Send cookies with requests
 });
 
-// Request interceptor - add JWT token
+// Request interceptor - add CSRF token
 apiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      // Read CSRF token from cookie and set as header
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("XSRF-TOKEN="))
+        ?.split("=")[1];
+      
+      if (csrfToken) {
+        config.headers["X-XSRF-TOKEN"] = csrfToken;
       }
     }
     return config;
@@ -27,10 +33,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
+      // Unauthorized - redirect to login (cookies will be cleared by backend)
       if (typeof window !== "undefined") {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("user");
         window.location.href = "/auth/login";
       }
     }

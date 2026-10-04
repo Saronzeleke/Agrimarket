@@ -80,6 +80,9 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   CORS_CREDENTIALS: z.string().transform((val) => val === 'true').default('true'),
 
+  // CSRF Protection
+  CSRF_ENABLED: z.string().transform((val) => val === 'true').default('true'),
+
   // Session
   SESSION_SECRET: z.string().min(32, 'SESSION_SECRET must be at least 32 characters'),
 
@@ -226,6 +229,11 @@ export const config = {
   cors: {
     origin: env.CORS_ORIGIN,
     credentials: env.CORS_CREDENTIALS,
+  },
+
+  // CSRF
+  csrf: {
+    enabled: env.CSRF_ENABLED,
   },
 
   // Session
