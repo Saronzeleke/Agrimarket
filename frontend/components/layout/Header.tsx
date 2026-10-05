@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   MagnifyingGlassIcon,
   ShoppingCartIcon,
@@ -20,16 +20,25 @@ import { ROUTES } from "@/lib/constants";
 
 export const Header: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuthStore();
   const { count } = useCartStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const navigationLinkClass = (route: string, mobile = false) =>
+    `${mobile ? "px-[16px] py-3" : "px-3 py-2"} text-sm font-medium rounded-lg transition-all ${
+      pathname === route
+        ? "text-[var(--primary)] bg-[var(--hover-bg)]"
+        : "text-[var(--text-primary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)]"
+    }`;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`${ROUTES.SEARCH}?q=${encodeURIComponent(searchQuery)}`);
+    const query = searchQuery.trim();
+    if (query) {
+      router.push(`${ROUTES.SEARCH}?q=${encodeURIComponent(query)}`);
+      setShowMobileMenu(false);
     }
   };
 
@@ -50,8 +59,8 @@ export const Header: React.FC = () => {
 
   return (
     <header className="bg-[var(--navbar-bg)] border-b border-[var(--border)] sticky top-0 z-50 shadow-sm transition-colors">
-      <div className="container-custom">
-        <div className="flex items-center justify-between h-16 gap-3 lg:gap-4">
+      <div className="container-custom header-container">
+        <div className="flex items-center justify-between h-[64px] gap-3 lg:gap-[16px]">
           {/* Logo & Brand - Left */}
           <Link href={ROUTES.HOME} className="flex items-center gap-2 flex-shrink-0 group">
             <div className="w-9 h-9 bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
@@ -62,34 +71,39 @@ export const Header: React.FC = () => {
             <span className="text-lg lg:text-xl font-bold text-[var(--primary)] tracking-tight">AgriMarket</span>
           </Link>
 
-          {/* Desktop Navigation - Center Left (hidden on mobile/tablet) */}
-          <nav className="hidden lg:flex items-center gap-1 flex-shrink-0">
+          {/* Desktop navigation is hidden below the desktop breakpoint. */}
+          <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-1 flex-shrink-0">
             <Link
               href={ROUTES.HOME}
-              className="px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
+              className={navigationLinkClass(ROUTES.HOME)}
+              aria-current={pathname === ROUTES.HOME ? "page" : undefined}
             >
               Home
             </Link>
             <Link
               href={ROUTES.MARKETPLACE}
-              className="px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
+              className={navigationLinkClass(ROUTES.MARKETPLACE)}
+              aria-current={pathname === ROUTES.MARKETPLACE ? "page" : undefined}
             >
               Marketplace
             </Link>
             {isAuthenticated && user?.role === "SELLER" && (
               <Link
                 href={ROUTES.DASHBOARD_SELLER}
-                className="px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
+                className={navigationLinkClass(ROUTES.DASHBOARD_SELLER)}
+                aria-current={pathname === ROUTES.DASHBOARD_SELLER ? "page" : undefined}
               >
                 Dashboard
               </Link>
             )}
           </nav>
 
-          {/* Search Bar - Flexible (hidden on mobile, visible from md up) */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md lg:max-w-xl">
+          {/* Search is shown in the desktop row; smaller layouts use the menu. */}
+          <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-xl">
             <div className="relative w-full">
+              <label htmlFor="desktop-search" className="sr-only">Search products</label>
               <input
+                id="desktop-search"
                 type="text"
                 placeholder="Search fresh produce..."
                 value={searchQuery}
@@ -118,10 +132,10 @@ export const Header: React.FC = () => {
                   <HeartIcon className="w-5 h-5" />
                 </Link>
 
-                {/* Cart - Visible from md up */}
+                {/* Cart is shown in the desktop row. */}
                 <Link
                   href={ROUTES.CART}
-                  className="hidden md:flex relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
+                  className="hidden lg:flex relative p-2 text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
                   title="Cart"
                 >
                   <ShoppingCartIcon className="w-5 h-5" />
@@ -141,11 +155,14 @@ export const Header: React.FC = () => {
                   <BellIcon className="w-5 h-5" />
                 </Link>
 
-                {/* User Menu - Visible from md up */}
-                <div className="relative hidden md:block">
+                {/* User menu is shown in the desktop row. */}
+                <div className="relative hidden lg:block">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-[var(--hover-bg)] rounded-lg transition-all"
+                    aria-expanded={showUserMenu}
+                    aria-controls="user-menu"
+                    aria-label="Open account menu"
                   >
                     <Avatar
                       firstName={user?.firstName}
@@ -160,8 +177,8 @@ export const Header: React.FC = () => {
                         className="fixed inset-0 z-10"
                         onClick={() => setShowUserMenu(false)}
                       />
-                      <div className="absolute right-0 mt-2 w-56 bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] py-2 z-20">
-                        <div className="px-4 py-3 border-b border-[var(--border)]">
+                      <div id="user-menu" className="absolute right-0 mt-2 w-56 bg-[var(--surface)] rounded-xl shadow-xl border border-[var(--border)] py-2 z-20">
+                        <div className="px-[16px] py-3 border-b border-[var(--border)]">
                           <p className="text-sm font-semibold text-[var(--text-primary)]">
                             {user?.firstName} {user?.lastName}
                           </p>
@@ -169,21 +186,21 @@ export const Header: React.FC = () => {
                         </div>
                         <Link
                           href={user?.role === "SELLER" ? ROUTES.DASHBOARD_SELLER : ROUTES.DASHBOARD_BUYER}
-                          className="block px-4 py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] transition-all"
+                          className="block px-[16px] py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] transition-all"
                           onClick={() => setShowUserMenu(false)}
                         >
                           Dashboard
                         </Link>
                         <Link
                           href={ROUTES.ORDERS}
-                          className="block px-4 py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] transition-all"
+                          className="block px-[16px] py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] transition-all"
                           onClick={() => setShowUserMenu(false)}
                         >
                           My Orders
                         </Link>
                         <Link
                           href={ROUTES.SETTINGS}
-                          className="block px-4 py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] transition-all"
+                          className="block px-[16px] py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] transition-all"
                           onClick={() => setShowUserMenu(false)}
                         >
                           Settings
@@ -191,7 +208,7 @@ export const Header: React.FC = () => {
                         <div className="border-t border-[var(--border)] mt-2 pt-2">
                           <button
                             onClick={handleLogout}
-                            className="w-full text-left px-4 py-2.5 text-sm text-[var(--error)] hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
+                            className="w-full text-left px-[16px] py-2.5 text-sm text-[var(--error)] hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
                           >
                             Logout
                           </button>
@@ -205,24 +222,25 @@ export const Header: React.FC = () => {
               <>
                 <Link
                   href={ROUTES.LOGIN}
-                  className="hidden md:inline-flex px-3 lg:px-4 py-2 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
+                  className="hidden lg:inline-flex px-[16px] py-2 text-sm font-medium text-[var(--text-primary)] hover:text-[var(--primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
                 >
                   Login
                 </Link>
                 <Link
                   href={ROUTES.REGISTER}
-                  className="hidden md:inline-flex px-3 lg:px-5 py-2 text-sm font-semibold bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-hover)] shadow-sm hover:shadow-md transition-all"
+                  className="hidden lg:inline-flex px-5 py-2 text-sm font-semibold bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-hover)] shadow-sm hover:shadow-md transition-all"
                 >
                   Sign Up
                 </Link>
               </>
             )}
 
-            {/* Mobile Menu Toggle - Visible below md (768px) */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 text-[var(--text-primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
-              aria-label="Toggle menu"
+              className="lg:hidden p-2 text-[var(--text-primary)] hover:bg-[var(--hover-bg)] rounded-lg transition-all"
+              aria-label={showMobileMenu ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={showMobileMenu}
+              aria-controls="responsive-navigation"
             >
               {showMobileMenu ? (
                 <XMarkIcon className="w-6 h-6" />
@@ -233,13 +251,14 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Menu - Below md (768px) */}
         {showMobileMenu && (
-          <div className="md:hidden border-t border-[var(--border)] py-4 space-y-1 animate-slide-in">
+          <div id="responsive-navigation" className="lg:hidden border-t border-[var(--border)] py-[16px] space-y-1 animate-slide-in">
             {/* Mobile Search */}
             <form onSubmit={handleSearch} className="px-2 pb-3">
               <div className="relative">
+                <label htmlFor="mobile-search" className="sr-only">Search products</label>
                 <input
+                  id="mobile-search"
                   type="text"
                   placeholder="Search fresh produce..."
                   value={searchQuery}
@@ -251,44 +270,36 @@ export const Header: React.FC = () => {
             </form>
 
             {/* Mobile Navigation */}
-            <nav className="flex flex-col">
+            <nav aria-label="Main navigation" className="flex flex-col">
               <Link
                 href={ROUTES.HOME}
-                className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
+                className={navigationLinkClass(ROUTES.HOME, true)}
+                aria-current={pathname === ROUTES.HOME ? "page" : undefined}
                 onClick={() => setShowMobileMenu(false)}
               >
                 Home
               </Link>
               <Link
                 href={ROUTES.MARKETPLACE}
-                className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
+                className={navigationLinkClass(ROUTES.MARKETPLACE, true)}
+                aria-current={pathname === ROUTES.MARKETPLACE ? "page" : undefined}
                 onClick={() => setShowMobileMenu(false)}
               >
                 Marketplace
               </Link>
-              {isAuthenticated && user?.role === "SELLER" && (
-                <Link
-                  href={ROUTES.DASHBOARD_SELLER}
-                  className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  Dashboard
-                </Link>
-              )}
-
               {/* Mobile Authenticated Actions */}
               {isAuthenticated ? (
                 <>
                   <Link
                     href={ROUTES.WISHLIST}
-                    className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
+                    className="px-[16px] py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     Wishlist
                   </Link>
                   <Link
                     href={ROUTES.CART}
-                    className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all flex items-center justify-between"
+                    className="px-[16px] py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all flex items-center justify-between"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     Cart
@@ -300,28 +311,28 @@ export const Header: React.FC = () => {
                   </Link>
                   <Link
                     href={ROUTES.NOTIFICATIONS}
-                    className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
+                    className="px-[16px] py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     Notifications
                   </Link>
                   <Link
                     href={user?.role === "SELLER" ? ROUTES.DASHBOARD_SELLER : ROUTES.DASHBOARD_BUYER}
-                    className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
+                    className="px-[16px] py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     My Dashboard
                   </Link>
                   <Link
                     href={ROUTES.ORDERS}
-                    className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
+                    className="px-[16px] py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     My Orders
                   </Link>
                   <Link
                     href={ROUTES.SETTINGS}
-                    className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
+                    className="px-[16px] py-3 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--primary)] rounded-lg transition-all"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     Settings
@@ -331,7 +342,7 @@ export const Header: React.FC = () => {
                       handleLogout();
                       setShowMobileMenu(false);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm font-medium text-[var(--error)] hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
+                    className="w-full text-left px-[16px] py-3 text-sm font-medium text-[var(--error)] hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
                   >
                     Logout
                   </button>
@@ -340,14 +351,14 @@ export const Header: React.FC = () => {
                 <>
                   <Link
                     href={ROUTES.LOGIN}
-                    className="mx-2 mt-2 px-4 py-2.5 text-sm font-medium text-center text-[var(--text-primary)] border border-[var(--border)] rounded-lg hover:bg-[var(--hover-bg)] hover:border-[var(--primary)] transition-all"
+                    className="mx-2 mt-2 px-[16px] py-2.5 text-sm font-medium text-center text-[var(--text-primary)] border border-[var(--border)] rounded-lg hover:bg-[var(--hover-bg)] hover:border-[var(--primary)] transition-all"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     Login
                   </Link>
                   <Link
                     href={ROUTES.REGISTER}
-                    className="mx-2 mt-2 px-4 py-2.5 text-sm font-semibold text-center bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-hover)] shadow-sm transition-all"
+                    className="mx-2 mt-2 px-[16px] py-2.5 text-sm font-semibold text-center bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-hover)] shadow-sm transition-all"
                     onClick={() => setShowMobileMenu(false)}
                   >
                     Sign Up
@@ -356,7 +367,7 @@ export const Header: React.FC = () => {
               )}
 
               {/* Theme Toggle in Mobile */}
-              <div className="px-4 py-3 flex items-center justify-between border-t border-[var(--border)] mt-2 pt-4">
+              <div className="px-[16px] py-3 flex items-center justify-between border-t border-[var(--border)] mt-2 pt-[16px]">
                 <span className="text-sm font-medium text-[var(--text-primary)]">Theme</span>
                 <ThemeToggle />
               </div>
