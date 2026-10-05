@@ -1,29 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  /* Light Theme - Premium Marketplace Palette */
-  --primary: #1E3A5F;        /* Deep Navy */
-  --primary-hover: #152B47;  /* Darker Navy */
-  --accent: #D97706;         /* Muted Orange */
-  --accent-hover: #B45309;   /* Darker Orange */
-  --background: #FAF8F5;     /* Warm Cream */
+  /* Light Theme - Fresh Agricultural Palette */
+  --primary: #0F6B3C;        /* Deep Agricultural Green */
+  --primary-hover: #0A5230;  /* Darker Green */
+  --accent: #E85D04;         /* Warm Harvest Orange */
+  --accent-hover: #C74E03;   /* Darker Orange */
+  --background: #F8FAF7;     /* Soft Clean Off-White */
   --surface: #FFFFFF;        /* Pure White */
-  --navbar-bg: #FEFDFB;      /* Off-White for navbar */
-  --text-primary: #1E3A5F;   /* Deep Navy for text */
-  --text-secondary: #64748B; /* Muted Slate */
-  --border: #E2E0DC;         /* Soft Border */
+  --navbar-bg: #FFFFFF;      /* Clean White Navbar */
+  --search-bg: #FFFFFF;      /* White Search Background */
+  --text-primary: #0F172A;   /* Strong Readable Text */
+  --text-secondary: #64748B; /* Muted Secondary Text */
+  --border: #E2E8F0;         /* Subtle Border */
   --error: #DC2626;
+  --hover-bg: #F8FAF7;       /* Soft hover background */
 }
 
 [data-theme="dark"] {
   /* Dark Theme */
+  --primary: #10B981;        /* Brighter green for dark mode */
+  --primary-hover: #059669;  
+  --accent: #F59E0B;         /* Brighter orange for dark mode */
+  --accent-hover: #D97706;
   --background: #0F172A;
   --surface: #1E293B;
   --navbar-bg: #1E293B;
+  --search-bg: #334155;      /* Darker search in dark mode */
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --border: #334155;
   --error: #EF4444;
+  --hover-bg: #334155;       /* Dark hover background */
 }
 
 @theme inline {

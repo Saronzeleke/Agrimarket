@@ -26,6 +26,12 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
     return next();
   }
 
+  // Skip if cookies not available (cookie-parser not installed)
+  if (!req.cookies) {
+    logger.warn('CSRF protection skipped: cookie-parser middleware not configured')
+    return next();
+  }
+
   // Skip CSRF for GET, HEAD, OPTIONS requests (safe methods)
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
     // Generate and set CSRF token cookie for GET requests if not already set
