@@ -61,7 +61,6 @@ const envSchema = z.object({
   TELEBIRR_APP_KEY: z.string().optional(),
   TELEBIRR_PUBLIC_KEY: z.string().optional(),
   TELEBIRR_API_URL: z.string().url().optional(),
-  USE_MOCK_PAYMENT: z.string().transform((val) => val === 'true').default('true'),
 
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
@@ -190,7 +189,6 @@ export const config = {
 
   // Payment
   payment: {
-    useMock: env.USE_MOCK_PAYMENT,
     chapa: {
       secretKey: env.CHAPA_SECRET_KEY,
       publicKey: env.CHAPA_PUBLIC_KEY,

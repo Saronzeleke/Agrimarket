@@ -51,7 +51,7 @@ export const CONSTANTS = {
   ] as const,
   
   // Payment Providers
-  PAYMENT_PROVIDERS: ['CHAPA', 'TELEBIRR', 'CBE_BIRR', 'MOCK'] as const,
+  PAYMENT_PROVIDERS: ['CHAPA', 'TELEBIRR', 'CBE_BIRR'] as const,
   
   // File Extensions
   ALLOWED_IMAGE_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.webp'] as const,

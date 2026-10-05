@@ -8,6 +8,7 @@ export interface EmailOptions {
 }
 
 export interface IEmailProvider {
+  isConfigured(): boolean
   // Send an email
   
   send(options: EmailOptions): Promise<void>

@@ -13,12 +13,16 @@ import config from '../../config/env'
 export class SMTPEmailProvider implements IEmailProvider {
   private transporter: Transporter | null = null
 
-  constructor() {
+  constructor(private readonly smtp = config.email.smtp) {
     this.initializeTransporter()
   }
 
+  isConfigured(): boolean {
+    return this.transporter !== null
+  }
+
   private initializeTransporter(): void {
-    const { smtp } = config.email
+    const smtp = this.smtp
 
     // Only initialize if SMTP credentials are provided
     if (!smtp.host || !smtp.port) {

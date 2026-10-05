@@ -8,7 +8,7 @@ export const checkoutSummarySchema = z.object({
 export const processCheckoutSchema = z.object({
   addressId: z.string().uuid('Invalid address ID'),
   notes: z.string().max(500, 'Notes cannot exceed 500 characters').optional(),
-  paymentMethod: z.enum(['MOCK', 'CHAPA', 'TELEBIRR', 'CBE_BIRR'], {
+  paymentMethod: z.enum(['CHAPA', 'TELEBIRR', 'CBE_BIRR'], {
     errorMap: () => ({ message: 'Invalid payment method' }),
   }),
 });

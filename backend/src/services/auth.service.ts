@@ -18,6 +18,7 @@ import {
   ConflictError,
   NotFoundError,
   BusinessLogicError,
+  ExternalServiceError,
 } from '../utils/errors'
 import { CONSTANTS } from '../config/constants'
 import { User } from '@prisma/client'
@@ -30,6 +31,12 @@ import { getRedisClient } from '../config/redis'
 const failedLoginAttemptsMemory = new Map<string, { count: number; expiresAt: Date }>();
 
 export class AuthService {
+  private ensureEmailDeliveryConfigured(): void {
+    if (!emailProvider.isConfigured()) {
+      throw new ExternalServiceError('email', 'Email delivery is not configured')
+    }
+  }
+
   /**
    * Track failed login attempt
    * Uses Redis if available, otherwise falls back to in-memory store
@@ -151,6 +158,10 @@ export class AuthService {
 
   // Register a new user
   async register(data: RegisterData): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
+    if (config.features.emailVerification) {
+      this.ensureEmailDeliveryConfigured()
+    }
+
     // Validate password strength
     const passwordValidation = validatePasswordStrength(data.password)
     if (!passwordValidation.valid) {
@@ -371,8 +382,14 @@ export class AuthService {
     // Delete verification token
     await emailVerificationRepository.delete(verification.id)
 
-    // Send welcome email
-    await emailProvider.sendWelcomeEmail(user.email, user.firstName)
+    // Verification is complete even if the optional welcome message cannot be sent.
+    if (emailProvider.isConfigured()) {
+      try {
+        await emailProvider.sendWelcomeEmail(user.email, user.firstName)
+      } catch (error) {
+        logger.warn('Welcome email delivery failed', { userId: user.id, error })
+      }
+    }
 
     logger.info('Email verified', {
       userId: user.id,
@@ -382,6 +399,8 @@ export class AuthService {
 
   // Resend verification email
   async resendVerificationEmail(email: string): Promise<void> {
+    this.ensureEmailDeliveryConfigured()
+
     // Find user
     const user = await userRepository.findByEmail(email)
     if (!user) {
@@ -422,6 +441,8 @@ export class AuthService {
   // Request password reset
   
   async requestPasswordReset(email: string): Promise<void> {
+    this.ensureEmailDeliveryConfigured()
+
     // Find user
     const user = await userRepository.findByEmail(email)
     

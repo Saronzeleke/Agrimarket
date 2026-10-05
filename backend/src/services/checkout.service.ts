@@ -8,7 +8,15 @@ import prisma from '../config/database';
 interface CheckoutData {
   addressId: string;
   notes?: string;
-  paymentMethod: 'MOCK' | 'CHAPA' | 'TELEBIRR' | 'CBE_BIRR';
+  paymentMethod: 'CHAPA' | 'TELEBIRR' | 'CBE_BIRR';
+}
+
+interface PaymentMethod {
+  id: CheckoutData['paymentMethod'];
+  name: string;
+  description: string;
+  enabled: boolean;
+  icon: string;
 }
 
 export const checkoutService = {
@@ -103,6 +111,14 @@ export const checkoutService = {
  //  Process checkout and create order
 
   async processCheckout(userId: string, data: CheckoutData, ipAddress?: string, userAgent?: string) {
+    const paymentMethodIsEnabled = this.getPaymentMethods().some(
+      (method) => method.id === data.paymentMethod && method.enabled
+    );
+
+    if (!paymentMethodIsEnabled) {
+      throw new BadRequestError('Checkout is unavailable because no payment provider is configured');
+    }
+
     // Validate cart
     const cart = await cartService.getCart(userId);
 
@@ -288,36 +304,7 @@ export const checkoutService = {
     };
   },
  // Get available payment methods
-  getPaymentMethods() {
-    return [
-      {
-        id: 'MOCK',
-        name: 'Mock Payment (Development)',
-        description: 'For testing purposes only',
-        enabled: true,
-        icon: 'credit-card',
-      },
-      {
-        id: 'CHAPA',
-        name: 'Chapa',
-        description: 'Pay with Chapa - Mobile money, cards, and more',
-        enabled: false, // Enable when integrated
-        icon: 'chapa',
-      },
-      {
-        id: 'TELEBIRR',
-        name: 'telebirr',
-        description: 'Pay with telebirr wallet',
-        enabled: false, // Enable when integrated
-        icon: 'telebirr',
-      },
-      {
-        id: 'CBE_BIRR',
-        name: 'CBE Birr',
-        description: 'Pay with CBE Birr mobile banking',
-        enabled: false, // Enable when integrated
-        icon: 'cbe',
-      },
-    ];
+  getPaymentMethods(): PaymentMethod[] {
+    return [];
   },
 };

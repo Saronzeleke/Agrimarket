@@ -4,7 +4,7 @@
  */
 
 import prisma from '../config/database';
-import { AuditLog } from '@prisma/client';
+import { AuditLog, Prisma } from '@prisma/client';
 import logger from '../config/logger';
 
 export class AuditLogRepository {
@@ -27,7 +27,7 @@ export class AuditLogRepository {
           action,
           entityType,
           entityId,
-          details: details || null,
+          details: details === undefined || details === null ? Prisma.DbNull : details,
           ipAddress: ipAddress || null,
           userAgent: userAgent || null,
         },
