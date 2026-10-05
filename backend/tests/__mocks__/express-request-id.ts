@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 
 const mockRequestId = () => {
   return (req: Request, res: Response, next: NextFunction) => {
-    req.id = 'test-request-id';
+    (req as Request & { id?: string }).id = 'test-request-id';
     next();
   };
 };

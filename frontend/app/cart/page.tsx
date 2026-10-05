@@ -24,22 +24,26 @@ export default function CartPage() {
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    let isCurrent = true;
 
-  const fetchCart = async () => {
-    try {
-      const response = await cartApi.getCart();
-      if (response.data.success && response.data.data) {
-        setCart(response.data.data);
-        setItems(response.data.data.items);
-      }
-    } catch (error) {
-      console.error("Failed to fetch cart:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    cartApi.getCart()
+      .then((response) => {
+        if (isCurrent && response.data.success && response.data.data) {
+          setCart(response.data.data);
+          setItems(response.data.data.items);
+        }
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) console.error("Failed to fetch cart:", error);
+      })
+      .finally(() => {
+        if (isCurrent) setLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [setItems]);
 
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
     if (quantity < 1) return;
@@ -51,7 +55,7 @@ export default function CartPage() {
         setItems(response.data.data.items);
         addToast("Cart updated", "success");
       }
-    } catch (error) {
+    } catch {
       addToast("Failed to update cart", "error");
     } finally {
       setUpdating(null);
@@ -63,10 +67,14 @@ export default function CartPage() {
     try {
       const response = await cartApi.removeItem(itemId);
       if (response.data.success) {
-        await fetchCart();
+        const cartResponse = await cartApi.getCart();
+        if (cartResponse.data.success && cartResponse.data.data) {
+          setCart(cartResponse.data.data);
+          setItems(cartResponse.data.data.items);
+        }
         addToast("Item removed from cart", "success");
       }
-    } catch (error) {
+    } catch {
       addToast("Failed to remove item", "error");
     } finally {
       setUpdating(null);

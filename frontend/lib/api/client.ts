@@ -35,7 +35,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Unauthorized - redirect to login (cookies will be cleared by backend)
       if (typeof window !== "undefined") {
-        window.location.href = "/auth/login";
+        window.location.assign(new URL("/auth/login", window.location.origin));
       }
     }
     return Promise.reject(error);

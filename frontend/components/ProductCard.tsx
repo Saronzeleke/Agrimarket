@@ -78,7 +78,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           addItem(cartResponse.data.data.items[cartResponse.data.data.items.length - 1]);
         }
       }
-    } catch (error) {
+    } catch {
       addToast("Failed to add product to cart", "error");
     } finally {
       setIsLoading(false);

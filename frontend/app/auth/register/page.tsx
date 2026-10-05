@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -49,7 +50,14 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const { confirmPassword, ...registerData } = data;
+      const registerData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        role: data.role,
+      };
       const response = await authApi.register(registerData);
       
       if (response.data.success && response.data.data) {
@@ -59,8 +67,11 @@ export default function RegisterPage() {
         addToast("Registration successful", "success");
         router.push(user.role === "SELLER" ? ROUTES.DASHBOARD_SELLER : ROUTES.DASHBOARD_BUYER);
       }
-    } catch (error: any) {
-      addToast(error.response?.data?.error || "Registration failed", "error");
+    } catch (error: unknown) {
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined;
+      addToast(message || "Registration failed", "error");
     } finally {
       setIsLoading(false);
     }

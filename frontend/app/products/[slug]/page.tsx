@@ -20,26 +20,38 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const productSlug = typeof params.slug === "string" ? params.slug : undefined;
 
   useEffect(() => {
-    if (params.slug) {
-      fetchProduct();
-    }
-  }, [params.slug]);
-
-  const fetchProduct = async () => {
-    try {
-      const response = await productApi.getProductBySlug(params.slug as string);
-      if (response.data.success && response.data.data) {
-        setProduct(response.data.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch product:", error);
+    if (!productSlug) {
       router.push("/404");
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    let isCurrent = true;
+
+    productApi.getProductBySlug(productSlug)
+      .then((response) => {
+        if (isCurrent && response.data.success && response.data.data) {
+          setProduct(response.data.data);
+        } else if (isCurrent) {
+          router.push("/404");
+        }
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) {
+          console.error("Failed to fetch product:", error);
+          router.push("/404");
+        }
+      })
+      .finally(() => {
+        if (isCurrent) setLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [productSlug, router]);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -49,7 +61,7 @@ export default function ProductDetailPage() {
       if (response.data.success) {
         addToast("Product added to cart", "success");
       }
-    } catch (error) {
+    } catch {
       addToast("Failed to add to cart", "error");
     } finally {
       setAddingToCart(false);

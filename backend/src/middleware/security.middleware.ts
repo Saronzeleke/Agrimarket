@@ -6,7 +6,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import { fileTypeFromBuffer } from 'file-type';
+import { fromBuffer as fileTypeFromBuffer } from 'file-type';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import config from '../config/env';
@@ -220,7 +220,9 @@ export const validateFileUpload = async (req: Request, res: Response, next: Next
     const files = req.file ? [req.file] : (Array.isArray(req.files) ? req.files : (req.files ? Object.values(req.files).flat() : []));
 
     for (const file of files) {
-      if (!file) continue;
+      if (!file) {
+        continue;
+      }
 
       // Validate file size (max 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB

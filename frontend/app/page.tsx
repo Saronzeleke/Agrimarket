@@ -40,31 +40,7 @@ export default function HomePage() {
 
         // Handle products with defensive checks and nested data extraction
         if (productsRes?.data?.success && productsRes.data.data) {
-          // Handle both { data: { data: [...] } } and { data: [...] } formats
-          let productsData = productsRes.data.data;
-          
-          // If data has a nested 'data' property (paginated response)
-          if (productsData && typeof productsData === 'object' && 'data' in productsData) {
-            productsData = (productsData as any).data;
-          }
-          
-          // Validate it's an array
-          if (Array.isArray(productsData)) {
-            // Additional safety: filter out invalid products
-            const validProducts = productsData.filter(
-              (p): p is Product => 
-                p != null && 
-                typeof p === 'object' && 
-                'id' in p && 
-                'name' in p
-            );
-            setFeaturedProducts(validProducts);
-          } else {
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('[Products] Unexpected response format:', productsData);
-            }
-            setFeaturedProducts([]);
-          }
+          setFeaturedProducts(productsRes.data.data.data.slice(0, 8));
         } else {
           setFeaturedProducts([]);
         }

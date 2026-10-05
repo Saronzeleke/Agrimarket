@@ -5,7 +5,6 @@
  */
 
 import multer from 'multer'
-import path from 'path'
 import config from './env'
 
 // Use memory storage to enable buffer-based magic number validation

@@ -1,11 +1,8 @@
 "use client";
 
 import React from "react";
-import { useAuthStore } from "@/lib/store/auth.store";
 
 export default function SellerDashboardPage() {
-  const { user } = useAuthStore();
-
   return (
     <div className="min-h-screen bg-[var(--background)] py-8">
       <div className="container-custom">

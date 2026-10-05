@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
+import axios from "axios";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -48,8 +49,11 @@ function LoginForm() {
         const redirect = searchParams.get("redirect");
         router.push(redirect || (user.role === "SELLER" ? ROUTES.DASHBOARD_SELLER : ROUTES.DASHBOARD_BUYER));
       }
-    } catch (error: any) {
-      addToast(error.response?.data?.error || "Login failed", "error");
+    } catch (error: unknown) {
+      const message = axios.isAxiosError<{ error?: string }>(error)
+        ? error.response?.data?.error
+        : undefined;
+      addToast(message || "Login failed", "error");
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +119,7 @@ function LoginForm() {
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-sm text-[var(--text-secondary)]">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href={ROUTES.REGISTER} className="text-[var(--primary)] font-medium hover:underline">
                 Sign up
               </Link>
