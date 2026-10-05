@@ -12,9 +12,10 @@ import logger from '../../config/logger';
 function getEmailProvider(): IEmailProvider {
   if (!SMTPEmailProvider.isConfigured()) {
     logger.warn('SMTP is not configured. Email-dependent actions are unavailable.');
+  } else {
+    logger.info('Using SMTP Email Provider');
   }
 
-  logger.info('Using SMTP Email Provider');
   return SMTPEmailProvider;
 }
 

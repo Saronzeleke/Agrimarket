@@ -21,6 +21,20 @@ export class SMTPEmailProvider implements IEmailProvider {
     return this.transporter !== null
   }
 
+  async verifyConnection(): Promise<void> {
+    if (!this.transporter) {
+      throw new Error('SMTP transporter not initialized. Check email configuration.')
+    }
+
+    try {
+      await this.transporter.verify()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      logger.error('SMTP connection failed', { error: message })
+      throw new Error('SMTP connection could not be verified.')
+    }
+  }
+
   private initializeTransporter(): void {
     const smtp = this.smtp
 
@@ -45,14 +59,6 @@ export class SMTPEmailProvider implements IEmailProvider {
         socketTimeout: 10000,
       })
 
-      // Verify connection on initialization
-      this.transporter.verify((error) => {
-        if (error) {
-          logger.error('SMTP connection failed', { error: error.message })
-        } else {
-          logger.info('✅ SMTP Email provider ready')
-        }
-      })
     } catch (error: any) {
       logger.error('Failed to initialize SMTP transporter', {
         error: error.message,

@@ -11,6 +11,9 @@ describe('email provider configuration', () => {
     });
 
     expect(provider.isConfigured()).toBe(false);
+    await expect(provider.verifyConnection()).rejects.toThrow(
+      'SMTP transporter not initialized. Check email configuration.'
+    );
     await expect(
       provider.sendVerificationEmail('user@example.com', 'verification-token')
     ).rejects.toThrow('SMTP transporter not initialized. Check email configuration.');

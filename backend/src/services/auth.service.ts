@@ -31,9 +31,15 @@ import { getRedisClient } from '../config/redis'
 const failedLoginAttemptsMemory = new Map<string, { count: number; expiresAt: Date }>();
 
 export class AuthService {
-  private ensureEmailDeliveryConfigured(): void {
+  private async ensureEmailDeliveryConfigured(): Promise<void> {
     if (!emailProvider.isConfigured()) {
       throw new ExternalServiceError('email', 'Email delivery is not configured')
+    }
+
+    try {
+      await emailProvider.verifyConnection()
+    } catch {
+      throw new ExternalServiceError('email', 'Email delivery is unavailable')
     }
   }
 
@@ -159,7 +165,7 @@ export class AuthService {
   // Register a new user
   async register(data: RegisterData): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
     if (config.features.emailVerification) {
-      this.ensureEmailDeliveryConfigured()
+      await this.ensureEmailDeliveryConfigured()
     }
 
     // Validate password strength
@@ -399,7 +405,7 @@ export class AuthService {
 
   // Resend verification email
   async resendVerificationEmail(email: string): Promise<void> {
-    this.ensureEmailDeliveryConfigured()
+    await this.ensureEmailDeliveryConfigured()
 
     // Find user
     const user = await userRepository.findByEmail(email)
@@ -441,7 +447,7 @@ export class AuthService {
   // Request password reset
   
   async requestPasswordReset(email: string): Promise<void> {
-    this.ensureEmailDeliveryConfigured()
+    await this.ensureEmailDeliveryConfigured()
 
     // Find user
     const user = await userRepository.findByEmail(email)
