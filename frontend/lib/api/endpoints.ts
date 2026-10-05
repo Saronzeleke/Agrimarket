@@ -31,6 +31,18 @@ export const authApi = {
     role: string;
   }) => apiClient.post<ApiResponse<{ user: User; accessToken: string }>>("/auth/register", data),
 
+  verifyEmail: (token: string) =>
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/verify-email", { token }),
+
+  resendVerification: (email: string) =>
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/resend-verification", { email }),
+
+  requestPasswordReset: (email: string) =>
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/forgot-password", { email }),
+
+  resetPassword: (token: string, password: string) =>
+    apiClient.post<ApiResponse<{ message: string }>>("/auth/reset-password", { token, password }),
+
   getMe: () => apiClient.get<ApiResponse<User>>("/auth/me"),
 
   logout: () => apiClient.post<ApiResponse>("/auth/logout"),

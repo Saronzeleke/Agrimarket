@@ -46,6 +46,16 @@ export const Footer: React.FC = () => {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/terms" className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors">
+                  Terms of Use
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors">
+                  Privacy Notice
+                </Link>
+              </li>
             </ul>
           </div>
 
