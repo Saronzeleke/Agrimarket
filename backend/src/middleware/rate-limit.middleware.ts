@@ -4,6 +4,7 @@
 
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
+import config from '../config/env';
 
 /**
  * General API rate limiter
@@ -38,7 +39,7 @@ export const apiLimiter = rateLimit({
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  max: config.rateLimit.auth.maxRequests,
   message: {
     success: false,
     error: {

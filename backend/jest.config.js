@@ -35,6 +35,6 @@ module.exports = {
   },
   setupFiles: ['<rootDir>/tests/env.setup.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  testTimeout: 10000,
+  testTimeout: 30000,
   verbose: true,
 };

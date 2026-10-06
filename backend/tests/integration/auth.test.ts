@@ -4,6 +4,7 @@ import { describe, test, expect } from '@jest/globals';
 import request from 'supertest';
 import app from '../../src/app';
 import { userFactory } from '../factories/user.factory';
+import config from '../../src/config/env';
 
 const hasTestDatabase = Boolean(
   process.env['TEST_DATABASE_URL']
@@ -140,15 +141,22 @@ const hasTestDatabase = Boolean(
         emailVerified: false,
       });
 
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send({
-          email: user.email,
-          password,
-        })
-        .expect(401);
+      const emailVerificationEnabled = config.features.emailVerification;
+      config.features.emailVerification = true;
 
-      expect(response.body.success).toBe(false);
+      try {
+        const response = await request(app)
+          .post('/api/v1/auth/login')
+          .send({
+            email: user.email,
+            password,
+          })
+          .expect(401);
+
+        expect(response.body.success).toBe(false);
+      } finally {
+        config.features.emailVerification = emailVerificationEnabled;
+      }
     });
   });
 
@@ -167,7 +175,7 @@ const hasTestDatabase = Boolean(
       const token = loginResponse.body.data.tokens.accessToken;
 
       const response = await request(app)
-        .get('/api/v1/auth/profile')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
 
@@ -178,7 +186,7 @@ const hasTestDatabase = Boolean(
 
     test('should reject request without token', async () => {
       const response = await request(app)
-        .get('/api/v1/auth/profile')
+        .get('/api/v1/auth/me')
         .expect(401);
 
       expect(response.body.success).toBe(false);
@@ -186,7 +194,7 @@ const hasTestDatabase = Boolean(
 
     test('should reject invalid token', async () => {
       const response = await request(app)
-        .get('/api/v1/auth/profile')
+        .get('/api/v1/auth/me')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
 

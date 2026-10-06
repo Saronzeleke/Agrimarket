@@ -25,6 +25,9 @@ beforeAll(async () => {
   if (!databaseUrl) {
     return;
   }
+  if (process.env['DATABASE_URL'] !== databaseUrl) {
+    throw new Error('Application and test cleanup must use the same test database.');
+  }
   // Connect to test database
   await prisma.$connect();
   
