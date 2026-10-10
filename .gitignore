@@ -107,6 +107,7 @@ appendonly.aof
 node_modules/
 */node_modules/
 package-lock.json
+!backend/package-lock.json
 yarn.lock
 pnpm-lock.yaml
 .pnpm-store/

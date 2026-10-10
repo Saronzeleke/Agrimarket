@@ -6,6 +6,7 @@ import { authenticate } from '../middleware/auth.middleware'
 import {
   authLimiter,
   passwordResetLimiter,
+  emailVerificationLimiter,
 } from '../middleware/rate-limit.middleware'
 
 const router = Router()
@@ -21,10 +22,10 @@ router.post('/login', authLimiter, authController.login)
 router.post('/refresh', authController.refreshToken)
 
 // POST /api/v1/auth/verify-email - Verify email address
-router.post('/verify-email', authController.verifyEmail)
+router.post('/verify-email', emailVerificationLimiter, authController.verifyEmail)
 
 // POST /api/v1/auth/resend-verification - Resend verification email
-router.post('/resend-verification', authLimiter, authController.resendVerification)
+router.post('/resend-verification', emailVerificationLimiter, authController.resendVerification)
 
 // POST /api/v1/auth/forgot-password - Request password reset
 router.post('/forgot-password', passwordResetLimiter, authController.requestPasswordReset)

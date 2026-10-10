@@ -227,3 +227,58 @@ export async function retry<T>(
 
   throw lastError!
 }
+
+/**
+ * Validate redirect URL to prevent open redirect attacks
+ * @param redirectUrl The URL to validate
+ * @param allowedDomains Array of allowed domains (defaults to config frontend URL)
+ * @returns true if URL is safe, false otherwise
+ */
+export function validateRedirectUrl(
+  redirectUrl: string,
+  allowedDomains?: string[]
+): boolean {
+  try {
+    // Empty or undefined URLs are not valid
+    if (!redirectUrl || redirectUrl.trim() === '') {
+      return false;
+    }
+
+    // Relative URLs (starting with /) are considered safe
+    if (redirectUrl.startsWith('/') && !redirectUrl.startsWith('//')) {
+      return true;
+    }
+
+    // Parse the URL
+    const url = new URL(redirectUrl);
+
+    // Get allowed domains from config if not provided
+    const allowed = allowedDomains || [];
+    
+    // Extract domain from frontend URL if not explicitly provided
+    if (allowed.length === 0) {
+      try {
+        // Use dynamic import for config
+        const configModule = require('../config/env');
+        const frontendUrl = configModule.default?.frontendUrl || configModule.config?.frontendUrl;
+        if (frontendUrl) {
+          const frontendDomain = new URL(frontendUrl);
+          allowed.push(frontendDomain.hostname);
+        }
+      } catch {
+        // If config can't be loaded, reject external URLs
+        return false;
+      }
+    }
+
+    // Check if the URL's hostname is in the allowed list
+    return allowed.some(domain => {
+      // Remove protocol and trailing slashes for comparison
+      const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      return url.hostname === cleanDomain;
+    });
+  } catch {
+    // If URL parsing fails, it's not a valid URL
+    return false;
+  }
+}

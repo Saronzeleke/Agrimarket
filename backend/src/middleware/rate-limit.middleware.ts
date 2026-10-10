@@ -4,6 +4,7 @@
 
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
+import config from '../config/env';
 
 /**
  * General API rate limiter
@@ -38,7 +39,7 @@ export const apiLimiter = rateLimit({
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
+  max: config.rateLimit.auth.maxRequests,
   message: {
     success: false,
     error: {
@@ -89,11 +90,11 @@ export const passwordResetLimiter = rateLimit({
 
 /**
  * Email verification rate limiter
- * 3 requests per hour per IP
+ * 10 requests per hour per IP
  */
 export const emailVerificationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3,
+  max: 10,
   message: {
     success: false,
     error: {

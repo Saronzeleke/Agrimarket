@@ -1,0 +1,41 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Implement Phase 1 core marketplace screens: Landing page (app/page.tsx with hero, category grid from GET /categories, featured products from GET /products?limit=8, how-it-works, trust stats, seller CTA), Marketplace grid (app/marketplace/page.tsx with product cards from GET /products with filter params, Sidebar filters, search, sort, pagination), Product detail (app/products/[slug]/page.tsx from GET /products/slug/:slug with image gallery, add-to-cart integration, seller info, reviews section), Cart page (app/cart/page.tsx from GET /cart with quantity controls, remove items, promo code input, order summary, checkout button), Auth screens (app/auth/login/page.tsx with email/password form calling POST /auth/login, app/auth/register/page.tsx multi-step form calling POST /auth/register). All screens must be fully responsive (375px/768px/1440px) and integrate with Zustand stores.",
+  "status": "pending",
+  "steps": [
+    "Create frontend/app/page.tsx: Hero section (full-width bg image, H1 'Connect with Ethiopian Farmers', search bar with category dropdown, 2 CTAs Browse/Sell), Category grid (fetch GET /categories, render 2x3 grid on mobile, 3x2 tablet, 6x1 desktop with icons and product counts), Featured products section (fetch GET /products?limit=8&featured=true, horizontal scroll mobile, 2x4 grid desktop, ProductCard component), How It Works (3 steps with Heroicons: MagnifyingGlassIcon/ShoppingCartIcon/TruckIcon + titles/descriptions), Trust indicators (4 stat cards: 10k+ Products, 500+ Farmers, 50k+ Buyers, 14 Regions), Seller CTA (full-width bg section with benefits list, 'Start Selling' button), Footer component",
+    "Create frontend/components/ProductCard.tsx: reusable card (4:3 image, name H4, price text-accent font-bold, unit text-textSecondary text-sm, location badge with MapPinIcon, rating stars + count, Add to Cart button visible on hover desktop/always mobile), onClick navigates to /products/:slug, Add to Cart calls cartStore.addItem()",
+    "Create frontend/app/marketplace/page.tsx: two-column layout (Sidebar filters left 1/4 width desktop/full-width-drawer mobile, ProductGrid right 3/4), fetch GET /products with query params ?category=&minPrice=&maxPrice=&region=&minRating=&page=&limit=12, search input (debounced), sort dropdown (Newest/Price Low/Price High/Rating), product grid 1 col mobile, 2 col tablet, 3 col desktop, Pagination at bottom",
+    "Wire up frontend/components/layout/Sidebar.tsx filters: Categories from GET /categories (checkbox list), Price range (two number inputs min/max), Region (Select dropdown with Ethiopian regions), Rating (1-5 star radio buttons), In Stock (toggle switch), Apply button triggers refetch with new params, Clear button resets filters",
+    "Create frontend/app/products/[slug]/page.tsx: fetch GET /products/slug/:slug, left column image gallery (main image + 4 thumbnails, click to switch), right column (breadcrumb Home > Category > Product, name H2, rating stars + review count, price text-3xl font-bold text-accent, unit, description, seller card with avatar/business name/location/verified badge/rating, quantity selector number input with +/- buttons, Add to Cart primary button calls cartApi.add + cartStore.syncWithBackend, Add to Wishlist outline button), below fold: tabs (Description full text, Reviews list, Seller info), Related products section (GET /products/:id/related, horizontal scroll of 4 ProductCards)",
+    "Create frontend/components/ReviewList.tsx: fetch GET /products/:productId/reviews, render each review (avatar, name, rating stars, verified purchase badge, date, title, comment, helpful count with thumbs up button, seller response if exists), pagination, empty state if no reviews",
+    "Create frontend/app/cart/page.tsx: fetch GET /cart via cartStore, if empty show EmptyState with 'Browse Products' button, else render list (each item: product image, name, price, quantity selector with +/- calling cartStore.updateItem, subtotal, Remove button calling cartStore.removeItem), right sidebar order summary card (Subtotal, Delivery estimate, Discount input with Apply button, Total, Checkout button navigates to /checkout if cart valid else show validation errors)",
+    "Create frontend/app/auth/login/page.tsx: center card, H2 'Welcome Back', email Input with validation, password Input with show/hide toggle, Remember me checkbox, primary Login button, links (Forgot password to /auth/forgot-password, Don't have account to /auth/register), on submit call authApi.login(email, password), on success save token via authStore.login() and redirect to redirect query param or /dashboard",
+    "Create frontend/app/auth/register/page.tsx: multi-step form (Step 1: Account type radio buttons Buyer/Seller, Step 2: firstName, lastName, email, phone, password, confirmPassword with validation, Step 3: Seller-only fields businessName/location/description, Step 4: Success message with 'Check your email to verify'), use react-hook-form + zod validation, on submit POST /auth/register, show verification required message"
+  ],
+  "acceptance_criteria": [
+    "Landing page (/) renders with hero, 6 category cards from backend, 8 featured products, how-it-works, stats, seller CTA, footer",
+    "Marketplace (/marketplace) shows product grid with working filters (category checkboxes, price range, region, rating), search input, sort dropdown, pagination navigating pages",
+    "Product detail (/products/:slug) displays full product info, image gallery, quantity selector, Add to Cart button that adds item to cart and updates Header cart count badge",
+    "Cart page (/cart) lists cart items from backend with quantity controls, remove buttons, order summary with subtotal/delivery/total, Checkout button",
+    "Login page (/auth/login) has email/password form, on submit calls POST /auth/login, saves token and user to authStore and localStorage, redirects to /dashboard",
+    "Register page (/auth/register) has multi-step form, validates all fields, on submit calls POST /auth/register, shows email verification required message",
+    "All pages are responsive at 375px, 768px, 1440px breakpoints",
+    "Header cart icon badge updates when items added to cart",
+    "Header user menu shows Login/Register when unauthenticated, Dashboard/Logout when authenticated"
+  ],
+  "verification": [
+    "npm run dev, open http://localhost:3000",
+    "Landing page: verify categories render from GET /categories, featured products from GET /products (check Network tab), click category navigates to /marketplace?category=:slug, click product card navigates to /products/:slug",
+    "Marketplace: select category filter -> URL updates with ?category=, products refetch, change price range -> refetch, search 'coffee' -> debounced refetch, sort by Price Low -> products reorder, paginate to page 2 -> URL updates with ?page=2",
+    "Product detail: open /products/:slug, click thumbnail switches main image, change quantity to 3, click Add to Cart -> POST /cart/items called (check Network), Header cart badge updates to 3, click Add to Wishlist -> POST /wishlist/items",
+    "Cart: open /cart, verify items from GET /cart, click + on quantity -> PATCH /cart/items/:id, cart subtotal updates, click Remove -> DELETE /cart/items/:id, item disappears, cart empty -> EmptyState shows",
+    "Login: open /auth/login, submit email/password -> POST /auth/login (check Network), on success -> authStore.user populated, localStorage.accessToken set, redirect to /dashboard, Header shows user menu with name",
+    "Register: open /auth/register, step through form, select Seller -> businessName field appears, submit -> POST /auth/register, success message shows",
+    "Responsive: test at 375px (mobile), 768px (tablet), 1440px (desktop) breakpoints in Chrome DevTools",
+    "npm run build (confirm no errors)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

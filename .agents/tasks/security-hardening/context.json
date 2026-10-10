@@ -1,0 +1,33 @@
+{
+  "project_type": "Full-stack TypeScript: Express.js + Prisma ORM backend (Node 18+), Next.js 16 frontend",
+  "language": "TypeScript",
+  "build_system": "npm workspaces - backend uses tsx for dev, tsc for build; frontend uses Next.js build system (Turbopack)",
+  "test_framework": "Jest for backend (scripts: test, test:unit, test:integration, test:e2e, test:coverage). No frontend tests configured yet.",
+  "build_command": "Backend: npm run build (tsc). Frontend: npm run build (next build)",
+  "test_command": "Backend: npm test or npm run test:unit. Frontend: none configured",
+  "verification_instructions": "1. Run `npm run lint` in backend to check TypeScript errors. 2. Run `npm run db:generate` after Prisma schema changes. 3. Run `npx prisma migrate dev --name <migration-name>` for database migrations. 4. Run `npm test` in backend for unit tests. 5. Start dev servers (backend: npm run dev on :3001, frontend: npm run dev on :3000) and manually test affected endpoints. 6. Check logs/ directory for Winston log output during runtime.",
+  "snapshot_or_generated_files": "Prisma Client is generated via `npx prisma generate` and lives in node_modules/@prisma/client. Prisma migrations are in backend/prisma/migrations/. Both get checked in. TypeScript builds to backend/dist/ which is gitignored.",
+  "environment_constraints": "1. .env file contains real production credentials (DB password, SMTP credentials, email) - MUST NOT be committed. 2. express-rate-limit is already installed and partially applied. 3. Helmet is already installed and configured in app.ts. 4. Redis is optional (graceful degradation required if unavailable). 5. JWT tokens currently stored in localStorage on frontend (XSS vulnerable). 6. No CSRF protection currently exists. 7. Rate limiting exists for auth routes but verify-email not covered yet.",
+  "contribution_requirements": "From README: Follow existing code style, write tests for new features, update documentation, run linters before committing. Security-first development. No specific AGENTS.md or CONTRIBUTING.md found with additional requirements.",
+  "key_patterns": "1. Zod validation schemas in backend/src/validators/*.validator.ts - all inputs validated before use. 2. Repository pattern: backend/src/repositories/*.repository.ts handles all DB access. 3. Service layer: backend/src/services/*.service.ts contains business logic. 4. Error handling: custom error classes in backend/src/utils/errors.ts, global error handler in backend/src/middleware/error.middleware.ts. 5. Response helpers: sendSuccess, sendError in backend/src/utils/response.ts. 6. JWT generation: backend/src/utils/jwt.utils.ts. 7. Frontend API client: frontend/lib/api/client.ts uses axios with interceptors for auth.",
+  "relevant_files": [
+    "backend/src/repositories/search.repository.ts",
+    "backend/src/repositories/saved-search.repository.ts",
+    "backend/src/middleware/security.middleware.ts",
+    "backend/src/controllers/auth.controller.ts",
+    "backend/src/services/auth.service.ts",
+    "backend/src/config/env.ts",
+    "backend/prisma/schema.prisma",
+    "backend/.env",
+    "backend/.env.example",
+    "backend/.gitignore",
+    "backend/src/app.ts",
+    "backend/src/routes/auth.routes.ts",
+    "backend/src/middleware/rate-limit.middleware.ts",
+    "frontend/lib/api/client.ts",
+    "backend/src/utils/jwt.utils.ts",
+    "backend/src/middleware/auth.middleware.ts",
+    "backend/package.json"
+  ],
+  "directory_structure": "Backend: src/config (env, logger, constants), src/controllers (HTTP handlers), src/services (business logic), src/repositories (DB access), src/middleware (auth, security, rate-limit, error, cache, performance), src/routes (Express routers), src/validators (Zod schemas), src/utils (helpers, errors, response, jwt, password), src/providers (email), prisma/ (schema, migrations, seed). Frontend: app/ (Next.js 13+ app router pages), lib/ (api client, constants, utils), components/, public/."
+}

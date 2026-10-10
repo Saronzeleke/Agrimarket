@@ -1,0 +1,43 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Implement Checkout flow and Dashboard screens. Build multi-step checkout (app/checkout/page.tsx: Step 1 delivery address from GET /addresses with create/select, Step 2 payment method from GET /checkout/payment-methods with radio selection Chapa/Telebirr/Cash, Step 3 review order with GET /checkout/summary, Step 4 submit via POST /checkout and redirect to success). Build Buyer Dashboard (app/dashboard/buyer/page.tsx with stats, recent orders from GET /orders, wishlist preview from GET /wishlist). Build Seller Dashboard (app/dashboard/seller/page.tsx with revenue chart from GET /seller/analytics/dashboard, orders from GET /seller/orders, inventory alerts from GET /seller/inventory/low-stock, Products management page app/dashboard/seller/products/page.tsx listing GET /seller/products with create/edit/delete modals, Orders page app/dashboard/seller/orders/page.tsx with status update controls calling PATCH /seller/orders/:id/status).",
+  "status": "pending",
+  "steps": [
+    "Create frontend/app/checkout/page.tsx: multi-step wizard (Stepper component showing 1-4 steps with checkmarks on completed), Step 1: fetch GET /addresses, show radio list of saved addresses with 'Use this address' button, 'Add new address' button opens modal with AddressForm (fullName, phone, region select, zone, woreda, kebele, specificLocation, addressType HOME/OFFICE radio, isDefault checkbox) calling POST /addresses, selected address stored in local state",
+    "Checkout Step 2: fetch GET /checkout/payment-methods, render payment method radio cards (Chapa logo + name + 'Fast & Secure', Telebirr logo, Cash on Delivery with warning 'Payment required on delivery'), selected method stored in state",
+    "Checkout Step 3: fetch GET /checkout/summary with selected addressId and paymentMethod, display order review (cart items list with images/names/quantities/prices, delivery address card, payment method badge, order summary: subtotal/delivery/discount/total), Edit links go back to previous steps, Promo code input with Apply button",
+    "Checkout Step 4: on Place Order button click POST /checkout with {addressId, paymentMethod, promoCode?}, on success clear cart via cartStore.clearCart(), redirect to /checkout/success?orderNumber=:orderNumber, success page shows green checkmark icon, 'Order Placed Successfully!', order number, 'View Order' button to /orders/:orderNumber, 'Continue Shopping' to /marketplace",
+    "Create frontend/app/dashboard/buyer/page.tsx: protected route (middleware checks auth), fetch GET /orders?limit=5 for recent orders, show stats cards (Total Orders count, Active Orders where status CONFIRMED|PROCESSING|SHIPPED, Total Spent sum, Avg Rating), recent orders table (order number, date, status badge with color, total, View button to /orders/:id), fetch GET /wishlist?limit=4 for wishlist preview (4 product cards, 'View All' to /wishlist)",
+    "Create frontend/app/dashboard/seller/page.tsx: fetch GET /seller/analytics/dashboard, render stats cards (Total Revenue, Orders This Month, Products Listed, Avg Rating), revenue chart (recharts LineChart with last 7 days data from analytics.salesOverTime), fetch GET /seller/orders?limit=5 for recent orders table (order number, customer name, items count, total, status, actions dropdown: Mark Processing/Shipped), fetch GET /seller/inventory/low-stock for inventory alerts section (list products with currentStock < lowStockThreshold, 'Add Stock' button opens modal)",
+    "Create frontend/app/dashboard/seller/products/page.tsx: fetch GET /seller/products with pagination, render products table (image thumbnail, name, category, price, stock from inventory, status active/inactive badge, actions: Edit icon/Delete icon), 'Add Product' primary button top-right opens ProductFormModal with fields (name, description, categoryId select from GET /categories, price number, unit text, productionLocation, harvestDate date picker, qualityGrade select A/B/C, images FileUpload array, variants array of {name, price, sku}), on submit POST /products with FormData for images, on success refetch products list",
+    "Create frontend/components/ProductFormModal.tsx: react-hook-form + zod validation for product creation/editing, image upload with preview (max 5 images 4:3 ratio), variants dynamic array (Add Variant button, each variant has name/price/sku fields with Remove button), Draft/Publish toggle sets active boolean, on edit mode pre-fill form with existing product data from GET /products/:id, submit button calls POST /products (create) or PUT /products/:id (update)",
+    "Create frontend/app/dashboard/seller/orders/page.tsx: fetch GET /seller/orders with filters (status dropdown, date range picker, search by order number), orders table (order number, customer name, date, items with expandable row showing item details, total, status badge, Actions column: status update dropdown calling PATCH /seller/orders/:orderId/status with {status: 'PROCESSING'|'SHIPPED'}), pagination",
+    "Create frontend/components/AddressForm.tsx: reusable form component with fields (fullName, phone with Ethiopian format validation +251, region Select with Ethiopian regions array ['Addis Ababa', 'Oromia', 'Amhara', 'Tigray', 'SNNPR', 'Sidama', 'Somali', 'Afar', 'Benishangul-Gumuz', 'Gambela', 'Harari', 'Dire Dawa', 'Southwestern'], zone, woreda, kebele, specificLocation textarea, addressType radio, isDefault checkbox), validation with zod (all required except isDefault), on submit call onSubmit prop with data"
+  ],
+  "acceptance_criteria": [
+    "Checkout flow: Step 1 shows saved addresses or create new form, Step 2 shows payment methods from backend, Step 3 shows order summary with all details, Step 4 submits order and redirects to success page with order number",
+    "Buyer Dashboard shows order stats, recent orders table with View links, wishlist preview section",
+    "Seller Dashboard shows revenue stats, sales chart, recent orders, low-stock alerts",
+    "Seller Products page lists all products with pagination, Add Product button opens modal, form validates all fields, image upload works, variants array dynamic, submit creates product via POST /products",
+    "Seller Orders page shows orders table with filters, status update dropdown calls PATCH /seller/orders/:id/status and updates UI",
+    "All dashboard routes protected by middleware (redirect to /auth/login if not authenticated)",
+    "AddressForm validates Ethiopian address structure and phone format"
+  ],
+  "verification": [
+    "Login as buyer, add items to cart, navigate to /checkout",
+    "Step 1: select saved address or click Add New -> modal opens, fill form, submit -> POST /addresses (check Network), address appears in list, select it, Next",
+    "Step 2: verify payment methods from GET /checkout/payment-methods render, select Chapa, Next",
+    "Step 3: verify GET /checkout/summary displays cart items/address/payment/totals, click Place Order",
+    "Step 4: verify POST /checkout called with correct payload, on success redirect to /checkout/success with order number displayed, cart badge in Header resets to 0",
+    "Navigate to /dashboard/buyer: verify stats cards, recent orders table with real data from GET /orders, wishlist section from GET /wishlist",
+    "Login as seller (use backend seed seller account), navigate to /dashboard/seller: verify revenue chart from GET /seller/analytics/dashboard, orders table from GET /seller/orders, inventory alerts from GET /seller/inventory/low-stock",
+    "Navigate to /dashboard/seller/products: verify products table from GET /seller/products, click Add Product -> modal opens, fill all fields, upload 2 images, add 2 variants, submit -> POST /products, modal closes, products refetch, new product appears",
+    "Click Edit on product -> modal opens with pre-filled data, change price, submit -> PUT /products/:id, table updates",
+    "Navigate to /dashboard/seller/orders: select status filter 'PENDING' -> refetch with ?status=PENDING, click status dropdown on order, select 'PROCESSING' -> PATCH /seller/orders/:id/status called, status badge updates",
+    "Test protected routes: logout, navigate to /dashboard -> redirect to /auth/login",
+    "npm run build (confirm no errors)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

@@ -1,0 +1,17 @@
+# Our security policy
+# Report security vulnerabilities to our security team
+
+Contact: mailto:security@agrimarket.com
+Contact: https://agrimarket.com/security
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en, am
+Canonical: https://agrimarket.com/.well-known/security.txt
+
+# Encryption key for secure communications
+# Encryption: https://agrimarket.com/pgp-key.txt
+
+# Security acknowledgments
+Acknowledgments: https://agrimarket.com/security/hall-of-fame
+
+# Please do NOT create public GitHub issues for security vulnerabilities
+# Use the contact methods above for responsible disclosure

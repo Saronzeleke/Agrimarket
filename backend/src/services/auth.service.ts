@@ -5,6 +5,7 @@
 import userRepository from '../repositories/user.repository'
 import emailVerificationRepository from '../repositories/email-verification.repository'
 import passwordResetRepository from '../repositories/password-reset.repository'
+import auditLogRepository from '../repositories/audit-log.repository'
 import { hashPassword, verifyPassword, validatePasswordStrength } from '../utils/password.utils'
 import { generateTokens, verifyRefreshToken } from '../utils/jwt.utils'
 import { generateToken, hashToken, addHours, isExpired } from '../utils/helpers'
@@ -17,16 +18,156 @@ import {
   ConflictError,
   NotFoundError,
   BusinessLogicError,
+  ExternalServiceError,
 } from '../utils/errors'
 import { CONSTANTS } from '../config/constants'
 import { User } from '@prisma/client'
 import emailProvider from '../providers/email'
 import config from '../config/env'
 import logger from '../config/logger'
+import { getRedisClient } from '../config/redis'
+
+// In-memory fallback for failed login attempts (used if Redis is unavailable)
+const failedLoginAttemptsMemory = new Map<string, { count: number; expiresAt: Date }>();
 
 export class AuthService {
+  private async ensureEmailDeliveryConfigured(): Promise<void> {
+    if (!emailProvider.isConfigured()) {
+      throw new ExternalServiceError('email', 'Email delivery is not configured')
+    }
+
+    try {
+      await emailProvider.verifyConnection()
+    } catch {
+      throw new ExternalServiceError('email', 'Email delivery is unavailable')
+    }
+  }
+
+  /**
+   * Track failed login attempt
+   * Uses Redis if available, otherwise falls back to in-memory store
+   */
+  private async trackFailedLogin(email: string): Promise<number> {
+    const redis = getRedisClient();
+    const key = `failed_login:${email}`;
+    const lockoutWindow = 15 * 60; // 15 minutes in seconds
+
+    if (redis) {
+      try {
+        const attempts = await redis.incr(key);
+        if (attempts === 1) {
+          // Set expiry on first attempt
+          await redis.expire(key, lockoutWindow);
+        }
+        return attempts;
+      } catch (error) {
+        logger.warn('Redis failed, using in-memory store for failed login tracking', { error });
+      }
+    }
+
+    // Fallback to in-memory
+    const now = new Date();
+    const record = failedLoginAttemptsMemory.get(email);
+    
+    if (record && record.expiresAt > now) {
+      record.count++;
+      return record.count;
+    } else {
+      const expiresAt = new Date(now.getTime() + lockoutWindow * 1000);
+      failedLoginAttemptsMemory.set(email, { count: 1, expiresAt });
+      return 1;
+    }
+  }
+
+  /**
+   * Get failed login attempt count
+   */
+  private async getFailedLoginCount(email: string): Promise<number> {
+    const redis = getRedisClient();
+    const key = `failed_login:${email}`;
+
+    if (redis) {
+      try {
+        const attempts = await redis.get(key);
+        return attempts ? parseInt(attempts, 10) : 0;
+      } catch (error) {
+        logger.warn('Redis failed, using in-memory store', { error });
+      }
+    }
+
+    // Fallback to in-memory
+    const record = failedLoginAttemptsMemory.get(email);
+    if (record && record.expiresAt > new Date()) {
+      return record.count;
+    }
+    return 0;
+  }
+
+  /**
+   * Reset failed login attempts (on successful login)
+   */
+  private async resetFailedLoginAttempts(email: string): Promise<void> {
+    const redis = getRedisClient();
+    const key = `failed_login:${email}`;
+
+    if (redis) {
+      try {
+        await redis.del(key);
+      } catch (error) {
+        logger.warn('Redis delete failed', { error });
+      }
+    }
+
+    // Also clear from in-memory
+    failedLoginAttemptsMemory.delete(email);
+  }
+
+  /**
+   * Add token to blacklist (for logout and refresh token rotation)
+   */
+  private async blacklistToken(token: string, expirySeconds: number): Promise<void> {
+    const redis = getRedisClient();
+    const key = `blacklisted_token:${hashToken(token)}`;
+
+    if (redis) {
+      try {
+        await redis.setex(key, expirySeconds, '1');
+        logger.debug('Token blacklisted', { tokenHash: hashToken(token).substring(0, 10) });
+      } catch (error) {
+        logger.error('Failed to blacklist token in Redis', { error });
+        // Note: Without Redis, token blacklisting won't work across server restarts
+        // In production, Redis should be required for this feature
+      }
+    } else {
+      logger.warn('Redis not available, token blacklisting disabled');
+    }
+  }
+
+  /**
+   * Check if token is blacklisted
+   */
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    const redis = getRedisClient();
+    const key = `blacklisted_token:${hashToken(token)}`;
+
+    if (redis) {
+      try {
+        const result = await redis.get(key);
+        return result === '1';
+      } catch (error) {
+        logger.error('Failed to check token blacklist', { error });
+        return false; // Fail open rather than blocking legitimate users
+      }
+    }
+    return false;
+  }
+
   // Register a new user
   async register(data: RegisterData): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
+    if (config.features.emailVerification) {
+      await this.ensureEmailDeliveryConfigured()
+    }
+
     // Validate password strength
     const passwordValidation = validatePasswordStrength(data.password)
     if (!passwordValidation.valid) {
@@ -94,18 +235,40 @@ export class AuthService {
 
   // Login user
  
-  async login(credentials: LoginCredentials): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
+  async login(credentials: LoginCredentials, ipAddress?: string, userAgent?: string): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
     // Find user by email
     const user = await userRepository.findByEmail(credentials.email)
     if (!user) {
       throw new InvalidCredentialsError()
     }
 
+    // Check if account is locked due to failed attempts
+    const failedAttempts = await this.getFailedLoginCount(credentials.email);
+    if (failedAttempts >= 5) {
+      logger.warn('Account locked due to too many failed login attempts', {
+        email: credentials.email,
+        attempts: failedAttempts,
+      });
+      throw new BusinessLogicError(
+        'Account temporarily locked due to too many failed login attempts. Please try again in 15 minutes.',
+        CONSTANTS.ERROR_CODES.ACCOUNT_LOCKED
+      );
+    }
+
     // Verify password
     const isValidPassword = await verifyPassword(credentials.password, user.password)
     if (!isValidPassword) {
+      // Track failed attempt
+      const attempts = await this.trackFailedLogin(credentials.email);
+      logger.warn('Failed login attempt', {
+        email: credentials.email,
+        attempts,
+      });
       throw new InvalidCredentialsError()
     }
+
+    // Reset failed attempts on successful login
+    await this.resetFailedLoginAttempts(credentials.email);
 
     // Check if email is verified
     if (config.features.emailVerification && !user.emailVerified) {
@@ -124,6 +287,17 @@ export class AuthService {
       role: user.role,
     })
 
+    // Audit log: USER_LOGIN
+    await auditLogRepository.logUserAction(
+      user.id,
+      'USER_LOGIN',
+      'USER',
+      user.id,
+      { email: user.email },
+      ipAddress,
+      userAgent
+    );
+
     logger.info('User logged in', {
       userId: user.id,
       email: user.email,
@@ -140,6 +314,13 @@ export class AuthService {
    // Refresh access token
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     try {
+      // Check if refresh token is blacklisted
+      const isBlacklisted = await this.isTokenBlacklisted(refreshToken);
+      if (isBlacklisted) {
+        logger.warn('Attempt to use blacklisted refresh token');
+        throw new InvalidCredentialsError();
+      }
+
       // Verify refresh token
       const payload = verifyRefreshToken(refreshToken)
 
@@ -154,14 +335,19 @@ export class AuthService {
         throw new AccountSuspendedError()
       }
 
-      // Generate new tokens
+      // Invalidate the old refresh token (rotation)
+      // Calculate remaining TTL from token expiry (7 days default)
+      const refreshTokenTTL = 7 * 24 * 60 * 60; // 7 days in seconds
+      await this.blacklistToken(refreshToken, refreshTokenTTL);
+
+      // Generate new tokens (including a new refresh token)
       const tokens = generateTokens({
         userId: user.id,
         email: user.email,
         role: user.role,
       })
 
-      logger.info('Token refreshed', {
+      logger.info('Token refreshed with rotation', {
         userId: user.id,
       })
 
@@ -202,8 +388,14 @@ export class AuthService {
     // Delete verification token
     await emailVerificationRepository.delete(verification.id)
 
-    // Send welcome email
-    await emailProvider.sendWelcomeEmail(user.email, user.firstName)
+    // Verification is complete even if the optional welcome message cannot be sent.
+    if (emailProvider.isConfigured()) {
+      try {
+        await emailProvider.sendWelcomeEmail(user.email, user.firstName)
+      } catch (error) {
+        logger.warn('Welcome email delivery failed', { userId: user.id, error })
+      }
+    }
 
     logger.info('Email verified', {
       userId: user.id,
@@ -213,6 +405,8 @@ export class AuthService {
 
   // Resend verification email
   async resendVerificationEmail(email: string): Promise<void> {
+    await this.ensureEmailDeliveryConfigured()
+
     // Find user
     const user = await userRepository.findByEmail(email)
     if (!user) {
@@ -253,6 +447,8 @@ export class AuthService {
   // Request password reset
   
   async requestPasswordReset(email: string): Promise<void> {
+    await this.ensureEmailDeliveryConfigured()
+
     // Find user
     const user = await userRepository.findByEmail(email)
     
@@ -282,7 +478,7 @@ export class AuthService {
   }
 
   // Reset password
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  async resetPassword(token: string, newPassword: string, ipAddress?: string, userAgent?: string): Promise<void> {
     // Validate password strength
     const passwordValidation = validatePasswordStrength(newPassword)
     if (!passwordValidation.valid) {
@@ -329,6 +525,17 @@ export class AuthService {
     // Mark token as used
     await passwordResetRepository.markAsUsed(reset.id)
 
+    // Audit log: PASSWORD_RESET
+    await auditLogRepository.logUserAction(
+      user.id,
+      'PASSWORD_RESET',
+      'USER',
+      user.id,
+      { email: user.email },
+      ipAddress,
+      userAgent
+    );
+
     logger.info('Password reset successfully', {
       userId: user.id,
       email: user.email,
@@ -339,7 +546,9 @@ export class AuthService {
   async changePassword(
     userId: string,
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
+    ipAddress?: string,
+    userAgent?: string
   ): Promise<void> {
     // Validate new password strength
     const passwordValidation = validatePasswordStrength(newPassword)
@@ -368,6 +577,17 @@ export class AuthService {
     // Update password
     await userRepository.updatePassword(user.id, hashedPassword)
 
+    // Audit log: PASSWORD_CHANGED
+    await auditLogRepository.logUserAction(
+      userId,
+      'PASSWORD_CHANGED',
+      'USER',
+      userId,
+      { email: user.email },
+      ipAddress,
+      userAgent
+    );
+
     logger.info('Password changed', {
       userId: user.id,
     })
@@ -382,6 +602,31 @@ export class AuthService {
 
     const { password, ...userWithoutPassword } = user
     return userWithoutPassword
+  }
+
+  /**
+   * Logout user and blacklist their tokens
+   */
+  async logout(userId: string, accessToken: string, ipAddress?: string, userAgent?: string): Promise<void> {
+    // Blacklist the access token
+    // Access tokens expire in 15 minutes by default
+    const accessTokenTTL = 15 * 60; // 15 minutes in seconds
+    await this.blacklistToken(accessToken, accessTokenTTL);
+
+    // Audit log: USER_LOGOUT
+    await auditLogRepository.logUserAction(
+      userId,
+      'USER_LOGOUT',
+      'USER',
+      userId,
+      null,
+      ipAddress,
+      userAgent
+    );
+
+    logger.info('User logged out, token blacklisted', {
+      userId,
+    });
   }
 }
 

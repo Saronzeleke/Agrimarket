@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+:root {
+  /* Light Theme - Fresh Agricultural Palette */
+  --primary: #0F6B3C;        /* Deep Agricultural Green */
+  --primary-hover: #0A5230;  /* Darker Green */
+  --accent: #E85D04;         /* Warm Harvest Orange */
+  --accent-hover: #C74E03;   /* Darker Orange */
+  --background: #F8FAF7;     /* Soft Clean Off-White */
+  --surface: #FFFFFF;        /* Pure White */
+  --navbar-bg: #FFFFFF;      /* Clean White Navbar */
+  --search-bg: #FFFFFF;      /* White Search Background */
+  --text-primary: #0F172A;   /* Strong Readable Text */
+  --text-secondary: #64748B; /* Muted Secondary Text */
+  --border: #E2E8F0;         /* Subtle Border */
+  --error: #DC2626;
+  --hover-bg: #F8FAF7;       /* Soft hover background */
+}
+
+[data-theme="dark"] {
+  /* Dark Theme */
+  --primary: #10B981;        /* Brighter green for dark mode */
+  --primary-hover: #059669;  
+  --accent: #F59E0B;         /* Brighter orange for dark mode */
+  --accent-hover: #D97706;
+  --background: #0F172A;
+  --surface: #1E293B;
+  --navbar-bg: #1E293B;
+  --search-bg: #334155;      /* Darker search in dark mode */
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border: #334155;
+  --error: #EF4444;
+  --hover-bg: #334155;       /* Dark hover background */
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  
+  /* Spacing scale */
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* Typography */
+h1 {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Utilities */
+.container-custom {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 768px) {
+  .container-custom {
+    max-width: 768px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .container-custom {
+    max-width: 1440px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+.header-container {
+  max-width: 1440px;
+}
+
+.marketplace-container {
+  max-width: 1440px;
+}
+
+/* Animations */
+@keyframes slide-in {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in {
+    animation: none;
+  }
+}

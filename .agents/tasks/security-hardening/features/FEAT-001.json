@@ -1,0 +1,45 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "CRITICAL: Eliminate SQL injection vulnerabilities and exposed credentials. Replace all $queryRawUnsafe/$executeRawUnsafe with Prisma ORM methods or Prisma.sql tagged templates in search.repository.ts and saved-search.repository.ts. Update .env.example with secure placeholder credentials and generation instructions. Verify .env is in .gitignore (already confirmed present).",
+  "status": "pending",
+  "steps": [
+    "1. SQLINJECTION FIX - search.repository.ts: Replace searchProducts() raw SQL query with Prisma findMany using where clauses, OR conditions for name/description LIKE search, orderBy for sorting. Use string interpolation ONLY inside Prisma.sql`` tagged template if raw SQL absolutely required for complex ranking. Current lines 50-120 use $queryRawUnsafe with user input concatenation.",
+    "2. SQLINJECTION FIX - search.repository.ts: Replace getSearchSuggestions() at line ~230 - use Prisma findMany with where: { name: { contains: query, mode: 'insensitive' } }, orderBy: [{ orderCount: 'desc' }, { rating: 'desc' }].",
+    "3. SQLINJECTION FIX - search.repository.ts: Replace logSearch() at line ~245 - use prisma.searchLog.create() instead of $executeRawUnsafe.",
+    "4. SQLINJECTION FIX - search.repository.ts: Replace getPopularSearches() at line ~260 - use prisma.searchLog.groupBy({ by: ['query'], where: { createdAt: { gte: thirtyDaysAgo } }, _count: true, orderBy: { _count: { query: 'desc' } } }).",
+    "5. SQLINJECTION FIX - search.repository.ts: Replace getUserRecentSearches() at line ~280 - use prisma.searchLog.findMany with where, distinct, orderBy.",
+    "6. SQLINJECTION FIX - saved-search.repository.ts: Replace create() at line ~20 - use prisma.savedSearch.create({ data: { userId, ...data } }).",
+    "7. SQLINJECTION FIX - saved-search.repository.ts: Replace findByUserId() at line ~35 - use prisma.savedSearch.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }).",
+    "8. SQLINJECTION FIX - saved-search.repository.ts: Replace findById() at line ~55 - use prisma.savedSearch.findFirst({ where: { id, userId } }).",
+    "9. SQLINJECTION FIX - saved-search.repository.ts: Replace update() at line ~75 - use prisma.savedSearch.update({ where: { id }, data: { ...updates, updatedAt: new Date() } }). Add authorization check (userId match).",
+    "10. SQLINJECTION FIX - saved-search.repository.ts: Replace delete() at line ~115 - use prisma.savedSearch.delete({ where: { id } }). Add authorization check.",
+    "11. CREDENTIALS FIX - .env.example: Replace line 19 DATABASE_URL with placeholder: postgresql://agrimarket_user:CHANGE_ME_STRONG_PASSWORD@localhost:5432/agrimarket. Add comment: Generate with `openssl rand -base64 32`.",
+    "12. CREDENTIALS FIX - .env.example: Lines 26-27 JWT secrets already have placeholders but add generation instruction comment above them: # Generate with: openssl rand -base64 64",
+    "13. CREDENTIALS FIX - .env.example: Lines 56-58 SMTP credentials - already have placeholders (smtp.example.com, your-email@example.com). Verify EMAIL_FROM and EMAIL_FROM_NAME don't expose real email.",
+    "14. CREDENTIALS FIX - .env.example: Line 83 SESSION_SECRET already has placeholder but add generation comment: # Generate with: openssl rand -base64 64",
+    "15. CREDENTIALS FIX - Create SECURITY.md in backend/ root documenting: credential rotation procedure, what secrets exist, how to generate them, reminder to never commit .env, instructions to change all defaults before production deployment.",
+    "16. Add inline code comments in both repository files explaining why Prisma ORM prevents SQL injection (parameterized queries under the hood)."
+  ],
+  "acceptance_criteria": [
+    "Zero occurrences of $queryRawUnsafe or $executeRawUnsafe in search.repository.ts and saved-search.repository.ts",
+    "All database queries use Prisma Client methods (findMany, create, update, delete, groupBy) or Prisma.sql tagged templates",
+    ".env.example contains ONLY placeholder values with NO real credentials",
+    ".env.example includes openssl generation instructions for all secrets (JWT, SESSION, DB password)",
+    "SECURITY.md exists in backend/ with credential management documentation",
+    ".gitignore includes .env and .env.* patterns (already verified present)",
+    "TypeScript compilation succeeds: npm run lint passes in backend/",
+    "Existing search and saved-search functionality works identically (no behavior change, only implementation)"
+  ],
+  "verification": [
+    "Run `npm run lint` in backend/ - no TypeScript errors",
+    "Run `npx prisma generate` to regenerate Prisma Client after any schema changes",
+    "Grep check: `grep -r \"\\$queryRawUnsafe\\|\\$executeRawUnsafe\" backend/src/repositories/search*.ts` returns no matches",
+    "Grep check: `grep -i \"Sharon\\|sharonkuye369\\|tftzlyavgjyvjkcg\" backend/.env.example` returns no matches",
+    "Manual verification: Read backend/.env.example and confirm all credentials are placeholders",
+    "Start backend dev server: `npm run dev` in backend/, hit search endpoint http://localhost:3001/api/v1/search?query=coffee, verify results returned",
+    "Run backend unit tests if search repository has tests: `npm run test:unit`"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

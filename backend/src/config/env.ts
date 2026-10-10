@@ -61,7 +61,6 @@ const envSchema = z.object({
   TELEBIRR_APP_KEY: z.string().optional(),
   TELEBIRR_PUBLIC_KEY: z.string().optional(),
   TELEBIRR_API_URL: z.string().url().optional(),
-  USE_MOCK_PAYMENT: z.string().transform((val) => val === 'true').default('true'),
 
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
@@ -79,6 +78,9 @@ const envSchema = z.object({
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   CORS_CREDENTIALS: z.string().transform((val) => val === 'true').default('true'),
+
+  // CSRF Protection
+  CSRF_ENABLED: z.string().transform((val) => val === 'true').default('true'),
 
   // Session
   SESSION_SECRET: z.string().min(32, 'SESSION_SECRET must be at least 32 characters'),
@@ -187,7 +189,6 @@ export const config = {
 
   // Payment
   payment: {
-    useMock: env.USE_MOCK_PAYMENT,
     chapa: {
       secretKey: env.CHAPA_SECRET_KEY,
       publicKey: env.CHAPA_PUBLIC_KEY,
@@ -226,6 +227,11 @@ export const config = {
   cors: {
     origin: env.CORS_ORIGIN,
     credentials: env.CORS_CREDENTIALS,
+  },
+
+  // CSRF
+  csrf: {
+    enabled: env.CSRF_ENABLED,
   },
 
   // Session

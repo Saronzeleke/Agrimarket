@@ -24,7 +24,7 @@ export class CategoryController {
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const categories = await categoryRepository.findAll()
-      sendSuccess(res, { categories })
+      sendSuccess(res, categories)
     } catch (error) {
       next(error)
     }

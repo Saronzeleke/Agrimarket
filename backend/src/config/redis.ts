@@ -2,6 +2,7 @@
  * Redis Configuration
  * 
  * Redis client setup for caching and session management.
+ * Now includes graceful degradation and error handling.
  */
 
 import Redis from 'ioredis';
@@ -46,6 +47,7 @@ export const initRedis = (): Redis => {
     });
 
     redisClient.on('error', (error) => {
+      // Log error but don't throw - allow graceful degradation
       logger.error('Redis connection error', { error: error.message });
     });
 
@@ -59,8 +61,10 @@ export const initRedis = (): Redis => {
 
     return redisClient;
   } catch (error) {
+    // Log error but don't throw - allow application to continue
     logger.error('Failed to initialize Redis', { error });
-    throw error;
+    logger.warn('Application will continue without Redis cache');
+    return null as any; // Return null to signal Redis unavailable
   }
 };
 
@@ -76,9 +80,13 @@ export const getRedisClient = (): Redis | null => {
  */
 export const closeRedis = async (): Promise<void> => {
   if (redisClient) {
-    await redisClient.quit();
-    redisClient = null;
-    logger.info('Redis connection closed');
+    try {
+      await redisClient.quit();
+      redisClient = null;
+      logger.info('Redis connection closed');
+    } catch (error) {
+      logger.error('Error closing Redis connection', { error });
+    }
   }
 };
 
@@ -100,7 +108,7 @@ export const pingRedis = async (): Promise<boolean> => {
     const result = await redisClient.ping();
     return result === 'PONG';
   } catch (error) {
-    logger.error('Redis ping failed', { error });
+    logger.warn('Redis ping failed, continuing without cache', { error });
     return false;
   }
 };

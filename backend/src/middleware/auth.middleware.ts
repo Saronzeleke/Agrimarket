@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express'
 import { verifyAccessToken } from '../utils/jwt.utils'
 import { AuthenticationError } from '../utils/errors'
 import userRepository from '../repositories/user.repository'
+import authService from '../services/auth.service'
 import prisma from '../config/database'
 
 /**
@@ -16,13 +17,29 @@ export async function authenticate(
   next: NextFunction
 ): Promise<void> {
   try {
-    // Extract token from Authorization header
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    let token: string | undefined
+
+    // Try to get token from cookie first (primary method for web clients)
+    if (req.cookies?.accessToken) {
+      token = req.cookies.accessToken
+    } 
+    // Fallback to Authorization header for API clients and mobile apps
+    else {
+      const authHeader = req.headers.authorization
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7) // Remove 'Bearer ' prefix
+      }
+    }
+
+    if (!token) {
       throw new AuthenticationError('No token provided')
     }
 
-    const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+    // Check if token is blacklisted (logout/refresh rotation)
+    const isBlacklisted = await authService.isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      throw new AuthenticationError('Token has been invalidated')
+    }
 
     // Verify token
     const payload = verifyAccessToken(token)
@@ -83,12 +100,23 @@ export async function optionalAuthenticate(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return next() // No token, continue without user
+    let token: string | undefined
+
+    // Try to get token from cookie first
+    if (req.cookies?.accessToken) {
+      token = req.cookies.accessToken
+    } 
+    // Fallback to Authorization header
+    else {
+      const authHeader = req.headers.authorization
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7)
+      }
     }
 
-    const token = authHeader.substring(7)
+    if (!token) {
+      return next() // No token, continue without user
+    }
 
     try {
       const payload = verifyAccessToken(token)

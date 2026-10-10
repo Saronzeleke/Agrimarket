@@ -5,6 +5,8 @@ import cors from 'cors'
 import helmet from 'helmet'
 import compression from 'compression'
 import morgan from 'morgan'
+import cookieParser from 'cookie-parser'
+import addRequestId from 'express-request-id'
 import config from './config/env'
 import logger, { httpLogStream } from './config/logger'
 import { CONSTANTS } from './config/constants'
@@ -15,6 +17,7 @@ import {
 import {
   sanitizeInput,
   logSuspiciousActivity,
+  csrfProtection,
 } from './middleware/security.middleware'
 import {
   apiLimiter,
@@ -23,6 +26,9 @@ import { performanceMiddleware, getSystemHealthMetrics } from './middleware/perf
 
 // Create Express application
 const app: Application = express()
+
+// Request ID Tracking - Must be first middleware
+app.use(addRequestId())
 
 // Security Middleware
 
@@ -45,11 +51,11 @@ app.use(
         }
       : false, // Disable in development
     crossOriginEmbedderPolicy: false,
-    hsts: {
+    hsts: config.isProduction ? {
       maxAge: 31536000, // 1 year
       includeSubDomains: true,
       preload: true,
-    },
+    } : false, // Disable HSTS in development
     noSniff: true,
     frameguard: {
       action: 'deny',
@@ -57,6 +63,15 @@ app.use(
     xssFilter: true,
   })
 )
+
+// Permissions-Policy header
+app.use((req, res, next) => {
+  res.setHeader(
+    'Permissions-Policy',
+    "geolocation=(), microphone=(), camera=(), payment=()"
+  );
+  next();
+});
 
 // CORS - Cross-Origin Resource Sharing
 const allowedOrigins = config.isProduction
@@ -91,7 +106,13 @@ app.use(logSuspiciousActivity)
 // Global API Rate Limiter
 app.use(apiLimiter)
 
+// CSRF Protection
+app.use(csrfProtection)
+
 // Parsing Middleware
+
+// Parse cookies
+app.use(cookieParser())
 
 // Parse JSON bodies
 app.use(express.json({ limit: '10mb' }))

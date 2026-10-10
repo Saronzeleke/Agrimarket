@@ -13,12 +13,30 @@ import config from '../../config/env'
 export class SMTPEmailProvider implements IEmailProvider {
   private transporter: Transporter | null = null
 
-  constructor() {
+  constructor(private readonly smtp = config.email.smtp) {
     this.initializeTransporter()
   }
 
+  isConfigured(): boolean {
+    return this.transporter !== null
+  }
+
+  async verifyConnection(): Promise<void> {
+    if (!this.transporter) {
+      throw new Error('SMTP transporter not initialized. Check email configuration.')
+    }
+
+    try {
+      await this.transporter.verify()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      logger.error('SMTP connection failed', { error: message })
+      throw new Error('SMTP connection could not be verified.')
+    }
+  }
+
   private initializeTransporter(): void {
-    const { smtp } = config.email
+    const smtp = this.smtp
 
     // Only initialize if SMTP credentials are provided
     if (!smtp.host || !smtp.port) {
@@ -41,14 +59,6 @@ export class SMTPEmailProvider implements IEmailProvider {
         socketTimeout: 10000,
       })
 
-      // Verify connection on initialization
-      this.transporter.verify((error) => {
-        if (error) {
-          logger.error('SMTP connection failed', { error: error.message })
-        } else {
-          logger.info('✅ SMTP Email provider ready')
-        }
-      })
     } catch (error: any) {
       logger.error('Failed to initialize SMTP transporter', {
         error: error.message,

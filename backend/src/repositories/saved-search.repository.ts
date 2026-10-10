@@ -17,172 +17,166 @@ export interface SavedSearchData {
 }
 
 export const savedSearchRepository = {
-  //Create a saved search for a user
-   
+  /**
+   * Create a saved search for a user
+   * Uses Prisma create for safe insertion - prevents SQL injection
+   */
   async create(userId: string, data: SavedSearchData) {
-    const savedSearch = await prisma.$executeRawUnsafe(
-      `
-      INSERT INTO saved_searches (id, "userId", name, query, filters, "notifyOnNewResults", "createdAt", "updatedAt")
-      VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, NOW(), NOW())
-      RETURNING *
-    `,
-      userId,
-      data.name,
-      data.query || null,
-      JSON.stringify(data.filters),
-      data.notifyOnNewResults || false
-    );
+    // Prisma automatically parameterizes all values, preventing SQL injection
+    const savedSearch = await prisma.savedSearch.create({
+      data: {
+        userId,
+        name: data.name,
+        query: data.query || null,
+        filters: data.filters,
+        notifyOnNewResults: data.notifyOnNewResults || false,
+      },
+    });
 
     return savedSearch;
   },
-// Get all saved searches for a user
-  
+  /**
+   * Get all saved searches for a user
+   * Uses Prisma findMany for safe querying - prevents SQL injection
+   */
   async findByUserId(userId: string) {
     try {
-      const searches: any[] = await prisma.$queryRawUnsafe(
-        `
-        SELECT *
-        FROM saved_searches
-        WHERE "userId" = $1
-        ORDER BY "createdAt" DESC
-      `,
-        userId
-      );
+      // Prisma ORM safely parameterizes the userId value
+      const searches = await prisma.savedSearch.findMany({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        select: {
+          id: true,
+          userId: true,
+          name: true,
+          query: true,
+          filters: true,
+          notifyOnNewResults: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-      return searches.map((s) => ({
-        ...s,
-        filters: typeof s.filters === 'string' ? JSON.parse(s.filters) : s.filters,
-      }));
+      return searches;
     } catch (error) {
       // Table might not exist yet
       return [];
     }
   },
-// Get a specific saved search
-  
+  /**
+   * Get a specific saved search
+   * Uses Prisma findFirst with authorization check - prevents SQL injection
+   */
   async findById(id: string, userId: string) {
     try {
-      const searches: any[] = await prisma.$queryRawUnsafe(
-        `
-        SELECT *
-        FROM saved_searches
-        WHERE id = $1 AND "userId" = $2
-      `,
-        id,
-        userId
-      );
+      // Prisma safely parameterizes both id and userId
+      const search = await prisma.savedSearch.findFirst({
+        where: {
+          id,
+          userId, // Authorization: ensure user owns this saved search
+        },
+      });
 
-      if (searches.length === 0) {
+      if (!search) {
         throw new NotFoundError('Saved search not found');
       }
 
-      const search = searches[0];
-      return {
-        ...search,
-        filters: typeof search.filters === 'string' ? JSON.parse(search.filters) : search.filters,
-      };
+      return search;
     } catch (error) {
       if (error instanceof NotFoundError) throw error;
       throw new NotFoundError('Saved search not found');
     }
   },
-//Update a saved search
-   
+  /**
+   * Update a saved search
+   * Uses Prisma update with authorization check - prevents SQL injection
+   */
   async update(id: string, userId: string, data: Partial<SavedSearchData>) {
-    const updates: string[] = [];
-    const params: any[] = [];
-    let paramIndex = 1;
+    // First verify the user owns this saved search (authorization check)
+    const existing = await this.findById(id, userId);
+    if (!existing) {
+      throw new NotFoundError('Saved search not found');
+    }
+
+    // Build update data object - only include provided fields
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
 
     if (data.name !== undefined) {
-      updates.push(`name = $${paramIndex}`);
-      params.push(data.name);
-      paramIndex++;
+      updateData.name = data.name;
     }
 
     if (data.query !== undefined) {
-      updates.push(`query = $${paramIndex}`);
-      params.push(data.query);
-      paramIndex++;
+      updateData.query = data.query;
     }
 
     if (data.filters !== undefined) {
-      updates.push(`filters = $${paramIndex}`);
-      params.push(JSON.stringify(data.filters));
-      paramIndex++;
+      updateData.filters = data.filters;
     }
 
     if (data.notifyOnNewResults !== undefined) {
-      updates.push(`"notifyOnNewResults" = $${paramIndex}`);
-      params.push(data.notifyOnNewResults);
-      paramIndex++;
+      updateData.notifyOnNewResults = data.notifyOnNewResults;
     }
-
-    if (updates.length === 0) {
-      return this.findById(id, userId);
-    }
-
-    updates.push(`"updatedAt" = NOW()`);
 
     try {
-      const result: any[] = await prisma.$queryRawUnsafe(
-        `
-        UPDATE saved_searches
-        SET ${updates.join(', ')}
-        WHERE id = $${paramIndex} AND "userId" = $${paramIndex + 1}
-        RETURNING *
-      `,
-        ...params,
-        id,
-        userId
-      );
+      // Prisma safely parameterizes all values
+      const updated = await prisma.savedSearch.update({
+        where: {
+          id,
+        },
+        data: updateData,
+      });
 
-      if (result.length === 0) {
-        throw new NotFoundError('Saved search not found');
-      }
-
-      const search = result[0];
-      return {
-        ...search,
-        filters: typeof search.filters === 'string' ? JSON.parse(search.filters) : search.filters,
-      };
+      return updated;
     } catch (error) {
-      if (error instanceof NotFoundError) throw error;
       throw new NotFoundError('Saved search not found');
     }
   },
-// Delete a saved search
- 
+  /**
+   * Delete a saved search
+   * Uses Prisma delete with authorization check - prevents SQL injection
+   */
   async delete(id: string, userId: string): Promise<void> {
     try {
-      const result: any = await prisma.$queryRawUnsafe(
-        `
-        DELETE FROM saved_searches
-        WHERE id = $1 AND "userId" = $2
-        RETURNING id
-      `,
-        id,
-        userId
-      );
-
-      if (result.length === 0) {
+      // First verify the user owns this saved search (authorization check)
+      const existing = await this.findById(id, userId);
+      if (!existing) {
         throw new NotFoundError('Saved search not found');
       }
+
+      // Prisma safely parameterizes the id
+      await prisma.savedSearch.delete({
+        where: {
+          id,
+        },
+      });
     } catch (error) {
       if (error instanceof NotFoundError) throw error;
       throw new NotFoundError('Saved search not found');
     }
   },
-// Execute a saved search
-  
+  /**
+   * Execute a saved search
+   */
   async execute(id: string, userId: string, { limit, offset }: { limit?: number; offset?: number }) {
     const savedSearch = await this.findById(id, userId);
 
     // Import here to avoid circular dependency
     const { searchRepository } = require('./search.repository');
 
+    // Safely spread filters if they exist
+    const filters = typeof savedSearch.filters === 'object' && savedSearch.filters !== null
+      ? savedSearch.filters
+      : {};
+
     return searchRepository.searchProducts({
-      query: savedSearch.query,
-      ...savedSearch.filters,
+      query: savedSearch.query || undefined,
+      ...filters,
       limit,
       offset,
     });

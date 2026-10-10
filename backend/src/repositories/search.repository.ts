@@ -23,7 +23,8 @@ export interface SearchResult {
 export const searchRepository = {
   /**
    * Advanced full-text search with ranking
-   * Uses PostgreSQL trigram similarity for fuzzy matching
+   * Uses Prisma ORM methods to prevent SQL injection vulnerabilities.
+   * Prisma automatically parameterizes all queries, preventing malicious SQL injection.
    */
   async searchProducts(filters: SearchFilters): Promise<SearchResult> {
     const {
@@ -38,7 +39,7 @@ export const searchRepository = {
       sortBy = 'relevance',
     } = filters;
 
-    // Build WHERE clause
+    // Build WHERE clause - Prisma parameterizes all values automatically
     const where: Prisma.ProductWhereInput = {
       active: true,
       ...(categoryId && { categoryId }),
@@ -48,145 +49,71 @@ export const searchRepository = {
       ...(minRating && { rating: { gte: minRating } }),
     };
 
-    // Full-text search using PostgreSQL
     let products;
     let total;
 
     if (query.trim()) {
-      // Use raw SQL for better full-text search with ranking
-      const searchQuery = query.trim().toLowerCase();
-      const searchPattern = `%${searchQuery}%`;
+      // Add search conditions - Prisma safely handles user input
+      where.OR = [
+        { name: { contains: query.trim(), mode: 'insensitive' } },
+        { description: { contains: query.trim(), mode: 'insensitive' } },
+      ];
 
-      // Calculate relevance score:
-      // - Exact match in name: highest priority
-      // - Starts with query: high priority
-      // - Contains in name: medium priority
-      // - Contains in description: lower priority
-      const orderByClause =
-        sortBy === 'relevance'
-          ? `
-            CASE 
-              WHEN LOWER(p.name) = $1 THEN 1
-              WHEN LOWER(p.name) LIKE $2 || '%' THEN 2
-              WHEN LOWER(p.name) LIKE $3 THEN 3
-              WHEN LOWER(p.description) LIKE $3 THEN 4
-              ELSE 5
-            END,
-            p."orderCount" DESC,
-            p.rating DESC
-          `
-          : sortBy === 'price_asc'
-            ? 'p.price ASC'
-            : sortBy === 'price_desc'
-              ? 'p.price DESC'
-              : sortBy === 'newest'
-                ? 'p."createdAt" DESC'
-                : sortBy === 'rating'
-                  ? 'p.rating DESC, p."reviewCount" DESC'
-                  : 'p."createdAt" DESC';
-
-      // Build additional WHERE conditions
-      const additionalConditions: string[] = [];
-      const additionalParams: any[] = [];
-      let paramIndex = 4; // Start from $4 since $1-$3 are used for search
-
-      if (categoryId) {
-        additionalConditions.push(`p."categoryId" = $${paramIndex}`);
-        additionalParams.push(categoryId);
-        paramIndex++;
+      // Determine sort order
+      let orderBy: any;
+      if (sortBy === 'price_asc') {
+        orderBy = { price: 'asc' };
+      } else if (sortBy === 'price_desc') {
+        orderBy = { price: 'desc' };
+      } else if (sortBy === 'newest') {
+        orderBy = { createdAt: 'desc' };
+      } else if (sortBy === 'rating') {
+        orderBy = [{ rating: 'desc' }, { reviewCount: 'desc' }];
+      } else {
+        // For relevance, prioritize by order count and rating
+        orderBy = [{ orderCount: 'desc' }, { rating: 'desc' }];
       }
 
-      if (minPrice !== undefined) {
-        additionalConditions.push(`p.price >= $${paramIndex}`);
-        additionalParams.push(minPrice);
-        paramIndex++;
-      }
-
-      if (maxPrice !== undefined) {
-        additionalConditions.push(`p.price <= $${paramIndex}`);
-        additionalParams.push(maxPrice);
-        paramIndex++;
-      }
-
-      if (location) {
-        additionalConditions.push(`LOWER(p."productionLocation") LIKE $${paramIndex}`);
-        additionalParams.push(`%${location.toLowerCase()}%`);
-        paramIndex++;
-      }
-
-      if (minRating !== undefined) {
-        additionalConditions.push(`p.rating >= $${paramIndex}`);
-        additionalParams.push(minRating);
-        paramIndex++;
-      }
-
-      const whereClause =
-        additionalConditions.length > 0
-          ? `AND ${additionalConditions.join(' AND ')}`
-          : '';
-
-      const sqlQuery = `
-        SELECT 
-          p.*,
-          json_build_object(
-            'id', sp.id,
-            'businessName', sp."businessName",
-            'rating', sp.rating,
-            'verified', sp.verified
-          ) as seller,
-          json_build_object(
-            'id', c.id,
-            'name', c.name,
-            'slug', c.slug
-          ) as category,
-          COALESCE(
-            (SELECT json_agg(json_build_object('id', pi.id, 'url', pi.url, 'alt', pi.alt, 'order', pi."order"))
-             FROM product_images pi WHERE pi."productId" = p.id ORDER BY pi."order"),
-            '[]'::json
-          ) as images
-        FROM products p
-        INNER JOIN seller_profiles sp ON p."sellerId" = sp.id
-        INNER JOIN categories c ON p."categoryId" = c.id
-        WHERE p.active = true
-          AND (
-            LOWER(p.name) LIKE $3
-            OR LOWER(p.description) LIKE $3
-          )
-          ${whereClause}
-        ORDER BY ${orderByClause}
-        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
-      `;
-
-      products = await prisma.$queryRawUnsafe(
-        sqlQuery,
-        searchQuery,
-        searchQuery,
-        searchPattern,
-        ...additionalParams,
-        limit,
-        offset
-      );
-
-      // Get total count
-      const countQuery = `
-        SELECT COUNT(*) as count
-        FROM products p
-        WHERE p.active = true
-          AND (
-            LOWER(p.name) LIKE $1
-            OR LOWER(p.description) LIKE $1
-          )
-          ${whereClause}
-      `;
-
-      const countResult: any = await prisma.$queryRawUnsafe(
-        countQuery,
-        searchPattern,
-        ...additionalParams
-      );
-      total = Number(countResult[0]?.count || 0);
+      // Fetch products using Prisma ORM - no SQL injection possible
+      [products, total] = await Promise.all([
+        prisma.product.findMany({
+          where,
+          include: {
+            seller: {
+              select: {
+                id: true,
+                businessName: true,
+                rating: true,
+                verified: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+            images: {
+              select: {
+                id: true,
+                url: true,
+                alt: true,
+                order: true,
+              },
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
+          orderBy,
+          take: limit,
+          skip: offset,
+        }),
+        prisma.product.count({ where }),
+      ]);
     } else {
-      // No search query - use regular filtering
+      // No search query - use regular filtering with Prisma ORM
       const orderBy =
         sortBy === 'price_asc'
           ? { price: 'asc' as const }
@@ -248,92 +175,118 @@ export const searchRepository = {
       suggestions,
     };
   },
-//Get autocomplete suggestions based on partial query
- 
+  /**
+   * Get autocomplete suggestions based on partial query
+   * Uses Prisma findMany with case-insensitive contains for safe filtering
+   */
   async getSearchSuggestions(
     query: string,
     limit: number = 10
   ): Promise<string[]> {
-    const searchPattern = `%${query.toLowerCase()}%`;
-
-    // Get product names that match
-    const products: any[] = await prisma.$queryRawUnsafe(
-      `
-      SELECT DISTINCT name
-      FROM products
-      WHERE active = true
-        AND LOWER(name) LIKE $1
-      ORDER BY "orderCount" DESC, rating DESC
-      LIMIT $2
-    `,
-      searchPattern,
-      limit
-    );
+    // Use Prisma ORM to safely query products - prevents SQL injection
+    const products = await prisma.product.findMany({
+      where: {
+        active: true,
+        name: {
+          contains: query,
+          mode: 'insensitive',
+        },
+      },
+      select: {
+        name: true,
+      },
+      orderBy: [
+        { orderCount: 'desc' },
+        { rating: 'desc' },
+      ],
+      take: limit,
+      distinct: ['name'],
+    });
 
     return products.map((p) => p.name);
   },
-// Log search query for analytics
-   
+  /**
+   * Log search query for analytics
+   * Uses Prisma create to safely insert data - prevents SQL injection
+   */
   async logSearch(query: string, userId?: string, resultCount?: number): Promise<void> {
     try {
-      await prisma.$executeRawUnsafe(
-        `
-        INSERT INTO search_logs (id, query, "userId", "resultCount", "createdAt")
-        VALUES (gen_random_uuid(), $1, $2, $3, NOW())
-      `,
-        query.trim().toLowerCase(),
-        userId || null,
-        resultCount || 0
-      );
+      // Prisma automatically parameterizes all values, preventing SQL injection
+      await prisma.searchLog.create({
+        data: {
+          query: query.trim().toLowerCase(),
+          userId: userId || null,
+          resultCount: resultCount || 0,
+        },
+      });
     } catch (error) {
       // Fail silently - logging shouldn't break search
       console.error('Failed to log search:', error);
     }
   },
-// Get popular search terms
-  
+  /**
+   * Get popular search terms
+   * Uses Prisma groupBy for safe aggregation - prevents SQL injection
+   */
   async getPopularSearches(limit: number = 10): Promise<{ query: string; count: number }[]> {
     try {
-      const results: any[] = await prisma.$queryRawUnsafe(
-        `
-        SELECT query, COUNT(*) as count
-        FROM search_logs
-        WHERE "createdAt" > NOW() - INTERVAL '30 days'
-          AND query IS NOT NULL
-          AND LENGTH(query) > 0
-        GROUP BY query
-        ORDER BY count DESC
-        LIMIT $1
-      `,
-        limit
-      );
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      // Prisma groupBy safely aggregates data without SQL injection risk
+      const results = await prisma.searchLog.groupBy({
+        by: ['query'],
+        where: {
+          createdAt: {
+            gte: thirtyDaysAgo,
+          },
+          query: {
+            not: '',
+          },
+        },
+        _count: {
+          query: true,
+        },
+        orderBy: {
+          _count: {
+            query: 'desc',
+          },
+        },
+        take: limit,
+      });
 
       return results.map((r) => ({
         query: r.query,
-        count: Number(r.count),
+        count: r._count?.query ?? 0,
       }));
     } catch (error) {
-      // Table might not exist yet
+      // Table might not exist yet or other error
       return [];
     }
   },
-// Get user's recent searches
-  
+  /**
+   * Get user's recent searches
+   * Uses Prisma findMany with distinct to safely retrieve unique searches
+   */
   async getUserRecentSearches(userId: string, limit: number = 10): Promise<string[]> {
     try {
-      const results: any[] = await prisma.$queryRawUnsafe(
-        `
-        SELECT DISTINCT query
-        FROM search_logs
-        WHERE "userId" = $1
-          AND query IS NOT NULL
-          AND LENGTH(query) > 0
-        ORDER BY "createdAt" DESC
-        LIMIT $2
-      `,
-        userId,
-        limit
-      );
+      // Prisma ORM safely handles all user input through parameterized queries
+      const results = await prisma.searchLog.findMany({
+        where: {
+          userId,
+          query: {
+            not: '',
+          },
+        },
+        select: {
+          query: true,
+        },
+        distinct: ['query'],
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: limit,
+      });
 
       return results.map((r) => r.query);
     } catch (error) {

@@ -1,0 +1,28 @@
+{
+  "project_type": "Next.js 14 App Router + TypeScript frontend consuming Express.js REST API backend",
+  "language": "TypeScript",
+  "build_system": "Next.js 14 with App Router, Tailwind CSS 3.4+, npm workspaces",
+  "test_framework": "None yet - to be added in testing phase",
+  "build_command": "npm run build (in frontend directory)",
+  "test_command": "npm run dev for development server on localhost:3000",
+  "verification_instructions": "For each feature: (1) Run npm run dev in frontend/ directory, (2) Open http://localhost:3000 in browser, (3) Test the implemented screens manually, (4) Verify API integration with backend at http://localhost:3001/api/v1, (5) Check responsive design at 375px, 768px, and 1440px breakpoints, (6) Run npm run build to ensure production build succeeds",
+  "snapshot_or_generated_files": "None checked in - .next/ build directory is gitignored",
+  "environment_constraints": "Backend API runs on http://localhost:3001/api/v1. JWT tokens sent via Authorization: Bearer header. Frontend directory is c:\\Users\\admin\\Kuperfume\\frontend (currently empty - needs bootstrap). Windows PowerShell environment.",
+  "contribution_requirements": "Follow Next.js 14 App Router conventions. Use TypeScript strict mode. Match design system exactly: primary #166534, secondary #65A30D, accent #F59E0B, Inter font. All components must be responsive (375px/768px/1440px). Use Zustand for state management. All API calls through centralized axios client with JWT interceptor.",
+  "key_patterns": "Backend uses: JWT in Authorization header (verifyAccessToken), Role enum (CUSTOMER/SELLER/ADMIN), Prisma models (User, Product, Order, Cart, etc.), response format {success:boolean, data/error}. Protected routes require authenticate middleware. Seller routes require requireSeller. Products have slug-based URLs. Pagination via query params ?page=&limit=. Categories cached aggressively (1 hour). User-specific cart/wishlist cached per user.",
+  "relevant_files": [
+    "backend/prisma/schema.prisma (complete data model)",
+    "backend/src/routes/auth.routes.ts (login, register, verify-email, refresh, /me)",
+    "backend/src/routes/product.routes.ts (list, getBySlug, getById, getRelated, create, update, delete)",
+    "backend/src/routes/cart.routes.ts (getCart, addToCart, updateCartItem, removeFromCart, clearCart, validateCart)",
+    "backend/src/routes/checkout.routes.ts (getCheckoutSummary, getPaymentMethods, processCheckout)",
+    "backend/src/routes/order.routes.ts (getOrders, getOrder, getOrderByNumber, cancelOrder, getOrderStats)",
+    "backend/src/routes/category.routes.ts (list, getBySlug)",
+    "backend/src/routes/address.routes.ts (getAddresses, createAddress, getDefaultAddress, setDefaultAddress)",
+    "backend/src/routes/notification.routes.ts (getNotifications, getUnreadCount, markAsRead, markAllAsRead)",
+    "backend/src/routes/wishlist.routes.ts (getWishlist, addToWishlist, removeFromWishlist, moveToCart, moveAllToCart)",
+    "backend/src/routes/seller.routes.ts (products, orders, inventory, reviews, analytics)",
+    "backend/src/middleware/auth.middleware.ts (JWT Bearer token auth)"
+  ],
+  "directory_structure": "backend/ (existing Express API), frontend/ (empty - will create Next.js 14 app with: app/ for routes, components/ui/ for design system, components/layout/ for Header/Footer/Sidebar, lib/api/ for backend client, lib/store/ for Zustand state, types/ for TypeScript interfaces)"
+}

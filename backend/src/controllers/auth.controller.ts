@@ -8,6 +8,7 @@ import { Request, Response, NextFunction } from 'express'
 import authService from '../services/auth.service'
 import { sendSuccess } from '../utils/response'
 import { CONSTANTS } from '../config/constants'
+import config from '../config/env'
 import {
   registerSchema,
   loginSchema,
@@ -29,10 +30,26 @@ export class AuthController {
       const data = registerSchema.parse(req.body)
       const result = await authService.register(data)
 
+      // Set httpOnly cookies for tokens
+      res.cookie('accessToken', result.tokens.accessToken, {
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      })
+
+      res.cookie('refreshToken', result.tokens.refreshToken, {
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+
       sendSuccess(
         res,
         {
           user: result.user,
+          // Still send tokens in response for backward compatibility during transition
           tokens: result.tokens,
         },
         CONSTANTS.HTTP_STATUS.CREATED
@@ -51,8 +68,24 @@ export class AuthController {
       const credentials = loginSchema.parse(req.body)
       const result = await authService.login(credentials)
 
+      // Set httpOnly cookies for tokens
+      res.cookie('accessToken', result.tokens.accessToken, {
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      })
+
+      res.cookie('refreshToken', result.tokens.refreshToken, {
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+
       sendSuccess(res, {
         user: result.user,
+        // Still send tokens in response for backward compatibility during transition
         tokens: result.tokens,
       })
     } catch (error) {
@@ -66,8 +99,33 @@ export class AuthController {
    */
   async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { refreshToken } = refreshTokenSchema.parse(req.body)
+      // Try to get refresh token from cookie first, then from body (fallback)
+      let refreshToken = req.cookies.refreshToken
+      
+      if (!refreshToken) {
+        const body = refreshTokenSchema.parse(req.body)
+        refreshToken = body.refreshToken
+      }
+
       const tokens = await authService.refreshToken(refreshToken)
+
+      // Set new accessToken cookie
+      res.cookie('accessToken', tokens.accessToken, {
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      })
+
+      // Also update refreshToken cookie if a new one was issued
+      if (tokens.refreshToken) {
+        res.cookie('refreshToken', tokens.refreshToken, {
+          httpOnly: true,
+          secure: config.isProduction,
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        })
+      }
 
       sendSuccess(res, { tokens })
     } catch (error) {
@@ -179,8 +237,35 @@ export class AuthController {
    */
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // JWT is stateless, so logout is handled client-side by deleting the token
-      // This endpoint can be used for logging or token blacklisting if needed
+      // Get the access token to blacklist it
+      let token = req.cookies?.accessToken;
+      
+      // Fallback to Authorization header
+      if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          token = authHeader.substring(7);
+        }
+      }
+
+      // Blacklist the token if we have it
+      if (token && req.user) {
+        await authService.logout(req.user.id, token);
+      }
+
+      // Clear httpOnly cookies
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'strict',
+      })
+
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'strict',
+      })
+
       sendSuccess(res, {
         message: 'Logged out successfully',
       })
